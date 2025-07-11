@@ -1,0 +1,96 @@
+Weapon Boosts Attributes:
+* Boosts 
+* DefaultBoosts - seems to be only WeaponProperty() and WeaponEnchantment()
+* PassivesOnEquip - Unique stuff to weapon
+* BoostsOnEquipMainHand
+* if UnlockSpell has "WeaponTypes" keyed off of weapon stat attribute "Weapon Properties" Ammunition|Melee
+
+"Proficiency Group" ->  i.e. "QuarterStaffs;SimpleWeapons"
+"Weapon Group" -> (Simple|Martial)(Melee|Ranged)Weapon
+
+"ArmorType" -> plate, None, cloth, etc.
+
+
+PassiveData
+
+Conditions - things that can trigger the PassiveData
+* IsMeleeAttack
+* IsHit
+* IsCritical
+* IsMiss
+* IsCriticalMiss
+* 
+
+Boosts - add damage to an attack and stuff like that
+* DamageBonus(amount[, damage type])
+* Disadvantage/Advantage(thing) - Concentration,AllSavingThrows, AttackTarget, AttackRoll
+* Disadvantage/Advantage(Skill, name) - Survival
+* Disadvantage/Advantage(SavingThrow, name) - Strength, Constitution, Wisdom, Charisma, Intelligence, Dexterity
+* IgnoreFallDamage()
+* ActionResource(Movement, meters, 0)
+* JumpMaxDistanceBonus(meters)  
+* ActionResource(SpellSlot, num, level) 
+* ProficiencyBonus(thing|Skill|SavingThrow [, name])
+* RollBonus(thing, value) - value can be a range i.e. 0-5, thing Attack, Ranged|MeleeSpellAttack,Damage, SkillCheck, RawAbility, Ranged|MeleeWeaponAttack, MeleeUnarmedAttack, Ranged|MeleeOffHandWeaponAttack
+* UnlockSpell(spellname)
+* AC(num)
+
+Can have conditionals "If(condition):boost"
+Boosts separated by ";"
+
+
+StatsFunctorContext - event to trigger StatusFunctor  i.e. "OnDamage"
+StatsFunctor - what to do when event is triggered
+
+
+amount:
+* a roll i.e. 1d4
+* LevelMapValue(<name unquoted>) - name references a LevelMapValues
+* WisdomModifier
+* SpellCastingAbilityModifier
+
+
+damage type
+* Thunder
+
+DescriptionParams
+
+MAG_HomingWeapon_Passive is a passive where weapon will come back to you.
+
+fill left side, decide on operation (and|or), fill right side
+
+start left, compose left, end left, create left filter, decide operation, 
+
+one,
+two,
+three
+
+expression = new;
+
+x = expression
+
+forEach(one) {
+
+     x.and() -> parent filter is null
+     expression.filter = type;
+     x.child = null;
+
+     x.and() parent filter != null
+     typeAndSlot = new And(left, slot)
+     x.filter = typeAndSlot;
+}
+
+x2 = x.or()
+x2.filter = null
+x2.parent = x
+
+forEach(two) {
+     x.or.and -> parent filter is null
+     or.filter = type;
+     or.child = null;
+
+     x.or.and() or parent filter != null
+     newFilter = new And(expression.filter, slot)
+     expression.filter = newFilter;
+     expression.child = null;}
+
