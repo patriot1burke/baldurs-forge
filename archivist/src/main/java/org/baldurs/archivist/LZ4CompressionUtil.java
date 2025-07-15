@@ -21,7 +21,7 @@ public class LZ4CompressionUtil {
 
     public static int decompressCLI(byte[] src, byte[] dest) {
         try {
-            System.out.println("Decompressing LZ4 CLI");
+            //System.out.println("Decompressing LZ4 CLI");
             
             // Create a temporary file
             Path tempFile = Files.createTempFile("lz4_src_", ".tmp");
@@ -37,12 +37,12 @@ public class LZ4CompressionUtil {
             outputTempFile.toFile().deleteOnExit();
             
             // Execute LZ4 CLI command
-            System.out.println("Executing LZ4 CLI command");
+            //System.out.println("Executing LZ4 CLI command");
             ProcessBuilder pb = new ProcessBuilder("lz4", "-f", "-d", tempFile.toString(), outputTempFile.toString());
-            System.out.println("Command: " + pb.command());
-            pb.inheritIO();
+            //System.out.println("Command: " + pb.command());
+            //pb.inheritIO();
             Process process = pb.start();
-            System.out.println("Process: " + process.pid());
+            //System.out.println("Process: " + process.pid());
             
             // Wait for the process to complete
             int exitCode = process.waitFor();

@@ -96,7 +96,7 @@ public class LSFReader implements AutoCloseable {
         // [S bytes of UTF-8 string data]
 
         int numHashEntries = buffer.getInt();
-        System.out.println("numHashEntries: " + numHashEntries);
+        //System.out.println("numHashEntries: " + numHashEntries);
         while (numHashEntries-- > 0) {
             List<String> hash = new ArrayList<>();
             names.add(hash);
@@ -124,7 +124,7 @@ public class LSFReader implements AutoCloseable {
         int index = 0;
 
         while (buffer.hasRemaining()) {
-            System.out.println("Adding node " + index);
+            //System.out.println("Adding node " + index);
             LSFNodeInfo resolved = new LSFNodeInfo();
 
             if (longNodes) {
@@ -197,25 +197,6 @@ public class LSFReader implements AutoCloseable {
             attributes.add(resolved);
             index++;
         }
-
-        if (DEBUG_LSF_SERIALIZATION) {
-            System.out.println(" ----- DUMP OF ATTRIBUTE REFERENCES -----");
-            for (int i = 0; i < prevAttributeRefs.size(); i++) {
-                System.out.printf("Node %d: last attribute %d%n", i, prevAttributeRefs.get(i));
-            }
-
-            System.out.println(" ----- DUMP OF V2 ATTRIBUTE TABLE -----");
-            for (int i = 0; i < attributes.size(); i++) {
-                LSFAttributeInfo resolved = attributes.get(i);
-                // LSFAttributeEntryV2 attribute = rawAttributes.get(i);
-
-                String debug = String.format(
-                        "%d: %s (offset %X, typeId %d, nextAttribute %d)",
-                        i, names.get(resolved.nameIndex).get(resolved.nameOffset),
-                        resolved.dataOffset, resolved.typeId, resolved.nextAttributeIndex);
-                System.out.println(debug);
-            }
-        }
     }
 
     /**
@@ -236,19 +217,6 @@ public class LSFReader implements AutoCloseable {
 
             attributes.add(resolved);
         }
-
-        if (DEBUG_LSF_SERIALIZATION) {
-            System.out.println(" ----- DUMP OF V3 ATTRIBUTE TABLE -----");
-            for (int i = 0; i < attributes.size(); i++) {
-                LSFAttributeInfo resolved = attributes.get(i);
-
-                String debug = String.format(
-                        "%d: %s (offset %X, typeId %d, length %d, nextAttribute %d)",
-                        i, names.get(resolved.nameIndex).get(resolved.nameOffset),
-                        resolved.dataOffset, resolved.typeId, resolved.length, resolved.nextAttributeIndex);
-                System.out.println(debug);
-            }
-        }
     }
 
     /**
@@ -263,23 +231,17 @@ public class LSFReader implements AutoCloseable {
         while (buffer.hasRemaining()) {
             LSFKeyEntry key = LSFKeyEntry.fromBuffer(buffer);
             String keyAttribute = names.get(key.getKeyNameIndex()).get(key.getKeyNameOffset());
-            System.out.println("keyAttribute: " + keyAttribute);
+            //System.out.println("keyAttribute: " + keyAttribute);
             LSFNodeInfo node = nodes.get((int) key.nodeIndex);
             node.keyAttribute = keyAttribute;
 
-            if (DEBUG_LSF_SERIALIZATION) {
-                String debug = String.format(
-                        "%d (%s): %s",
-                        key.nodeIndex, names.get(node.nameIndex).get(node.nameOffset), keyAttribute);
-                System.out.println(debug);
-            }
-        }
+         }
     }
 
     private ByteBuffer decompress(int sizeOnDisk, int uncompressedSize,
             String debugDumpTo, boolean allowChunked) throws IOException {
         if (sizeOnDisk == 0 && uncompressedSize != 0) {
-            System.out.println("data is not compressed");
+            //System.out.println("data is not compressed");
             byte[] buf = new byte[uncompressedSize];
             map.get(buf);
 
@@ -316,12 +278,12 @@ public class LSFReader implements AutoCloseable {
         // LZ4CompressionUtil.decompress(compressed, buf);
 
         if (chunked) {
-            System.out.println("decompressing with CLI");
+            //System.out.println("decompressing with CLI");
             int bytesRead = LZ4CompressionUtil.decompressCLI(compressed, buf);
-            System.out.println("frame bytesRead: " + bytesRead);
+            //System.out.println("frame bytesRead: " + bytesRead);
         } else {
             int bytesRead = LZ4CompressionUtil.decompress(compressed, buf);
-            System.out.println("bytesRead: " + bytesRead);
+            //System.out.println("bytesRead: " + bytesRead);
         }
 
         ByteBuffer bufBuf = ByteBuffer.wrap(buf);
@@ -364,7 +326,7 @@ public class LSFReader implements AutoCloseable {
             LSFHeader hdr = LSFHeader.fromBuffer(map);
             gameVersion = PackedVersion.fromInt32(hdr.engineVersion);
         }
-        System.out.println("version: " + version);
+        //System.out.println("version: " + version);
         if (version.getValue() < LSFVersion.VER_BG3_NODE_KEYS.getValue()) {
             LSFMetadataV5 meta = LSFMetadataV5.fromBuffer(map);
             metadata = new LSFMetadataV6();
@@ -386,30 +348,30 @@ public class LSFReader implements AutoCloseable {
     public Resource read() throws IOException {
         readHeaders(map);
 
-        System.out.println("stringsSizeOnDisk: " + metadata.stringsSizeOnDisk);
-        System.out.println("stringsUncompressedSize: " + metadata.stringsUncompressedSize);
-        System.out.println("nodesSizeOnDisk: " + metadata.nodesSizeOnDisk);
-        System.out.println("nodesUncompressedSize: " + metadata.nodesUncompressedSize);
-        System.out.println("attributesSizeOnDisk: " + metadata.attributesSizeOnDisk);
-        System.out.println("attributesUncompressedSize: " + metadata.attributesUncompressedSize);
-        System.out.println("valuesSizeOnDisk: " + metadata.valuesSizeOnDisk);
-        System.out.println("--------------------------------");
+        //System.out.println("stringsSizeOnDisk: " + metadata.stringsSizeOnDisk);
+        //System.out.println("stringsUncompressedSize: " + metadata.stringsUncompressedSize);
+        //System.out.println("nodesSizeOnDisk: " + metadata.nodesSizeOnDisk);
+        //System.out.println("nodesUncompressedSize: " + metadata.nodesUncompressedSize);
+        //System.out.println("attributesSizeOnDisk: " + metadata.attributesSizeOnDisk);
+        //System.out.println("attributesUncompressedSize: " + metadata.attributesUncompressedSize);
+        //System.out.println("valuesSizeOnDisk: " + metadata.valuesSizeOnDisk);
+        //System.out.println("--------------------------------");
         names = new ArrayList<>();
-        System.out.println("reading names");
+        //System.out.println("reading names");
         ByteBuffer namesStream = decompress(metadata.stringsSizeOnDisk,
                 metadata.stringsUncompressedSize, "strings.bin", false);
         readNames(namesStream);
 
         nodes = new ArrayList<>();
 
-        System.out.println("reading nodes");
+        //System.out.println("reading nodes");
         ByteBuffer nodesStream = decompress(metadata.nodesSizeOnDisk,
                 metadata.nodesUncompressedSize, "nodes.bin", true);
         boolean hasAdjacencyData = version.getValue() >= LSFVersion.VER_EXTENDED_NODES.getValue()
                 && metadata.metadataFormat == LSFMetadataFormat.KEYS_AND_ADJACENCY;
         readNodes(nodesStream, hasAdjacencyData);
 
-        System.out.println("reading attributes");
+        //System.out.println("reading attributes");
         attributes = new ArrayList<>();
         ByteBuffer attributesStream = decompress(metadata.attributesSizeOnDisk,
                 metadata.attributesUncompressedSize, "attributes.bin", true);
@@ -421,20 +383,20 @@ public class LSFReader implements AutoCloseable {
             readAttributesV2(attributesStream);
         }
 
-        System.out.println("reading values");
+        //System.out.println("reading values");
         this.values = decompress(metadata.valuesSizeOnDisk,
                 metadata.valuesUncompressedSize, "values.bin", true);
 
         if (metadata.metadataFormat == LSFMetadataFormat.KEYS_AND_ADJACENCY) {
             ByteBuffer keysStream = decompress(metadata.keysSizeOnDisk,
                     metadata.keysUncompressedSize, "keys.bin", true);
-        System.out.println("reading keys");
+        //System.out.println("reading keys");
         readKeys(keysStream);
         }
 
         Resource resource = new Resource();
         resource.metadataFormat = metadata.metadataFormat;
-        System.out.println("reading regions");
+        //System.out.println("reading regions");
         readRegions(resource, this.values);
 
         resource.metadata.majorVersion = gameVersion.major;
@@ -447,7 +409,7 @@ public class LSFReader implements AutoCloseable {
 
     private void readRegions(Resource resource, ByteBuffer attrReader) throws IOException {
         nodeInstances = new ArrayList<>();
-        System.out.println("nodes.size(): " + nodes.size());
+        //System.out.println("nodes.size(): " + nodes.size());
  
         for (int i = 0; i < nodes.size(); i++) {
             //System.out.println("i: " + i);
@@ -457,7 +419,7 @@ public class LSFReader implements AutoCloseable {
             //System.out.println("defn.nameOffset: " + defn.nameOffset);
             //System.out.println("defn.firstAttributeIndex: " + defn.firstAttributeIndex);
             //System.out.println("defn.keyAttribute: " + defn.keyAttribute);
-            System.out.println("--------------------------------");
+            //System.out.println("--------------------------------");
             if (defn.parentIndex == -1) {
                 Region region = new Region();
                 readNode(defn, region, attrReader);
@@ -469,7 +431,7 @@ public class LSFReader implements AutoCloseable {
                 Node node = new Node();
                 readNode(defn, node, attrReader);
                 node.keyAttribute = defn.keyAttribute;
-                System.out.println("parentIndex: " + defn.parentIndex);
+                //System.out.println("parentIndex: " + defn.parentIndex);
                 node.parent = nodeInstances.get(defn.parentIndex);
                 nodeInstances.get(defn.parentIndex).appendChild(node);
                 nodeInstances.add(node);
@@ -479,25 +441,21 @@ public class LSFReader implements AutoCloseable {
 
     private void readNode(LSFNodeInfo defn, Node node, ByteBuffer attributeReader) throws IOException {
         node.name = names.get(defn.nameIndex).get(defn.nameOffset);
-        System.out.printf("Begin node %s%n", node.name);
-        System.out.printf("Defn firstAttributeIndex: %d%n", defn.firstAttributeIndex);
+        //System.out.printf("Begin node %s%n", node.name);
+        //System.out.printf("Defn firstAttributeIndex: %d%n", defn.firstAttributeIndex);
 
-        if (DEBUG_LSF_SERIALIZATION) {
-            // NodeSerializationSettings debugSerializationSettings = new
-            // NodeSerializationSettings();
-        }
 
         if (defn.firstAttributeIndex != -1) {
             LSFAttributeInfo attribute = attributes.get(defn.firstAttributeIndex);
-            System.out.printf("Attribute nameIndex: %d, nameOffset: %d%n, nextAttributeIndex: %d\n",
-                    attribute.nameIndex, attribute.nameOffset, attribute.nextAttributeIndex);
+            //System.out.printf("Attribute nameIndex: %d, nameOffset: %d%n, nextAttributeIndex: %d\n",
+            //        attribute.nameIndex, attribute.nameOffset, attribute.nextAttributeIndex);
             while (true) {
                 // Note: In Java we need to handle stream positioning differently
                 // This is a simplified approach - in practice you'd need to implement
                 // proper stream positioning or use a different approach
 
                 AttributeType type = AttributeType.fromInt((int) attribute.typeId);
-                System.out.println("Attribute type: " + type);
+                //System.out.println("Attribute type: " + type);
                 if (type != AttributeType.None) {
                     NodeAttribute value = readAttribute(type,
                             attributeReader, attribute.length);
@@ -510,12 +468,6 @@ public class LSFReader implements AutoCloseable {
                     }
                     String string = list.get(attribute.nameOffset);
                     node.attributes.put(string, value);
-                }
-
-                if (DEBUG_LSF_SERIALIZATION) {
-                    // System.out.printf(" %X: %s (%s)%n", attribute.dataOffset,
-                    // names.get(attribute.nameIndex).get(attribute.nameOffset),
-                    // value.asString());
                 }
 
                 if (attribute.nextAttributeIndex == -1) {
