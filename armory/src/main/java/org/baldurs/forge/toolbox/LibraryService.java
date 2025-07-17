@@ -1,5 +1,6 @@
 package org.baldurs.forge.toolbox;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -11,8 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.baldurs.archivist.PackageReader;
+import org.baldurs.archivist.LS.Converter;
 import org.baldurs.forge.model.StatModel;
+import org.baldurs.forge.scanner.ArchiveSource;
 import org.baldurs.forge.scanner.BaldursArchive;
+import org.baldurs.forge.scanner.ModuleInfo;
 import org.baldurs.forge.scanner.RootTemplate;
 import org.baldurs.forge.scanner.StatsArchive;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -26,7 +31,6 @@ import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class LibraryService {
-    private BaldursArchive library = new BaldursArchive();
     private boolean initialized = false;
 
     @Inject
@@ -34,12 +38,35 @@ public class LibraryService {
     private String rootPath;
 
     String cachePath = "/cache";
+    Path modsPath;
 
     @PostConstruct
     public void init() {
         cachePath = rootPath + cachePath;
+        modsPath = Path.of(rootPath + "/mods");
         scanFiles();
+        mergeArchives();
     }
+
+    public Path modsPath() {
+        return modsPath;
+    }
+
+    private Map<String, ArchiveSource> archives = new HashMap<>();
+
+    private Map<String, String> icons = new HashMap<>();
+    private BaldursArchive archive;
+
+    private void mergeArchives() {
+        archive = new BaldursArchive();
+        for (ArchiveSource source : archives.values()) {
+            archive.stats.merge(source.archive.stats);
+            archive.rootTemplates.merge(source.archive.rootTemplates);
+            archive.localizations.merge(source.archive.localizations);
+            icons.putAll(source.icons);
+        }
+    }
+
 
     private void scanFiles() {
         if (initialized)
@@ -47,59 +74,101 @@ public class LibraryService {
         initialized = true;
         try {
             Log.info("Loading game data...");
-            Path root = Path.of(cachePath);
-            if (!Files.exists(root)) {
-                Files.createDirectories(root);
-            }
-
-            Path statsPath = root.resolve("stats.json");
-            if (Files.exists(statsPath)) {
-                library.getStatsCollector().load(statsPath);
-            } else {
-                library.getStatsCollector()
-                        .scan(Path.of("/mnt/c/Users/patri/mods/shared/Public/Shared/Stats/Generated/Data"))
-                        .scan(Path.of("/mnt/c/Users/patri/mods/shared/Public/SharedDev/Stats/Generated/Data"))
-                        .scan(Path.of("/mnt/c/Users/patri/mods/gustav/Public/GustavDev/Stats/Generated/Data"))
-                        .scan(Path.of("/mnt/c/Users/patri/mods/gustav/Public/Gustav/Stats/Generated/Data"))
-                        .save(statsPath);
-            }
-
-            Path rootTemplatesPath = root.resolve("root-templates.json");
-            if (Files.exists(rootTemplatesPath)) {
-                library.getRootTemplateCollector().load(rootTemplatesPath);
-            } else {
-                library.getRootTemplateCollector()
-                        .scan(Path.of("/mnt/c/Users/patri/mods/shared/Public/Shared/RootTemplates/_merged.lsx"))
-                        .scan(Path.of("/mnt/c/Users/patri/mods/shared/Public/SharedDev/RootTemplates/_merged.lsx"))
-                        .scan(Path.of("/mnt/c/Users/patri/mods/gustav/Public/GustavDev/RootTemplates/_merged.lsx"))
-                        .scan(Path.of("/mnt/c/Users/patri/mods/gustav/Public/Gustav/RootTemplates/_merged.lsx"))
-                        .save(rootTemplatesPath);
-            }
-
-            Path localizationPath = root.resolve("localization.json");
-            if (Files.exists(localizationPath)) {
-                library.getLocalizationCollector().load(localizationPath);
-            } else {
-                library.getLocalizationCollector()
-                        .scan(Path.of("/mnt/c/Users/patri/mods/bg3-localization/Localization/English/english.xml"));
-                library.getLocalizationCollector().save(localizationPath);
-            }
-
+            loadCoreGameData();
+            loadMods();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-
-    public BaldursArchive library() {
-        return library;
+    private void loadMods() throws Exception {
+        for (Path modPath : Files.list(modsPath).toList()) {
+            if (Files.isDirectory(modPath)) {
+                Path archivePath = modPath.resolve("archive.json");
+                if (Files.exists(archivePath)) {
+                    ArchiveSource source = ArchiveSource.load(archivePath);
+                    archives.put(source.name, source);
+                }
+            }
+        }
     }
+
+    private void loadCoreGameData() throws IOException, Exception {
+        Path root = Path.of(cachePath);
+        if (!Files.exists(root)) {
+            Files.createDirectories(root);
+        }
+        BaldursArchive library = new BaldursArchive();
+        ArchiveSource source = new ArchiveSource();
+        source.name = "Core Game";
+        source.archive = library;
+
+        Path statsPath = root.resolve("stats.json");
+        if (Files.exists(statsPath)) {
+            library.getStats().load(source, statsPath);
+        } else {
+            library.getStats()
+                    .scan(source, Path.of("/mnt/c/Users/patri/mods/shared/Public/Shared/Stats/Generated/Data"))
+                    .scan(source, Path.of("/mnt/c/Users/patri/mods/shared/Public/SharedDev/Stats/Generated/Data"))
+                    .scan(source, Path.of("/mnt/c/Users/patri/mods/gustav/Public/GustavDev/Stats/Generated/Data"))
+                    .scan(source, Path.of("/mnt/c/Users/patri/mods/gustav/Public/Gustav/Stats/Generated/Data"))
+                    .save(statsPath);
+        }
+
+        Path rootTemplatesPath = root.resolve("root-templates.json");
+        if (Files.exists(rootTemplatesPath)) {
+            library.getRootTemplates().load(source, rootTemplatesPath);
+        } else {
+            library.getRootTemplates()
+                    .scan(source, Path.of("/mnt/c/Users/patri/mods/shared/Public/Shared/RootTemplates/_merged.lsx"))
+                    .scan(source, Path.of("/mnt/c/Users/patri/mods/shared/Public/SharedDev/RootTemplates/_merged.lsx"))
+                    .scan(source, Path.of("/mnt/c/Users/patri/mods/gustav/Public/GustavDev/RootTemplates/_merged.lsx"))
+                    .scan(source, Path.of("/mnt/c/Users/patri/mods/gustav/Public/Gustav/RootTemplates/_merged.lsx"))
+                    .save(rootTemplatesPath);
+        }
+
+        Path localizationPath = root.resolve("localization.json");
+        if (Files.exists(localizationPath)) {
+            library.getLocalizations().load(localizationPath);
+        } else {
+            library.getLocalizations()
+                    .scan(Path.of("/mnt/c/Users/patri/mods/bg3-localization/Localization/English/english.xml"))
+                    .save(localizationPath);
+        }
+        Path icons = root.resolve("images/icons");
+        Path itemsIcons = icons.resolve("items-tooltip");
+        for (Path itemIcon : Files.list(itemsIcons).toList()) {
+            String name = itemIcon.getFileName().toString().replace(".144.png", "");
+            source.icons.put(name, "/static/img/icons/items-tooltip/" + name + ".144.png");
+        }
+        Path skillsIcons = icons.resolve("skills");
+        for (Path skillIcon : Files.list(skillsIcons).toList()) {
+            String name = skillIcon.getFileName().toString().replace(".png", "");
+            source.icons.put(name, "/static/img/icons/skills/" + name + ".png");
+        }
+        archives.put(source.name, source);
+    }
+
+    public BaldursArchive archive() {
+        return archive;
+    }
+    public Map<String, String> icons() {
+        return icons;
+    }
+
+    public void uploadMod(Path pak) throws Exception {
+        ArchiveSource source = ArchiveSource.unpackMod(pak);
+        archives.put(source.name, source);
+    }
+
 
     @Tool("Find a root template by stat name")
     public RootTemplate findRootTemplateByStatName(String statName) {
-        Log.infof("Finding root template for stat: %s", statName);
-        for (RootTemplate rootTemplate : library.getRootTemplateCollector().templates.values()) {
-            if (statName.equals(rootTemplate.Stats)) {
-                return rootTemplate;
+        //Log.infof("Finding root template for stat: %s", statName);
+        for (ArchiveSource source : archives.values()) {
+            for (RootTemplate rootTemplate : source.archive.getRootTemplates().templates.values()) {
+                if (statName.equals(rootTemplate.Stats)) {
+                    return rootTemplate;
+                }
             }
         }
         return null;
@@ -107,37 +176,43 @@ public class LibraryService {
 
     @Tool("Get or find or show a stat by name")
     public StatModel getStatByName(String name, @P(value = "Add parent data?", required = false) boolean parentData) {
-        StatsArchive.Stat stat = library.statsCollector.getByName(name);
-        if (stat == null) {
-            return null;
+        for (ArchiveSource source : archives.values()) {
+            StatsArchive.Stat stat = source.archive.stats.getByName(name);
+            if (stat != null) {
+                if (parentData) {
+                    return new StatModel(stat.name, stat.type, stat.using, stat.aggregateData());
+                } else {
+                    return new StatModel(stat.name, stat.type, stat.using, stat.data);
+                }
+            }
         }
-        if (parentData) {
-            return new StatModel(stat.name, stat.type, stat.using, stat.aggregateData());
-        } else {
-            return new StatModel(stat.name, stat.type, stat.using, stat.data);
-        }
+        return null;
     }
 
     @Tool("Get all possible values for a Stat attribute")
     public List<String> getStatAttributeValues(String attributeName) {
-        scanFiles();
-        Set<String> values = library.statsCollector.collectAttributesValues(attributeName);
-        List<String> list = new ArrayList<>(values);
-        Collections.sort(list);
-        return list;
+        for (ArchiveSource source : archives.values()) {
+            Set<String> values = source.archive.stats.collectAttributesValues(attributeName);
+            List<String> list = new ArrayList<>(values);
+            Collections.sort(list);
+            return list;
+        }
+        return Collections.emptyList();
     }
 
     @Tool("Get all possible boost function signatures")
     public List<String> getAllBoostFunctionSignatures() {
-        scanFiles();
         Map<String, Set<String>> boosts = new HashMap<>();
 
-        Set<String> macros = library.statsCollector.collectAttributesValues("Boosts");
-        macros.addAll(library.statsCollector.collectAttributesValues("PassivesOnEquip"));
-        macros.addAll(library.statsCollector.collectAttributesValues("DefaultBoosts"));
-        macros.addAll(library.statsCollector.collectAttributesValues("BoostsOnEquipMainHand"));
-        macros.addAll(library.statsCollector.collectAttributesValues("PassivesOffHand"));
-        return getFunctions(boosts, macros);
+        for (ArchiveSource source : archives.values()) {
+            Set<String> macros = source.archive.stats.collectAttributesValues("Boosts");
+            macros.addAll(source.archive.stats.collectAttributesValues("PassivesOnEquip"));
+            macros.addAll(source.archive.stats.collectAttributesValues("DefaultBoosts"));
+            macros.addAll(source.archive.stats.collectAttributesValues("BoostsOnEquipMainHand"));
+            macros.addAll(source.archive.stats.collectAttributesValues("PassivesOffHand"));
+            return getFunctions(boosts, macros);
+        }
+        return Collections.emptyList();
     }
 
     private List<String> getFunctions(Map<String, Set<String>> boosts, Set<String> macros) {
@@ -195,4 +270,6 @@ public class LibraryService {
         Collections.sort(functions, Comparator.naturalOrder());
         return functions;
     }
+
+
 }

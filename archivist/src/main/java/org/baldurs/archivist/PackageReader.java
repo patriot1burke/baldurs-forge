@@ -128,18 +128,18 @@ public class PackageReader {
                 throw new RuntimeException("Invalid signature");
             }
             int version = map.getInt(4);
-            System.out.println("Version: " + version);
+            //System.out.println("Version: " + version);
             header = new PackageHeader(map, (int)4);
-            System.out.println("Header: " + header);
+            //System.out.println("Header: " + header);
             fileListOffset = (int)header.FileListOffset;
             LZ4Factory factory = LZ4Factory.fastestInstance();
             LZ4SafeDecompressor decompressor = factory.safeDecompressor();
 
             //System.out.println("Reading compressed file list");
             int numFiles = map.getInt(fileListOffset);
-            System.out.println("Num files: " + numFiles);
+            //System.out.println("Num files: " + numFiles);
             int compressedSize = map.getInt(fileListOffset + 4);
-            System.out.println("Compressed filelist size: " + compressedSize);
+            //System.out.println("Compressed filelist size: " + compressedSize);
             byte[] compressedFileList = new byte[compressedSize];
             for (int i = 0; i < compressedFileList.length; i++) {
                 int index = fileListOffset + 8 + i;
@@ -167,14 +167,14 @@ public class PackageReader {
         map.order(ByteOrder.LITTLE_ENDIAN);
         LZ4Factory factory = LZ4Factory.fastestInstance();
         for (FileEntry fileEntry : fileList) {
-            System.out.println("Extracting: " + fileEntry.Name);
-            System.out.println("Offset in file 1: " + fileEntry.OffsetInFile1);
-            System.out.println("Offset in file 2: " + fileEntry.OffsetInFile2);
-            System.out.println("Archive part: " + fileEntry.ArchivePart);
-            System.out.printf("Flags: 0x%08X%n", fileEntry.Flags);
-            System.out.println("Size on disk: " + fileEntry.SizeOnDisk);
-            System.out.println("Uncompressed size: " + fileEntry.UncompressedSize);
-            System.out.println("Offset: " + fileEntry.offsetInFile);
+            //System.out.println("Extracting: " + fileEntry.Name);
+            //System.out.println("Offset in file 1: " + fileEntry.OffsetInFile1);
+            //System.out.println("Offset in file 2: " + fileEntry.OffsetInFile2);
+            //System.out.println("Archive part: " + fileEntry.ArchivePart);
+            //System.out.printf("Flags: 0x%08X%n", fileEntry.Flags);
+            //System.out.println("Size on disk: " + fileEntry.SizeOnDisk);
+            //System.out.println("Uncompressed size: " + fileEntry.UncompressedSize);
+            //System.out.println("Offset: " + fileEntry.offsetInFile);
 
             if (fileEntry.SizeOnDisk > channel.size()) {
                 throw new RuntimeException("File is larger than the archive");

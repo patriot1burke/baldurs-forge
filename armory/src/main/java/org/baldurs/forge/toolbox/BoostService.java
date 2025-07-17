@@ -18,15 +18,16 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class BoostService {
     @Inject
-    LibraryService bg3DB;
+    LibraryService library;
     @Inject
     MacroService macroService;
 
-    static String spellIconPath = "/static/img/icons/skills/";
-    static String spellIconSuffix = ".png";
-
-    static String spellIconPath(String icon) {
-        return spellIconPath + icon + spellIconSuffix;
+    String spellIconPath(String icon) {
+        String url = library.icons().get(icon);
+        if (url == null) {
+            return "";
+        }
+        return url;
     }
 
     public interface BoostWriter {
@@ -185,7 +186,7 @@ public class BoostService {
         if (handle == null) {
             return null;
         }
-        String description = bg3DB.library().getLocalizationCollector().getLocalization(handle);
+        String description = library.archive().localizations.getLocalization(handle);
         if (description != null) {
             String params = stat.getField("DescriptionParams");
             if (params == null) {
@@ -209,11 +210,11 @@ public class BoostService {
         if (handle == null) {
             return null;
         }
-        return bg3DB.library().getLocalizationCollector().getLocalization(handle);
+        return library.archive().localizations.getLocalization(handle);
     }
 
     public BoostService passive(String name, BoostWriter writer) {
-        StatsArchive.Stat stat = bg3DB.library().statsCollector.getByName(name);
+        StatsArchive.Stat stat = library.archive().stats.getByName(name);
         if (stat == null) {
             return this;
         }
@@ -242,7 +243,7 @@ public class BoostService {
     }
 
     public BoostService weapon(String weaponName, BoostWriter writer) {
-        StatsArchive.Stat stat = bg3DB.library().statsCollector.getByName(weaponName);
+        StatsArchive.Stat stat = library.archive().stats.getByName(weaponName);
         return weapon(stat, writer);
     }
 
@@ -265,16 +266,16 @@ public class BoostService {
     }
 
     public BoostService stat(StatsArchive.Stat stat, BoostWriter writer) {
-        if (stat.type.equals(StatsArchive.Library.ARMOR_TYPE)) {
+        if (stat.type.equals(StatsArchive.ARMOR_TYPE)) {
             armor(stat, writer);
-        } else if (stat.type.equals(StatsArchive.Library.WEAPON_TYPE)) {
+        } else if (stat.type.equals(StatsArchive.WEAPON_TYPE)) {
             weapon(stat, writer);
         }
         return this;
     }
 
     public BoostService armor(String armorName, BoostWriter writer) {
-        StatsArchive.Stat stat = bg3DB.library().statsCollector.getByName(armorName);
+        StatsArchive.Stat stat = library.archive().stats.getByName(armorName);
         return armor(stat, writer);
     }
 

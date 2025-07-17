@@ -16,7 +16,7 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class MacroService {
     @Inject
-    LibraryService bg3DB;
+    LibraryService library;
 
     @Inject
     BoostService descriptionService;
@@ -357,7 +357,7 @@ public class MacroService {
             writer.write("Spell Save DC +" + macro.args[0]);
         });
         transformers.put("UnlockSpell", (macro, writer) -> {
-            Stat stat = bg3DB.library().statsCollector.getByName(macro.args[0]);
+            Stat stat = library.archive().stats.getByName(macro.args[0]);
             if (stat == null) {
                 writer.write("<i>UnlockSpell (no stat)" + macro.args[0] + "</i>");
                 return;

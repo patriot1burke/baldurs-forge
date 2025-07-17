@@ -51,6 +51,11 @@ public class LocalizationArchive {
 
     public Map<String, Map<Integer, String>> localization = new HashMap<>();
 
+    public LocalizationArchive merge(LocalizationArchive other) {
+        localization.putAll(other.localization);
+        return this;
+    }
+
     public String getLocalization(String handle) {
         return getLocalization(Handle.fromString(handle));
     }
@@ -70,7 +75,7 @@ public class LocalizationArchive {
     }
 
 
-    public void scan(Path xmlPath) throws Exception {
+    public LocalizationArchive scan(Path xmlPath) throws Exception {
         List<Element> localizationElements = getLocalizationAsElements(xmlPath);
         int sum = 0;
         for (Element localizationElement : localizationElements) {
@@ -81,6 +86,7 @@ public class LocalizationArchive {
             sum++;
         }
         Log.info("Scanned " + sum + " localizations");
+        return this;
     }
 
     public void save(Path dest) throws Exception {

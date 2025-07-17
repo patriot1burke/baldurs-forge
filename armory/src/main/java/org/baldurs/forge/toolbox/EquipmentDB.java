@@ -71,11 +71,11 @@ public class EquipmentDB {
 
     private void buildEquipment() {
         Log.info("Building equipment database");
-        Map<String, StatsArchive.Stat> armors = libraryService.library().statsCollector.getArmor();
+        Map<String, StatsArchive.Stat> armors = libraryService.archive().stats.getByType(EquipmentType.Armor.name());
         for (StatsArchive.Stat armor : armors.values()) {
             addEquipment(armor);
         }
-        Map<String, StatsArchive.Stat> weapons = libraryService.library().statsCollector.getWeapons();
+        Map<String, StatsArchive.Stat> weapons = libraryService.archive().stats.getByType(EquipmentType.Weapon.name());
         for (StatsArchive.Stat weapon : weapons.values()) {
             addEquipment(weapon);
         }
@@ -99,8 +99,7 @@ public class EquipmentDB {
             }
         }
         Rarity rarity = Rarity.fromString(item.getField("Rarity"));
-        RootTemplate rootTemplate = libraryService.library()
-                .getRootTemplateCollector().templates.get(item.getField("RootTemplate"));
+        RootTemplate rootTemplate = libraryService.archive().rootTemplates.getRootTemplate(item.getField("RootTemplate"));
         if (rootTemplate == null) {
             Log.debug("No root template for " + id);
             return;
@@ -110,15 +109,14 @@ public class EquipmentDB {
             Log.debug("No display name for " + id);
             return;
         }
-        String name = libraryService.library().getLocalizationCollector().getLocalization(displayName);
+        String name = libraryService.archive().localizations.getLocalization(displayName);
         if (name == null) {
             Log.debug("No name for " + id);
             return;
         }
         String description = "";
         if (rootTemplate.Description != null) {
-            description = libraryService.library().getLocalizationCollector()
-                    .getLocalization(rootTemplate.Description);
+            description = libraryService.archive().localizations.getLocalization(rootTemplate.Description);
         } else {
             Log.debug("No description for " + id);
         }
@@ -177,12 +175,10 @@ public class EquipmentDB {
                 .embeddingStore(embeddingStore)
                 .build();
 
-        int MAX_INGEST = 20;
-
         List<Document> docs = new ArrayList<>();
         for (Equipment item : equipmentDB.values()) {
             BoostWriter boostWriter = boostService.text();
-            StatsArchive.Stat stat = libraryService.library().statsCollector.getByName(item.id());
+            StatsArchive.Stat stat = libraryService.archive().stats.getByName(item.id());
             boostService.stat(stat, boostWriter);
             String boost = boostWriter.toString();
             Metadata metadata = Metadata.from(Map.of(

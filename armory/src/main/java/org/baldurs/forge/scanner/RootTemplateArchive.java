@@ -67,7 +67,19 @@ public class RootTemplateArchive {
 
     public Map<String, RootTemplate> templates = new HashMap<>();
 
-    public RootTemplateArchive scan(Path xmlPath) throws Exception {
+    public RootTemplate getRootTemplate(String id) {
+        return templates.get(id);
+    }
+
+    public RootTemplateArchive merge(RootTemplateArchive other) {
+        templates.putAll(other.templates);
+        for (RootTemplate template : templates.values()) {
+            template.archive = this;
+        }
+        return this;
+    }
+
+    public RootTemplateArchive scan(ArchiveSource source, Path xmlPath) throws Exception {
         List<Element> gameObjects = getGameObjectsAsElements(xmlPath);
         int sum = 0;
         for (Element gameObject : gameObjects) {
@@ -94,7 +106,7 @@ public class RootTemplateArchive {
                     icon = attributeElement.getAttribute("value");
                 }
             }
-            templates.put(mapKey, new RootTemplate(stats, mapKey, displayName, description, parentTemplateId, icon, this));
+            templates.put(mapKey, new RootTemplate(stats, mapKey, displayName, description, parentTemplateId, icon, source, this));
             sum++;
         }
         Log.info("Scanned " + sum + " root templates");
@@ -106,11 +118,12 @@ public class RootTemplateArchive {
         objectMapper.writeValue(dest.toFile(), templates);
     }
 
-    public void load(Path dest) throws Exception {
+    public void load(ArchiveSource source, Path dest) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         templates = objectMapper.readValue(dest.toFile(), new TypeReference<Map<String, RootTemplate>>() {});
         for (RootTemplate template : templates.values()) {
             template.archive = this;
+            template.source = source;
         }
         Log.info("Loaded " + templates.size() + " root templates");
     }

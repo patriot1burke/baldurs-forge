@@ -1,17 +1,17 @@
 package org.baldurs.forge.scanner;
 
 public class BaldursArchive {
-    public LocalizationArchive localizationCollector = new LocalizationArchive();
-    public StatsArchive.Library statsCollector = new StatsArchive.Library();
-    public RootTemplateArchive rootTemplateCollector = new RootTemplateArchive();
+    public LocalizationArchive localizations = new LocalizationArchive();
+    public StatsArchive stats = new StatsArchive();
+    public RootTemplateArchive rootTemplates = new RootTemplateArchive();
 
-    public LocalizationArchive getLocalizationCollector() {
-        return localizationCollector;
+    public LocalizationArchive getLocalizations() {
+        return localizations;
     }
-    public StatsArchive.Library getStatsCollector() {
-        return statsCollector;
+    public StatsArchive getStats() {
+        return stats;
     }
-    public RootTemplateArchive getRootTemplateCollector() {
-        return rootTemplateCollector;
+    public RootTemplateArchive getRootTemplates() {
+        return rootTemplates;
     }
 }

@@ -9,36 +9,33 @@ public class RootTemplate {
     public String Description;
     public String ParentTemplateId;
     public String icon;
+    @JsonIgnore
+    public ArchiveSource source;
+    @JsonIgnore
+    public RootTemplateArchive archive;
 
     public RootTemplate() {
     }
 
-    public RootTemplate(String stats, String mapKey, String displayName, String description, String parentTemplateId, String icon, RootTemplateArchive archive) {
+    public RootTemplate(String stats, String mapKey, String displayName, String description, String parentTemplateId, String icon, ArchiveSource source, RootTemplateArchive archive) {
         Stats = stats;
         MapKey = mapKey;
         DisplayName = displayName;
         Description = description;
         ParentTemplateId = parentTemplateId;
         this.icon = icon;
+        this.source = source;
         this.archive = archive;
     }
 
-    @JsonIgnore
-    public RootTemplateArchive archive;
-
-    @JsonIgnore
     public String resolveIcon() {
-        if (icon != null) {
-            return icon;
-        }
-        if (ParentTemplateId == null) {
+        if (icon != null) return icon;
+        
+        RootTemplate parent = archive.templates.get(ParentTemplateId);
+        if (parent != null) {
+            return parent.resolveIcon();
+        } else {
             return null;
         }
-        RootTemplate rootTemplate = archive.templates.get(ParentTemplateId);
-        if (rootTemplate == null) {
-            return null;
-        }
-        return rootTemplate.resolveIcon();
     }
-
 }

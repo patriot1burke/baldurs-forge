@@ -15,6 +15,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.baldurs.forge</groupId>
+            <artifactId>baldurs-archivist</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-rest</artifactId>
         </dependency>
