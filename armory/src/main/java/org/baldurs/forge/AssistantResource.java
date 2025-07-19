@@ -1,5 +1,6 @@
 package org.baldurs.forge;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -19,6 +20,8 @@ import org.baldurs.forge.toolbox.EquipmentDB;
 import org.baldurs.forge.toolbox.LibraryService;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
+import org.jboss.resteasy.reactive.RestForm;
+import org.jboss.resteasy.reactive.multipart.FileUpload;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -88,6 +91,8 @@ public class AssistantResource {
 		return Response.ok(response).build();
 	}
 
+	
+
 	/**
 	 * Handles file upload for mod files.
 	 */
@@ -96,6 +101,7 @@ public class AssistantResource {
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response uploadFile(InputStream fileInputStream, @QueryParam("filename") String filename) throws Exception {
+		LOG.info("Uploading file: " + filename);
 		try {
 			if (fileInputStream == null) {
 				return Response.status(Status.BAD_REQUEST)
@@ -119,7 +125,7 @@ public class AssistantResource {
 			Files.copy(fileInputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
 
 			LOG.info("File uploaded successfully: " + filePath.toString());
-			library.uploadMod(filePath);
+			equipmentDB.uploadMod(filePath);
 
 			// Return success response
 			return Response.ok()
@@ -133,5 +139,54 @@ public class AssistantResource {
 				.build();
 		}
 	}
+
+	@POST
+	@Path("/upload-pak")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response uploadpak(@RestForm("pak") FileUpload file, @QueryParam("filename") String filename) throws Exception {
+		LOG.info("Uploading file: " + filename);
+		try {
+			LOG.info("Uploading file: " + file.uploadedFile());
+			InputStream fileInputStream = new FileInputStream(file.uploadedFile().toFile());
+			if (fileInputStream == null) {
+				return Response.status(Status.BAD_REQUEST)
+					.entity("{\"error\": \"No file provided\"}")
+					.build();
+			}
+
+			// Use provided filename or generate unique one if not provided
+			if (filename == null || filename.isEmpty()) {
+				filename = "upload_" + UUID.randomUUID().toString() + ".pak";
+			}
+
+			// Create uploads directory if it doesn't exist
+			java.nio.file.Path uploadsDir = library.modsPath();
+			if (!Files.exists(uploadsDir)) {
+				Files.createDirectories(uploadsDir);
+			}
+
+			// Save the file
+			java.nio.file.Path filePath = uploadsDir.resolve(filename);
+			Files.copy(fileInputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+
+			LOG.info("File uploaded successfully: " + filePath.toString());
+			equipmentDB.uploadMod(filePath);
+
+			// Return success response
+			return Response.ok()
+				.entity("{\"message\": \"File uploaded successfully\", \"filename\": \"" + filename + "\"}")
+				.build();
+
+		} catch (IOException e) {
+			LOG.error("Error uploading file: " + e.getMessage(), e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR)
+				.entity("{\"error\": \"Failed to upload file: " + e.getMessage() + "\"}")
+				.build();
+		}
+	}
+
+
+
+
 
 }

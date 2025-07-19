@@ -1,6 +1,8 @@
 package org.baldurs.forge.toolbox;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,6 +19,7 @@ import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.model.EquipmentSlot;
 import org.baldurs.forge.model.EquipmentType;
 import org.baldurs.forge.model.Rarity;
+import org.baldurs.forge.scanner.ArchiveSource;
 import org.baldurs.forge.scanner.RootTemplate;
 import org.baldurs.forge.scanner.RootTemplateArchive;
 import org.baldurs.forge.scanner.StatsArchive;
@@ -73,17 +76,17 @@ public class EquipmentDB {
         Log.info("Building equipment database");
         Map<String, StatsArchive.Stat> armors = libraryService.archive().stats.getByType(EquipmentType.Armor.name());
         for (StatsArchive.Stat armor : armors.values()) {
-            addEquipment(armor);
+            addEquipment(equipmentDB, armor);
         }
         Map<String, StatsArchive.Stat> weapons = libraryService.archive().stats.getByType(EquipmentType.Weapon.name());
         for (StatsArchive.Stat weapon : weapons.values()) {
-            addEquipment(weapon);
+            addEquipment(equipmentDB, weapon);
         }
         Log.info("Added " + equipmentDB.size() + " to equipment database");
 
     }
 
-    private void addEquipment(StatsArchive.Stat item) {
+    private void addEquipment(Map<String, Equipment> db, StatsArchive.Stat item) {
         String id = item.name;
         EquipmentType type = EquipmentType.valueOf(item.type);
         EquipmentSlot slot = EquipmentSlot.fromString(item.getField("Slot"));
@@ -129,6 +132,7 @@ public class EquipmentDB {
         String boost = boostWriter.toString();
         //Log.infof("Boosts for %s: %s", id, boost);
         String icon = rootTemplate.resolveIcon();
+        icon = libraryService.icons().get(icon);
         String weaponType = null;
         if (type == EquipmentType.Weapon) {
             String proficiencies = item.getField("Proficiency Group");
@@ -161,7 +165,7 @@ public class EquipmentDB {
             }
         }
         Equipment equipment = new Equipment(id, type, slot, rarity, name, description, boost, icon, weaponType, armorType, armorClass, weaponProperties, rootTemplate, item);
-        equipmentDB.put(id, equipment);
+        db.put(id, equipment);
     }
 
     private void load() throws Exception {
@@ -169,14 +173,19 @@ public class EquipmentDB {
         Log.info("Loading items...");
 
         embeddingStore.removeAll();
+        Collection<Equipment> equipment = equipmentDB.values();
 
+        ingest(equipmentDB.values());
+    }
+
+    private void ingest(Collection<Equipment> equipment) {
         EmbeddingStoreIngestor ingester = EmbeddingStoreIngestor.builder()
                 .embeddingModel(embeddingModel)
                 .embeddingStore(embeddingStore)
                 .build();
 
         List<Document> docs = new ArrayList<>();
-        for (Equipment item : equipmentDB.values()) {
+        for (Equipment item : equipment) {
             BoostWriter boostWriter = boostService.text();
             StatsArchive.Stat stat = libraryService.archive().stats.getByName(item.id());
             boostService.stat(stat, boostWriter);
@@ -213,7 +222,26 @@ public class EquipmentDB {
          }
         ingester.ingest(docs);
 
-        Log.info("Ingested " + equipmentDB.size() + " items");
+        Log.info("Ingested " + equipment.size() + " items");
+    }
+    public void uploadMod(Path pak) throws Exception {
+        ArchiveSource source = libraryService.uploadMod(pak);
+        Log.info("Importing mod " + source.name);
+        Map<String, Equipment> newEquipment = new HashMap<>();
+        Map<String, StatsArchive.Stat> armors = source.archive.stats.getByType(EquipmentType.Armor.name());
+        for (StatsArchive.Stat armor : armors.values()) {
+            addEquipment(newEquipment, armor);
+        }
+        Map<String, StatsArchive.Stat> weapons = source.archive.stats.getByType(EquipmentType.Weapon.name());
+        for (StatsArchive.Stat weapon : weapons.values()) {
+                addEquipment(newEquipment, weapon);
+        }
+        Log.info("Added " + newEquipment.size() + " to equipment database");
+        equipmentDB.putAll(newEquipment);
+        // TODO: This doesn't seem to work.  Older ingestions seem to disappear.
+        // instead re-ingest everything
+        //ingest(newEquipment.values());
+        load();
     }
 
     @Tool("Find an item in the equipment database by name")

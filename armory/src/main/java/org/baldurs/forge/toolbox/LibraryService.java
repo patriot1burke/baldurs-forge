@@ -60,11 +60,16 @@ public class LibraryService {
     private void mergeArchives() {
         archive = new BaldursArchive();
         for (ArchiveSource source : archives.values()) {
-            archive.stats.merge(source.archive.stats);
-            archive.rootTemplates.merge(source.archive.rootTemplates);
-            archive.localizations.merge(source.archive.localizations);
-            icons.putAll(source.icons);
+            mergeArchive(source);
         }
+    }
+
+    private void mergeArchive(ArchiveSource source) {
+        Log.infof("Merging archive: %s", source.name);
+        archive.stats.merge(source.archive.stats);
+        archive.rootTemplates.merge(source.archive.rootTemplates);
+        archive.localizations.merge(source.archive.localizations);
+        icons.putAll(source.icons);
     }
 
 
@@ -86,6 +91,7 @@ public class LibraryService {
                 Path archivePath = modPath.resolve("archive.json");
                 if (Files.exists(archivePath)) {
                     ArchiveSource source = ArchiveSource.load(archivePath);
+                    Log.info("Loaded mod " + source.name);
                     archives.put(source.name, source);
                 }
             }
@@ -134,7 +140,7 @@ public class LibraryService {
                     .scan(Path.of("/mnt/c/Users/patri/mods/bg3-localization/Localization/English/english.xml"))
                     .save(localizationPath);
         }
-        Path icons = root.resolve("images/icons");
+        Path icons = Path.of(rootPath).resolve("images/icons");
         Path itemsIcons = icons.resolve("items-tooltip");
         for (Path itemIcon : Files.list(itemsIcons).toList()) {
             String name = itemIcon.getFileName().toString().replace(".144.png", "");
@@ -155,9 +161,16 @@ public class LibraryService {
         return icons;
     }
 
-    public void uploadMod(Path pak) throws Exception {
+    public ArchiveSource uploadMod(Path pak) throws Exception {
         ArchiveSource source = ArchiveSource.unpackMod(pak);
         archives.put(source.name, source);
+        mergeArchive(source);
+        return source;
+    }
+
+    @Tool("Find a localization by id")
+    public String findLocalization(String handle) {
+        return archive.localizations.getLocalization(handle);
     }
 
 

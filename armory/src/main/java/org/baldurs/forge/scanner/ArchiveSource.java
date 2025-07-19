@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ArchiveSource {
     public String name;
     public String modPath;
-    public Map<String, String> icons;
+    public Map<String, String> icons = new HashMap<>();
     @JsonIgnore
     public BaldursArchive archive;
 
@@ -57,14 +58,20 @@ public class ArchiveSource {
         Path statsPath = dir.resolve("stats.json");
         if (Files.exists(statsPath)) {
             source.archive.getStats().load(source, statsPath);
+        } else {
+            throw new Exception("Stats path not found: " + statsPath);
         }
         Path rootTemplatesPath = dir.resolve("root-templates.json");
         if (Files.exists(rootTemplatesPath)) {
             source.archive.getRootTemplates().load(source, rootTemplatesPath);
+        } else {
+            throw new Exception("Root templates path not found: " + rootTemplatesPath);
         }
         Path localizationPath = dir.resolve("localization.json");
         if (Files.exists(localizationPath)) {
             source.archive.getLocalizations().load(localizationPath);
+        } else {
+            throw new Exception("Localization path not found: " + localizationPath);
         }
         return source;
     }
@@ -125,6 +132,7 @@ public class ArchiveSource {
                 Path lsxPath = lsfFile.resolveSibling(lsfFile.getFileName().toString().replace(".lsf", ".lsx"));
                 Converter.lsfToLsx(lsfFile, lsxPath);
                 archive.getRootTemplates().scan(archiveSource, lsxPath);
+                archive.getRootTemplates().save(extractPath.resolve("root-templates.json"));
                 Log.infof("Scanned root template file: %s", lsfFile);
             }
         } catch (Exception e) {
@@ -151,10 +159,20 @@ public class ArchiveSource {
         Path itemsIconsPath = controllerIconsPath.resolve("items_png");
         if (Files.exists(itemsIconsPath)) {
             convertDDStoPNG(archiveSource, itemsIconsPath);
+        } else {
+            Log.infof("No items icons path found: %s", itemsIconsPath);
         }
         Path skillsIconsPath = controllerIconsPath.resolve("skills_png");
         if (Files.exists(skillsIconsPath)) {
             convertDDStoPNG(archiveSource, skillsIconsPath);
+        } else {
+            Log.infof("No skills icons path found: %s", skillsIconsPath);
+        }
+        Set<String> iconNames = new HashSet<>(archiveSource.icons.keySet());
+        for (String icon : iconNames) {
+            String iconPath = archiveSource.icons.get(icon);
+            iconPath = iconPath.replace(pak.getParent().toString(), "/static/mods");
+            archiveSource.icons.put(icon, iconPath);
         }
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.writeValue(extractPath.resolve("archive.json").toFile(), archiveSource);
@@ -172,7 +190,8 @@ public class ArchiveSource {
             if (Files.exists(pngPath)) {
                 continue;
             }
-            String cmd = String.format("convert %s %s", ddsFile, pngPath);
+            String cmd = String.format("magick %s %s", ddsFile, pngPath);
+            Log.infof("Converting DDS to PNG: %s", cmd);
             Process process = new ProcessBuilder(cmd.split(" "))
             .start();
             process.waitFor();

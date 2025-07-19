@@ -1222,17 +1222,35 @@
             function handleFileUpload(file) {
                 // Show loading message
                 addMessage(`Uploading file: ${file.name}...`, false);
-                
+
+                const formData = new FormData();
+                formData.append('pak', file);
+                $.ajax({
+                    url: `/assistant/upload-pak?filename=${encodeURIComponent(file.name)}`,
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        addMessage(`File uploaded successfully: ${file.name}`, false);
+                    },
+                    error: function(xhr, status, error) {
+                        addMessage(`Error uploading file: ${error}`, false);
+                        console.error('Upload error:', xhr.responseText);
+                    }
+                });
+                /*    
                 const reader = new FileReader();
                 reader.onload = function(e) {
+                    console.log('reader.onload');
                     const arrayBuffer = e.target.result;
                     
                     $.ajax({
                         url: `/assistant/upload?filename=${encodeURIComponent(file.name)}`,
                         type: 'POST',
-                        data: arrayBuffer,
+                        //data: arrayBuffer,
                         processData: false,
-                        contentType: 'application/octet-stream',
+                        //contentType: 'application/octet-stream',
                         success: function(response) {
                             addMessage(`File uploaded successfully: ${file.name}`, false);
                             // If the server returns data, display it
@@ -1248,7 +1266,9 @@
                         }
                     });
                 };
+                console.log('reader.readAsArrayBuffer');
                 reader.readAsArrayBuffer(file);
+                */
             }
 
             // Tooltip functionality
@@ -1264,6 +1284,8 @@
                 const $tooltipFooter = tooltip.find('.tooltip-footer');
                 const $tooltipImage = tooltip.find('.tooltip-item-image');
 
+                console.log('showEquipmentPanel');
+                console.log(equipment);
                 if (equipment.icon) {
                     $tooltipImage.attr('src', equipment.icon);
                 } else {

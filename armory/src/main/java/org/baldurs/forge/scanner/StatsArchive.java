@@ -25,21 +25,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.logging.Log;
 
 public class StatsArchive {
-    private static Pattern dataPattern = Pattern.compile("^data\\s+\"([^\"]+)\"\\s+\"([^\"]+)\"$");
-    private static Pattern newEntryPattern = Pattern.compile("^new entry\\s+\"([^\"]+)\"$");
-    private static Pattern typePattern = Pattern.compile("^type\\s+\"([^\"]+)\"$");
-    private static Pattern usingPattern = Pattern.compile("^using\\s+\"([^\"]+)\"$");
+    private static Pattern dataPattern = Pattern.compile("^data\\s+\"([^\"]+)\"\\s+\"([^\"]+)\"\\s*$");
+    private static Pattern newEntryPattern = Pattern.compile("^new entry\\s+\"([^\"]+)\"\\s*$");
+    private static Pattern typePattern = Pattern.compile("^type\\s+\"([^\"]+)\"\\s*$");
+    private static Pattern usingPattern = Pattern.compile("^using\\s+\"([^\"]+)\"\\s*$");
 
     public static class Stat {
         public String name;
         public String type;
         public String using;
+        public Map<String, String> data;
+
         @JsonIgnore
         public StatsArchive library;
         @JsonIgnore
         public ArchiveSource source;
-        @JsonIgnore
-        public Map<String, String> data;
+
+        public Stat() {
+        }
 
         public Stat(String name, String type, StatsArchive library, Map<String, String> data, ArchiveSource source) {
             this.name = name;
@@ -87,7 +90,10 @@ public class StatsArchive {
 
     public void merge(StatsArchive other) {
         byName.putAll(other.byName);
-        byType.putAll(other.byType);
+        for (String type : other.byType.keySet()) {
+            Map<String, Stat> typeEntries = byType.computeIfAbsent(type, k -> new HashMap<>());
+            typeEntries.putAll(other.byType.get(type));
+        }
         for (Stat stat : other.byName.values()) {
             stat.library = this;
         }
