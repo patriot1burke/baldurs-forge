@@ -2,7 +2,9 @@ package org.bg3.forge;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Optional;
 
+import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.scanner.IconCollector;
 import org.baldurs.forge.scanner.RootTemplate;
 import org.baldurs.forge.scanner.RootTemplateArchive;
@@ -11,8 +13,18 @@ import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import dev.langchain4j.model.chat.request.json.JsonSchema;
+import dev.langchain4j.service.output.JsonSchemas;
+
 
 public class ScannerTest {
+
+    @Test
+    public void testJsonSchema() throws Exception {
+        Optional<JsonSchema> schema = JsonSchemas.jsonSchemaFrom(EquipmentModel.class);
+        System.out.println(schema.get().toString());
+    }
+
     //@Test
     public void testObjecvtMapper() throws Exception{
         String hello = "hello \"world\"";

@@ -1072,6 +1072,8 @@
                 }
                 return splitStr.join(' ');
             }
+
+            chatHistory = null;
         
             // Send a message to the Ask API
             async function sendAskMessage(message) {
@@ -1080,15 +1082,35 @@
                 addMessage(message, true);
                 $messageInput.val('');
                 showLoading();
-        
+    
+                        
                 try {
+                    /*
                     const response = await $.ajax({
                         url: `/assistant/ask?query=${encodeURIComponent(message)}`,
                         type: 'GET'
                     });
+                    */
+                    let postData = null;
+                    if (chatHistory) {
+                        postData = JSON.stringify(chatHistory);
+                    }
+
+                    const response = await $.ajax({
+                        url: `/assistant/ask?query=${encodeURIComponent(message)}`,
+                        type: 'POST',
+                        data: postData,
+                        processData: false,
+                        contentType: false
+                    });
+
+                    console.log(response);
+                    const responseData = JSON.parse(response);
+                    const msg = responseData.message;
+                    chatHistory = responseData.chatHistory;
         
                     hideLoading();
-                    addMessage(response, false);
+                    addMessage(msg, false);
                 } catch (error) {
                     hideLoading();
                     addMessage(`Sorry, there was an error processing your request: ${error.statusText || error.message}`, false);

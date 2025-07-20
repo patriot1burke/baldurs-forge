@@ -15,6 +15,8 @@ import org.baldurs.forge.model.Equipment;
 import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.nli.ToolBoxNLI;
 import org.baldurs.forge.nli.ToolBoxNLIInvoker;
+import org.baldurs.forge.playground.EquipmentBuilder;
+import org.baldurs.forge.playground.JsonChatMemory;
 import org.baldurs.forge.toolbox.BoostService;
 import org.baldurs.forge.toolbox.EquipmentDB;
 import org.baldurs.forge.toolbox.LibraryService;
@@ -53,6 +55,12 @@ public class AssistantResource {
 	@Inject
 	EquipmentDB equipmentDB;
 
+	@Inject
+	EquipmentBuilder equipmentBuilder;
+
+	@Inject
+	JsonChatMemory jsonChatMemory;
+
 
 	@Inject
 	@ToolBoxNLI({EquipmentDB.class, LibraryService.class, BoostService.class})
@@ -75,10 +83,11 @@ public class AssistantResource {
 	/**
 	 * Executes a natural language query and feeds back data into the LLM to provide a natural language response.
 	 */
-	@GET
+	@POST
 	@Path("/ask")
 	@Produces(MediaType.TEXT_PLAIN)
-	public Response naturalLanguage(@QueryParam("query") String query) throws Exception {
+	public Response naturalLanguage(@QueryParam("query") String query, String chatHistory) throws Exception {
+		/* 
 		List<EquipmentModel> items = equipmentDB.search(query);
 
         String response = "";
@@ -88,6 +97,13 @@ public class AssistantResource {
            response = forgeAgent.queryEquipment(query, EquipmentModel.toJson(items));
 		   LOG.info("RESPONSE:\n " + response + "\n");
         }
+		*/
+		jsonChatMemory.load(chatHistory);
+		String response = equipmentBuilder.buildEquipment(query);
+		ObjectMapper mapper = new ObjectMapper();
+		response = mapper.writeValueAsString(response);
+		String messages = jsonChatMemory.toJson();
+		response = "{\"message\": " + response + ", \"chatHistory\": " + messages + "}";
 		return Response.ok(response).build();
 	}
 

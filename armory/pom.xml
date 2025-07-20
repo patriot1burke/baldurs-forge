@@ -46,6 +46,12 @@
             <groupId>io.quarkiverse.langchain4j</groupId>
             <artifactId>quarkus-langchain4j-pgvector</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.commonmark</groupId>
+            <artifactId>commonmark</artifactId>
+            <version>0.25.0</version>
+        </dependency>
+        
         <!-- UI -->
         <dependency>
             <groupId>io.quarkus</groupId>
