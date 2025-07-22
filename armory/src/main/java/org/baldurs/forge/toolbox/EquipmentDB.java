@@ -3,7 +3,6 @@ package org.baldurs.forge.toolbox;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,15 +12,12 @@ import java.util.Set;
 import org.baldurs.forge.agents.ForgeAgent;
 import org.baldurs.forge.agents.MetadataAgent;
 import org.baldurs.forge.model.Equipment;
-import org.baldurs.forge.model.EquipmentFilter;
-import org.baldurs.forge.model.EquipmentFilters;
 import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.model.EquipmentSlot;
 import org.baldurs.forge.model.EquipmentType;
 import org.baldurs.forge.model.Rarity;
 import org.baldurs.forge.scanner.ArchiveSource;
 import org.baldurs.forge.scanner.RootTemplate;
-import org.baldurs.forge.scanner.RootTemplateArchive;
 import org.baldurs.forge.scanner.StatsArchive;
 import org.baldurs.forge.toolbox.BoostService.BoostWriter;
 import org.baldurs.forge.util.FilterExpression;
@@ -32,6 +28,7 @@ import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingSearchResult;
 import dev.langchain4j.store.embedding.EmbeddingStore;
@@ -102,7 +99,8 @@ public class EquipmentDB {
             }
         }
         Rarity rarity = Rarity.fromString(item.getField("Rarity"));
-        RootTemplate rootTemplate = libraryService.archive().rootTemplates.getRootTemplate(item.getField("RootTemplate"));
+        RootTemplate rootTemplate = libraryService.archive().rootTemplates
+                .getRootTemplate(item.getField("RootTemplate"));
         if (rootTemplate == null) {
             Log.debug("No root template for " + id);
             return;
@@ -130,7 +128,7 @@ public class EquipmentDB {
             throw new RuntimeException("Error processing boosts for " + id, e);
         }
         String boost = boostWriter.toString();
-        //Log.infof("Boosts for %s: %s", id, boost);
+        // Log.infof("Boosts for %s: %s", id, boost);
         String icon = rootTemplate.resolveIcon();
         icon = libraryService.icons().get(icon);
         String weaponType = null;
@@ -164,13 +162,18 @@ public class EquipmentDB {
                 }
             }
         }
-        Equipment equipment = new Equipment(id, type, slot, rarity, name, description, boost, icon, weaponType, armorType, armorClass, weaponProperties, rootTemplate, item);
+        Equipment equipment = new Equipment(id, type, slot, rarity, name, description, boost, icon, weaponType,
+                armorType, armorClass, weaponProperties, rootTemplate, item);
         db.put(id, equipment);
     }
 
     private void load() throws Exception {
 
         Log.info("Loading items...");
+
+        Log.info("**************************************************");
+        Log.info("Removing all items from vector db for clean ingestion...");
+        Log.info("**************************************************");
 
         embeddingStore.removeAll();
         Collection<Equipment> equipment = equipmentDB.values();
@@ -191,9 +194,9 @@ public class EquipmentDB {
             boostService.stat(stat, boostWriter);
             String boost = boostWriter.toString();
             Metadata metadata = Metadata.from(Map.of(
-                    "id", item.id(), 
-                    "type", item.type().name(), 
-                    "slot", item.slot().name(), 
+                    "id", item.id(),
+                    "type", item.type().name(),
+                    "slot", item.slot().name(),
                     "rarity", item.rarity().name()));
             if (item.weaponType() != null) {
                 metadata.put("weaponType", item.weaponType());
@@ -214,16 +217,16 @@ public class EquipmentDB {
             if (item.weaponProperties() != null) {
                 content += "Weapon Properties: " + item.weaponProperties() + "\n";
             }
-            content +=
-                    "Boosts: " + boost;
-            //Log.info("\nid: " + item.id() + "\n" + content);
+            content += "Boosts: " + boost;
+            // Log.info("\nid: " + item.id() + "\n" + content);
             Document document = Document.from(content, metadata);
             docs.add(document);
-         }
+        }
         ingester.ingest(docs);
 
         Log.info("Ingested " + equipment.size() + " items");
     }
+
     public void uploadMod(Path pak) throws Exception {
         ArchiveSource source = libraryService.uploadMod(pak);
         Log.info("Importing mod " + source.name);
@@ -234,14 +237,14 @@ public class EquipmentDB {
         }
         Map<String, StatsArchive.Stat> weapons = source.archive.stats.getByType(EquipmentType.Weapon.name());
         for (StatsArchive.Stat weapon : weapons.values()) {
-                addEquipment(newEquipment, weapon);
+            addEquipment(newEquipment, weapon);
         }
         Log.info("Added " + newEquipment.size() + " to equipment database");
         equipmentDB.putAll(newEquipment);
-        // TODO: This doesn't seem to work.  Older ingestions seem to disappear.
+        // TODO: This doesn't seem to work. Older ingestions seem to disappear.
         // instead re-ingest everything
-        //ingest(newEquipment.values());
-        load();
+        ingest(newEquipment.values());
+        // load();
     }
 
     @Tool("Find an item in the equipment database by name")
@@ -255,30 +258,57 @@ public class EquipmentDB {
         return EquipmentModel.from(equipment);
     }
 
-    public static record SearchResult(List<EquipmentModel> items, String summary) {}
+    public static record SearchResult(List<EquipmentModel> items, String summary) {
+    }
 
     @Tool("Search or find or show items in the equipment database based on a natural language query")
     @Transactional
-    public SearchResult searchAndSummary(String queryString) {
+    public SearchResult searchAndSummary(@UserMessage String queryString) {
         Log.infof("searchAndSummary for: %s", queryString);
-        List<EquipmentModel> models = search(queryString);
+        Filter filter = null;
+        try {
+            EquipmentType type = metadataAgent.equipmentType(queryString);
+            if (type != null && type != EquipmentType.All) {
+                Log.infof("Filter Type: %s", type);
+                Filter typeFilter = new MetadataFilterBuilder("type").isEqualTo(type.name());
+                if (filter == null) {
+                    filter = typeFilter;
+                } else {
+                    filter = filter.and(typeFilter);
+                }
+                try {
+                    EquipmentSlot slot = metadataAgent.equipmentSlot(queryString);
+                    if (slot != null && slot != EquipmentSlot.Unknown) {
+                        Log.infof("Filter Slot: %s", slot);
+                        Filter slotFilter = new MetadataFilterBuilder("slot").isEqualTo(slot.name());
+                        filter =filter.and(slotFilter);
+                    }
+                } catch (Exception e) {
+                    Log.warnf("Error getting equipment slot metadata from prompt query: %s", e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            Log.warnf("Error getting equipment type metadata from prompt query: %s", e.getMessage());
+        }
+
+        List<EquipmentModel> models = search(queryString, filter);
         String summary = forgeAgent.queryEquipment(queryString, EquipmentModel.toJson(models));
         return new SearchResult(models, summary);
     }
 
     @Transactional
-    public List<EquipmentModel> search(String queryString) {
+    public List<EquipmentModel> search(String queryString, Filter filter) {
         Log.infof("Querying for: %s", queryString);
         // getting the filter is not very reliable or accurate
         // need to play with it more
-        //Filter filter = getFilter(queryString);
+        // Filter filter = getFilter(queryString);
 
         Embedding embedding = embeddingModel.embed(queryString).content();
         EmbeddingSearchRequest request = EmbeddingSearchRequest.builder()
                 .queryEmbedding(embedding)
-                //.filter(filter.filter())
+                .filter(filter)
                 .minScore(0.5)
-                .maxResults(10)
+                .maxResults(5)
                 .build();
 
         EmbeddingSearchResult<TextSegment> search = embeddingStore.search(request);
@@ -292,28 +322,9 @@ public class EquipmentDB {
 
     }
 
-    private Filter getFilter(String queryString) {
-        EquipmentFilters filters = metadataAgent.answer(queryString);
-        FilterExpression filter = new FilterExpression();
-        if (filters != null && filters.filters() != null && !filters.filters().isEmpty()) {
-            for (EquipmentFilter eq : filters.filters()) {
-                FilterExpression x = new FilterExpression();
-                if (eq.type() != null) {
-                    Filter typeFilter = new MetadataFilterBuilder("type").isEqualTo(eq.type().name());
-                    x.and(typeFilter);
-                }
-                if (eq.slot() != null && eq.slot() != EquipmentSlot.Unknown) {
-                    Filter slotFilter = new MetadataFilterBuilder("slot").isEqualTo(eq.slot().name());
-                    x.and(slotFilter);
-                }
-                filter.or(x);
-            }
-        }
-        return filter.filter();
-    }
-
     /**
      * Utility method to find capital letters in a string
+     * 
      * @param str the input string
      * @return a list of capital letters found in the string
      */
@@ -322,7 +333,7 @@ public class EquipmentDB {
         if (str == null) {
             return capitals;
         }
-        
+
         for (char c : str.toCharArray()) {
             if (Character.isUpperCase(c)) {
                 capitals.add(c);
@@ -333,6 +344,7 @@ public class EquipmentDB {
 
     /**
      * Alternative method to find capital letters using regex
+     * 
      * @param str the input string
      * @return a list of capital letters found in the string
      */
@@ -341,12 +353,12 @@ public class EquipmentDB {
         if (str == null) {
             return capitals;
         }
-        
+
         // Using regex to find capital letters
         String capitalPattern = "[A-Z]";
         java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(capitalPattern);
         java.util.regex.Matcher matcher = pattern.matcher(str);
-        
+
         while (matcher.find()) {
             capitals.add(matcher.group().charAt(0));
         }
@@ -355,6 +367,7 @@ public class EquipmentDB {
 
     /**
      * Method to get positions of capital letters in a string
+     * 
      * @param str the input string
      * @return a map of character to list of positions where it appears
      */
@@ -363,7 +376,7 @@ public class EquipmentDB {
         if (str == null) {
             return positions;
         }
-        
+
         for (int i = 0; i < str.length(); i++) {
             char c = str.charAt(i);
             if (Character.isUpperCase(c)) {
@@ -375,6 +388,7 @@ public class EquipmentDB {
 
     /**
      * Adds spaces between capital letters in a string
+     * 
      * @param str the input string
      * @return the string with spaces added between capital letters
      */
@@ -382,7 +396,7 @@ public class EquipmentDB {
         if (str == null || str.isEmpty()) {
             return str;
         }
-        
+
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < str.length(); i++) {
             char c = str.charAt(i);

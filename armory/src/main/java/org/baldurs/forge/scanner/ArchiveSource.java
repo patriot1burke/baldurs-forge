@@ -191,7 +191,7 @@ public class ArchiveSource {
                 continue;
             }
             String cmd = String.format("magick %s %s", ddsFile, pngPath);
-            Log.infof("Converting DDS to PNG: %s", cmd);
+            //Log.infof("Converting DDS to PNG: %s", cmd);
             Process process = new ProcessBuilder(cmd.split(" "))
             .start();
             process.waitFor();

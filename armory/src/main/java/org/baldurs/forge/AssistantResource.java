@@ -11,12 +11,12 @@ import java.util.UUID;
 
 import org.baldurs.forge.agents.ForgeAgent;
 import org.baldurs.forge.agents.MetadataAgent;
+import org.baldurs.forge.builder.EquipmentBuilder;
+import org.baldurs.forge.builder.JsonChatMemory;
 import org.baldurs.forge.model.Equipment;
 import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.nli.ToolBoxNLI;
 import org.baldurs.forge.nli.ToolBoxNLIInvoker;
-import org.baldurs.forge.playground.EquipmentBuilder;
-import org.baldurs.forge.playground.JsonChatMemory;
 import org.baldurs.forge.toolbox.BoostService;
 import org.baldurs.forge.toolbox.EquipmentDB;
 import org.baldurs.forge.toolbox.LibraryService;
