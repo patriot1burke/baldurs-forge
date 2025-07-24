@@ -1,5 +1,7 @@
 package org.baldurs.forge.builder;
 
+import org.baldurs.forge.context.ClientMemoryProvider;
+
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
@@ -10,7 +12,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.RequestScoped;
 
 @RequestScoped
-@RegisterAiService(chatMemoryProviderSupplier = JsonChatMemoryProvider.class)
+@RegisterAiService(chatMemoryProviderSupplier = ClientMemoryProvider.class)
 public interface EquipmentBuilderAgent {
 
     @SystemMessage("""

@@ -12,7 +12,8 @@ import java.util.UUID;
 import org.baldurs.forge.agents.ForgeAgent;
 import org.baldurs.forge.agents.MetadataAgent;
 import org.baldurs.forge.builder.EquipmentBuilder;
-import org.baldurs.forge.builder.JsonChatMemory;
+import org.baldurs.forge.chat.BaldursForgeChat;
+import org.baldurs.forge.context.ChatContext;
 import org.baldurs.forge.model.Equipment;
 import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.nli.ToolBoxNLI;
@@ -42,12 +43,6 @@ import jakarta.ws.rs.core.Response.Status;
 public class AssistantResource {
 	private static final Logger LOG = Logger.getLogger( AssistantResource.class);
 
-	@Inject
-    ForgeAgent forgeAgent;
-
-
-	@Inject
-	MetadataAgent metadataFinderAgent;
 
 	@Inject
 	LibraryService library;
@@ -59,13 +54,11 @@ public class AssistantResource {
 	EquipmentBuilder equipmentBuilder;
 
 	@Inject
-	JsonChatMemory jsonChatMemory;
-
-
-	@Inject
 	@ToolBoxNLI({EquipmentDB.class, LibraryService.class, BoostService.class})
 	ToolBoxNLIInvoker assistantCommandService;
 
+	@Inject
+	BaldursForgeChat chat;
 	
 
 	/**
@@ -86,7 +79,7 @@ public class AssistantResource {
 	@POST
 	@Path("/ask")
 	@Produces(MediaType.TEXT_PLAIN)
-	public Response naturalLanguage(@QueryParam("query") String query, String chatHistory) throws Exception {
+	public ChatContext naturalLanguage(ChatContext context) throws Exception {
 		/* 
 		List<EquipmentModel> items = equipmentDB.search(query);
 
@@ -98,13 +91,8 @@ public class AssistantResource {
 		   LOG.info("RESPONSE:\n " + response + "\n");
         }
 		*/
-		jsonChatMemory.load(chatHistory);
-		String response = equipmentBuilder.buildEquipment(query);
-		ObjectMapper mapper = new ObjectMapper();
-		response = mapper.writeValueAsString(response);
-		String messages = jsonChatMemory.toJson();
-		response = "{\"message\": " + response + ", \"chatHistory\": " + messages + "}";
-		return Response.ok(response).build();
+		chat.chat(context.userMessage());
+		return context;
 	}
 
 	

@@ -262,9 +262,14 @@ public class EquipmentDB {
     }
 
     @Tool("Search or find or show items in the equipment database based on a natural language query")
-    @Transactional
     public SearchResult searchAndSummary(@UserMessage String queryString) {
         Log.infof("searchAndSummary for: %s", queryString);
+        List<EquipmentModel> models = ragSearch(queryString);
+        String summary = forgeAgent.queryEquipment(queryString, EquipmentModel.toJson(models));
+        return new SearchResult(models, summary);
+    }
+
+    public List<EquipmentModel> ragSearch(String queryString) {
         Filter filter = null;
         try {
             EquipmentType type = metadataAgent.equipmentType(queryString);
@@ -291,13 +296,11 @@ public class EquipmentDB {
             Log.warnf("Error getting equipment type metadata from prompt query: %s", e.getMessage());
         }
 
-        List<EquipmentModel> models = search(queryString, filter);
-        String summary = forgeAgent.queryEquipment(queryString, EquipmentModel.toJson(models));
-        return new SearchResult(models, summary);
+        List<EquipmentModel> models = embeddingSearchRequest(queryString, filter);
+        return models;
     }
 
-    @Transactional
-    public List<EquipmentModel> search(String queryString, Filter filter) {
+    public List<EquipmentModel> embeddingSearchRequest(String queryString, Filter filter) {
         Log.infof("Querying for: %s", queryString);
         // getting the filter is not very reliable or accurate
         // need to play with it more

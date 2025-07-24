@@ -990,6 +990,51 @@
                 $chatContainer.append($resultDev);
             }
 
+            function listEquipmentEvent(items) {
+                const $resultDev = $('<div>', {
+                    class: `message assistant-message`
+                });
+      
+                const $list = $('<ul>', { class: 'tool-results-list' });
+                for (const item of items) {
+                    const $listItem = $('<li>');
+                    const $itemAnchor =  $('<a>', {
+                        text: item.name,
+                        class: `rarity-${item.rarity.toLowerCase()}`
+                    });
+                    $itemAnchor.data("equipment", item);
+                    $itemAnchor.attr('equipment-tooltip', item.name);
+                    $listItem.append($itemAnchor);
+                    $list.append($listItem);
+                }
+                const $paragraph = $('<p>');
+                $paragraph.append($list);
+                $resultDev.append($paragraph);
+                $chatContainer.append($resultDev);
+            }
+
+            function showEquipmentEvent(equipment) {
+                if (!equipment) {
+                    const $messageDiv = $('<div>', { class: 'message data-message' });
+                    const $notFoundDiv = $('<div>');
+                    $notFoundDiv.html('No equipment found');
+                    $messageDiv.append($notFoundDiv);
+                    $chatContainer.append($messageDiv);
+                    return;
+                }
+                console.log(equipment);
+                const $resultDev = $('<div>', {
+                    class: `message assistant-message`
+                });
+                const $equipmentPanel = $baseEquipmentPanel.clone();
+                $equipmentPanel.css('position', 'relative');
+                showEquipmentPanel($equipmentPanel, equipment);
+                $resultDev.append($equipmentPanel);
+                $equipmentPanel.addClass('show');
+                $chatContainer.append($resultDev);
+            }
+
+
             function findByName(data) {
                 const equipment = data.response;
                 if (!equipment) {
@@ -1073,7 +1118,7 @@
                 return splitStr.join(' ');
             }
 
-            chatHistory = null;
+            chatContext = null;
         
             // Send a message to the Ask API
             async function sendAskMessage(message) {
@@ -1092,12 +1137,14 @@
                     });
                     */
                     let postData = null;
-                    if (chatHistory) {
-                        postData = JSON.stringify(chatHistory);
+                    let request = {
+                        userMessage: message,
+                        context: chatContext
                     }
+                    postData = JSON.stringify(request);
 
                     const response = await $.ajax({
-                        url: `/assistant/ask?query=${encodeURIComponent(message)}`,
+                        url: `/assistant/ask`,
                         type: 'POST',
                         data: postData,
                         processData: false,
@@ -1106,11 +1153,22 @@
 
                     console.log(response);
                     const responseData = JSON.parse(response);
-                    const msg = responseData.message;
-                    chatHistory = responseData.chatHistory;
-        
+                    if (responseData.response) {
+                        for (const action of responseData.response) {
+                            if (action.type === 'ListEquipment') {
+                                console.log('ListEquipment');
+                                listEquipmentEvent(action.equipment);
+                            } else if (action.type === 'ShowEquipment') {
+                                console.log('ShowEquipment');
+                                showEquipmentEvent(action.equipment);
+                            } else if (action.type === 'Message') {
+                                console.log('Message');
+                                addMessage(action.message, false);
+                            }
+                        }
+                    }
+                    chatContext = responseData.context;        
                     hideLoading();
-                    addMessage(msg, false);
                 } catch (error) {
                     hideLoading();
                     addMessage(`Sorry, there was an error processing your request: ${error.statusText || error.message}`, false);
