@@ -44,8 +44,6 @@ import jakarta.inject.Inject;
 public class ChatContext {
 
     Map<String, Object> serverContext = new HashMap<>();
-    List<Object> serverEvents = new ArrayList<>();
-
     Map<String, Object> sharedContext = new HashMap<>();
 
     List<Object> response = new ArrayList<>();
@@ -58,17 +56,6 @@ public class ChatContext {
 
     public void setUserMessage(String userMessage) {
         this.userMessage = userMessage;
-    }
-
-    /**
-     * Invoked tools can add events to this list.
-     * They will be executed after chat request resolves on server and before
-     * response is sent to client.
-     * 
-     * @return
-     */
-    public List<Object> serverEvents() {
-        return serverEvents;
     }
 
     /**
