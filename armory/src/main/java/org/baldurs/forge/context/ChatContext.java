@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -20,6 +21,7 @@ import jakarta.inject.Inject;
  * Expects the following JSON format for requests:
  * {
  *    "userMessage": "...",
+ *    "memoryId": "...",
  *    "context": {
  *       "shared": {
  *           "...": "..."
@@ -32,6 +34,7 @@ import jakarta.inject.Inject;
  * Outputs the following JSON format for responses:
  * {
  *    "response": "[...]",
+ *    "memoryId": "...",
  *    "context": {
  *       "shared": {
  *           "...": "..."
@@ -49,9 +52,18 @@ public class ChatContext {
     List<Object> response = new ArrayList<>();
 
     String userMessage = null;
+    String memoryId = UUID.randomUUID().toString();
 
     public String userMessage() {
         return userMessage;
+    }
+
+    public String memoryId() {
+        return memoryId;
+    }
+
+    public void setMemoryId(String memoryId) {
+        this.memoryId = memoryId;
     }
 
     public void setUserMessage(String userMessage) {

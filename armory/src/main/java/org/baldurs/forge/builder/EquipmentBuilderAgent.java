@@ -1,6 +1,7 @@
 package org.baldurs.forge.builder;
 
 import org.baldurs.forge.context.ClientMemoryProvider;
+import org.baldurs.forge.context.MessageWindowClientMemoryProvider;
 
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.service.MemoryId;
@@ -11,8 +12,8 @@ import io.quarkiverse.langchain4j.RegisterAiService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.RequestScoped;
 
-@RequestScoped
-@RegisterAiService(chatMemoryProviderSupplier = ClientMemoryProvider.class)
+@ApplicationScoped
+@RegisterAiService(chatMemoryProviderSupplier = MessageWindowClientMemoryProvider.class)
 public interface EquipmentBuilderAgent {
 
     @SystemMessage("""
@@ -21,10 +22,17 @@ public interface EquipmentBuilderAgent {
 
         {schema}
 
-        Ask the user questions until they have provided all the information needed to build the equipment json document.
-        When finished, call the finishEquipment tool to finish the equipment.
+        This is the current JSON document: 
+        
+        {currentJson}
+
+        Ask the user questions until they have provided all the required information needed to build the equipment json document.
+        Add field values from any information you can infer from the user message.
+        Make sure to update the current JSON document whenever you get new information from user using the updateEquipment tool.
+        When all required fields are filled, ask the user if they want to fill in any optional fields.
+        When the user is done, call the finishEquipment tool to finish the equipment.
 
         """)
     @ToolBox(EquipmentBuilder.class)
-    public String buildEquipment(String schema, @UserMessage String userMessage);
+    public String buildEquipment(@MemoryId String memoryId, String schema, String currentJson, @UserMessage String userMessage);
 }

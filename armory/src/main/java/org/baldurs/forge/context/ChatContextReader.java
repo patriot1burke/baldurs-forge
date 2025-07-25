@@ -55,9 +55,13 @@ public class ChatContextReader implements MessageBodyReader<ChatContext> {
         if (userMessageNode != null && !userMessageNode.isNull()) {
             context.setUserMessage(userMessageNode.asText());
         }
-        JsonNode contextNode = node.get("context");
+         JsonNode contextNode = node.get("context");
         if (contextNode == null || contextNode.isNull()) {
             return context;
+        }
+        JsonNode memoryIdNode = contextNode.get("memoryId");
+        if (memoryIdNode != null && !memoryIdNode.isNull()) {
+            context.setMemoryId(memoryIdNode.asText());
         }
         JsonNode memoryNode = contextNode.get("memory");
         if (memoryNode != null && !memoryNode.isNull()) {

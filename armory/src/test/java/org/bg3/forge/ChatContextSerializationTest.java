@@ -19,7 +19,7 @@ public class ChatContextSerializationTest {
         ObjectMapper mapper = new ObjectMapper();
         ChatContext context = new ChatContext();
         context.response().add(new MessageAction("Hello"));
-        ClientMemoryStore memory = ClientMemoryStore.create(mapper);
+        ClientMemoryStore memory = ClientMemoryStore.pojo(mapper);
         memory.updateMessages("test", List.of(new UserMessage("Hello")));
         
         StringWriter writer = new StringWriter();

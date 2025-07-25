@@ -13,6 +13,7 @@ import org.baldurs.forge.agents.ForgeAgent;
 import org.baldurs.forge.agents.MetadataAgent;
 import org.baldurs.forge.builder.EquipmentBuilder;
 import org.baldurs.forge.chat.BaldursForgeChat;
+import org.baldurs.forge.chat.ChatService;
 import org.baldurs.forge.context.ChatContext;
 import org.baldurs.forge.model.Equipment;
 import org.baldurs.forge.model.EquipmentModel;
@@ -28,6 +29,7 @@ import org.jboss.resteasy.reactive.multipart.FileUpload;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -58,7 +60,7 @@ public class AssistantResource {
 	ToolBoxNLIInvoker assistantCommandService;
 
 	@Inject
-	BaldursForgeChat chat;
+	ChatService chat;
 	
 
 	/**
@@ -91,7 +93,8 @@ public class AssistantResource {
 		   LOG.info("RESPONSE:\n " + response + "\n");
         }
 		*/
-		chat.chat(context.userMessage());
+		Log.info("CHAT: " + context.memoryId());
+		chat.chat(context);
 		return context;
 	}
 

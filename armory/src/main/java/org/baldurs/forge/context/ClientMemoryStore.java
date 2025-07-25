@@ -14,9 +14,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.langchain4j.data.message.ChatMessage;
 import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import dev.langchain4j.data.message.ChatMessageDeserializer;
 import dev.langchain4j.data.message.ChatMessageSerializer;
+import dev.langchain4j.store.memory.chat.ChatMemoryStore;
+import io.quarkus.logging.Log;
 
 /**
  * 
@@ -89,10 +92,50 @@ public class ClientMemoryStore {
         }
     }
 
-    public static ClientMemoryStore create(ObjectMapper mapper) {
+    public void ping() {
+        // exists to test CDI request scope
+    }
+
+    public static ClientMemoryStore pojo(ObjectMapper mapper) {
         ClientMemoryStore memory = new ClientMemoryStore();
         memory.mapper = mapper;
         return memory;
     }
 
+    /**
+     * Wraps the ClientMemoryStore in a ChatMemoryStore.
+     * ChatMemoryStore.deleteMessages can be called by Quarkus out of scope of a request.  Since ClientMemoryStore is request scoped,
+     * this wrapper catches any CDI exceptions and eats them to avoid logging so many errors.
+     * @return
+     */
+    public static ChatMemoryStore beanDelegate() {
+        return new ChatMemoryStore() {
+
+            @Override
+            public void deleteMessages(Object memoryId) {
+                ClientMemoryStore clientMemoryStore = null;
+                try {
+                    clientMemoryStore = CDI.current().select(ClientMemoryStore.class).get();
+                    clientMemoryStore.ping(); // ping forces CDI to reference the instance
+                } catch (Exception e) {
+                    return;
+                }
+
+            }
+
+            @Override
+            public List<ChatMessage> getMessages(Object memoryId) {
+                ClientMemoryStore clientMemoryStore = CDI.current().select(ClientMemoryStore.class).get();
+                return clientMemoryStore.getMessages(memoryId);
+            }
+
+            @Override
+            public void updateMessages(Object memoryId, List<ChatMessage> messages) {
+                ClientMemoryStore clientMemoryStore = CDI.current().select(ClientMemoryStore.class).get();
+                clientMemoryStore.updateMessages(memoryId, messages);
+            }
+
+        };
+    }
 }
+
