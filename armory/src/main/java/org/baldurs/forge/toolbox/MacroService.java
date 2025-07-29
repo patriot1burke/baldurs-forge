@@ -177,21 +177,17 @@ public class MacroService {
         transformers.put("Advantage", (macro, writer) -> {
             if (macro.args.length == 2) {
                 writer.write("Advantage on " + macro.args[1] + " checks");
-            }
-            if (macro.args[0].equals("AttackRoll")) {   
+            } else if (macro.args[0].equals("AttackRoll")) {   
                 writer.write("Advantage on attack rolls");
-            }
-            if (macro.args[0].equals("AllAbilities")) {
+            } else if (macro.args[0].equals("AllAbilities")) {
                 writer.write("Advantage on all ability checks");
-            }
-            if (macro.args[0].equals("AllSavingThrows")) {
+            } else if (macro.args[0].equals("AllSavingThrows")) {
                 writer.write("Advantage on all saving throws");
-            }
-            if (macro.args[0].equals("Concentration")) {
+            } else if (macro.args[0].equals("Concentration")) {
                 writer.write("Advantage on Concentration checks");
+            } else {
+                writer.write("Advantage on " + macro.args[0] + " checks");
             }
-
-            writer.write("Advantage on " + macro.args[0] + " checks");
         });
         transformers.put("CannotBeDisarmed", (macro, writer) -> {
             writer.write("Cannot be disarmed");

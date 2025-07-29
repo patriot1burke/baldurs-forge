@@ -20,4 +20,7 @@ public interface BaldursForgeChat extends BaldursChat {
     """)
     @ToolBox({EquipmentQueryCommands.class})
     String chat(@MemoryId String memoryId, @UserMessage String message);
+
+    @SystemMessage(fromResource = "prompts/nl2boost.txt")
+    String generateBoost(@MemoryId String memoryId, @UserMessage String message);
 }

@@ -77,6 +77,7 @@ public class StatsArchive {
 
     public static final String ARMOR_TYPE = "Armor";
     public static final String WEAPON_TYPE = "Weapon";
+    public static final String SPELL_TYPE = "SpellData";
     private Map<String, Stat> byName = new HashMap<>();
     private Map<String, Map<String, Stat>> byType = new HashMap<>();
     private final ArchiveSource source;

@@ -24,6 +24,9 @@ public class EquipmentQueryCommands {
     @Inject
     EquipmentBuilder equipmentBuilder;
 
+    @Inject
+    ChatService chatService;
+
     public static class ListEquipmentAction extends Action {
         List<EquipmentModel> equipment;
 
@@ -85,6 +88,13 @@ public class EquipmentQueryCommands {
     public String createNewEquipment(String userMessage) {
         Log.info("Creating new equipment");
         return equipmentBuilder.chat(context.memoryId(), context.userMessage());
+    }
+
+    @Tool("Generate a boost for equipment")
+    public void generateBoost(String userMessage) {
+        Log.info("Generating boost for equipment");
+        chatService.setChatFrame(context, BoostChat.class);
+        context.response().add(new MessageAction("What boosts do you want to add?"));
     }
 
 }

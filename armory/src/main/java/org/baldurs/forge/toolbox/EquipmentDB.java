@@ -35,6 +35,7 @@ import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
 import dev.langchain4j.store.embedding.filter.Filter;
 import dev.langchain4j.store.embedding.filter.MetadataFilterBuilder;
+import dev.langchain4j.store.embedding.filter.logical.Not;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -175,9 +176,8 @@ public class EquipmentDB {
         Log.info("Removing all items from vector db for clean ingestion...");
         Log.info("**************************************************");
 
-        embeddingStore.removeAll();
-        Collection<Equipment> equipment = equipmentDB.values();
-
+        Filter filter = new MetadataFilterBuilder("type").isNotEqualTo("Spell");
+        embeddingStore.removeAll(filter);
         ingest(equipmentDB.values());
     }
 
@@ -270,7 +270,7 @@ public class EquipmentDB {
     }
 
     public List<EquipmentModel> ragSearch(String queryString) {
-        Filter filter = null;
+        Filter filter = new MetadataFilterBuilder("type").isNotEqualTo("Spell");
         try {
             EquipmentType type = metadataAgent.equipmentType(queryString);
             if (type != null && type != EquipmentType.All) {
@@ -302,15 +302,11 @@ public class EquipmentDB {
 
     public List<EquipmentModel> embeddingSearchRequest(String queryString, Filter filter) {
         Log.infof("Querying for: %s", queryString);
-        // getting the filter is not very reliable or accurate
-        // need to play with it more
-        // Filter filter = getFilter(queryString);
-
         Embedding embedding = embeddingModel.embed(queryString).content();
         EmbeddingSearchRequest request = EmbeddingSearchRequest.builder()
                 .queryEmbedding(embedding)
                 .filter(filter)
-                .minScore(0.5)
+                .minScore(0.75)
                 .maxResults(5)
                 .build();
 

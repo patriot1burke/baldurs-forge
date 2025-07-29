@@ -27,11 +27,15 @@ public class ChatService {
     @Inject
     EquipmentBuilder equipmentBuilder;
 
+    @Inject
+    BoostChat boostChat;
+
     Map<String, BaldursChat> chatFrames = new HashMap<>();
 
     @PostConstruct
     public void init() {
         chatFrames.put(EquipmentBuilder.class.getName(), equipmentBuilder);
+        chatFrames.put(BoostChat.class.getName(), boostChat);
     }
 
     public void setChatFrame(ChatContext context, Class<? extends BaldursChat> chatFrame) {
