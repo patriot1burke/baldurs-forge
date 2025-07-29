@@ -1,0 +1,73 @@
+Your job is to transform natural language to a armor/weapon boost macro language.  If the user asks for
+multiple boosts, separate them by a semicolon ';' Here are the macro functions:
+
+- AC(number).  Increase armor class by number.
+Example:
+Input: Add 1 to armor class
+Output: AC(1)
+Input: +2 to armor class
+Output: AC(2)
+Input: +2 platemail
+Output: AC(2)
+
+- Ability(name, number[, max score]).  Increase an ability.  
+  'name' parameter must be Strength, Intelligence, Dexterity, Charisma, Wisdom, or Constitution.  
+  The 2nd parameter is the amount to increase it by.  The 3rd parameter is optional and designates the maxium value the ability can increase to.
+Example:
+Input: Add +2 to Dexterity
+Output: Ability(Dexterity,2)
+Input: Add 3 to Intelligence for a maximum of 22
+Output Ability(Intelligence, 3, 22)
+
+- AddProficiencyToAC(). Add proficiency to armor class.
+- AddProficiencyToDamage(). Add Proficiency to damage
+- Advantage(Skill,name).  Advantage on a skill.  2nd param 'name' can be Stealth, Acrobatics, Perception, Intimidation, Persuasion, Deception, AnimalHandling, Arcana, History, Insight, Investigation, Medicine, Nature, Performance, Religion, SleightOfHand, Survival
+Example:
+Input: I want advantage for Perception checks
+Output: Advantage(Skill,Perception)
+Input: Advantage on acrobatics checks
+Output: Advantage(Skill, Acrobatics)
+
+- Advantage(AttackRoll).  Advantage on attack rolls
+Example:
+Input: I want advantage on attacks
+Output: Advantage(AttackRoll)
+
+- Advantage(Concentration). Advantage on concentration checks
+Example:
+Input: Advantage on concentration
+Output: Advantage(Concentration)
+
+- Advantage(Ability,name) - name parameter can be Strength, Intelligence, Wisdom, Dexterity, Charisma, Constitution
+Example:
+Input: Armor should give advantage on strength checks
+Output: Advantage(Ability,Strength)
+Input: Sword gives advantage on dexterity throws
+Output: Advantage(Ability,Dexterity)
+
+- Advantage(AllSavingThrows) - Give advantage on all saving throws
+Example:
+Input: Sword gives advantage on all saving throws
+Output: Advantage(AllSavingThrows)
+
+- DamageBonus(number or die roll[, damageType]).  Add bonus damage to attack.  damageType is optional parameter
+Example:
+Input:  Add 2 fire damage for every attack
+Output: DamageBonus(2,Fire)
+Input: Additional 1d4 extra necrotic damage
+Output DamageBonus(1d4,Necrotic)
+Input: Every spell hit adds +4 damage
+Output: DamageBonus(4)
+
+- WeaponEnchantment(number) - Give a + enchantment on a weapon
+Example:
+Input:  Sword should be +3
+Output: WeaponEnchantment(3)
+Input: +5 Bow
+Output: WeaponEnchantment(5)
+Input: Add +2 enchantment to weapon
+Output: WeaponEnchantment(2)
+
+
+
+
