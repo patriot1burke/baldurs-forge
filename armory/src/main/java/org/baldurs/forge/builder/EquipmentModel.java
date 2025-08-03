@@ -15,7 +15,18 @@ import org.baldurs.forge.model.EquipmentSlot;
 import org.baldurs.forge.model.EquipmentType;
 import org.baldurs.forge.model.Rarity;
 
-public record EquipmentModel(
+public class EquipmentModel {
+    public EquipmentType type;
+    public EquipmentSlot slot;
+    public Rarity rarity;
+    public String name;
+    public String description;
+    public int armorClass;
+    public String weaponType;
+    public String armorType;
+    public String boostMacro;
+
+    public EquipmentModel(
                 EquipmentType type,
                 EquipmentSlot slot,
                 Rarity rarity,
@@ -23,7 +34,21 @@ public record EquipmentModel(
                 String description,
                 int armorClass,
                 String weaponType,
-                String armorType
+                String armorType,
+                String boostMacro
                 ) {
+        this.type = type;
+        this.slot = slot;
+        this.rarity = rarity;
+        this.name = name;
+        this.description = description;
+        this.armorClass = armorClass;
+        this.weaponType = weaponType;
+        this.armorType = armorType;
+        this.boostMacro = boostMacro;
+    }
+
+    public EquipmentModel() {
+    }
 
 }

@@ -1,7 +1,9 @@
 Your job is to transform natural language to a armor/weapon boost macro language.  If the user asks for
 multiple boosts, separate them by a semicolon ';' Here are the macro functions:
 
-- AC(number).  Increase armor class by number.
+- valueparam.  This is a logical value for a parameter.  It's values can be a number, die roll, StrengthModifier, IntelligencModifier, WisdomModifier, DexterityModifier, CharismaModifier, ConstitutionModifier, ProficiencyBonus
+
+- AC(valueparam).  Increase armor class by number.
 Example:
 Input: Add 1 to armor class
 Output: AC(1)
@@ -9,6 +11,12 @@ Input: +2 to armor class
 Output: AC(2)
 Input: +2 platemail
 Output: AC(2)
+Input: Boost armor class by strength modifier
+Output: AC(StrengthModifier)
+Input: Increase armor class by Constitution
+Output: AC(ConstitutionModifier)
+Input: Boost armor class by proficiency
+Output: AC(ProficiencyBonus)
 
 - Ability(name, number[, max score]).  Increase an ability.  
   'name' parameter must be Strength, Intelligence, Dexterity, Charisma, Wisdom, or Constitution.  
@@ -50,7 +58,7 @@ Example:
 Input: Sword gives advantage on all saving throws
 Output: Advantage(AllSavingThrows)
 
-- DamageBonus(number or die roll[, damageType]).  Add bonus damage to attack.  damageType is optional parameter
+- DamageBonus(valueparam[, damageType]).  Add bonus damage to attack.  damageType is optional parameter
 Example:
 Input:  Add 2 fire damage for every attack
 Output: DamageBonus(2,Fire)
@@ -58,6 +66,17 @@ Input: Additional 1d4 extra necrotic damage
 Output DamageBonus(1d4,Necrotic)
 Input: Every spell hit adds +4 damage
 Output: DamageBonus(4)
+Input: Add wisdom necrotic damage
+Output: DamageBonus(WisdomModifier, Necrotic)
+
+-SpellSaveDC(valueparam).  Add bonus to spell save DC.
+Example:
+Input: +2 to Spell Save
+Output: SpellSaveDC(2)
+Input: Add dexterity modifier to spell DC
+Output: SpellSaveDC(DexterityModifier)
+Inpput: spell save increased by proficiency
+Output: SpellSaveDC(ProficiencyBonus)
 
 - WeaponEnchantment(number) - Give a + enchantment on a weapon
 Example:

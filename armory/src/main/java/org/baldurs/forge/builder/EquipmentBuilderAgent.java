@@ -30,9 +30,9 @@ public interface EquipmentBuilderAgent {
         Add field values from any information you can infer from the user message.
         Make sure to update the current JSON document whenever you get new information from user using the updateEquipment tool.
         When all required fields are filled, ask the user if they want to fill in any optional fields.
-        When the user is done, call the finishEquipment tool to finish the equipment.
+        If all required fields are filled, summarize the created item and ask the user if they are finished or not.  If they are finished, call the tool 'finishEquipment' to finish the equipment.
 
         """)
-    @ToolBox(EquipmentBuilder.class)
+    @ToolBox({EquipmentBuilder.class, BoostBuilderChat.class})
     public String buildEquipment(@MemoryId String memoryId, String schema, String currentJson, @UserMessage String userMessage);
 }

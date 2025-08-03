@@ -85,17 +85,10 @@ public class EquipmentBuilder implements BaldursChat {
         return html;
     }
 
-    @Tool("Call this every time you change the equipment json documentyou are building.")
+    @Tool("Call this every time you change the equipment json document you are building.")
     public void updateEquipment(EquipmentModel equipment) {
         Log.info("Updating equipment: " + equipment);
         context.setShared("currentEquipment", equipment);
-    }
-
-    //@Tool("Show what you have so far for the equipment you are building.")
-    public String showCurrentEquipmentBuilder(EquipmentModel currentJson) {
-        Log.info("Showing current equipment: " + currentJson);
-        context.response().add(currentJson);
-        return "This is what I have so far.";
     }
 
     @Tool("When finished building equipment, call this tool to finish the equipment.")
@@ -103,10 +96,29 @@ public class EquipmentBuilder implements BaldursChat {
         chatService.popChatFrame(context);
         context.setShared("currentEquipment", null);
         Log.info("Finishing equipment");
+        String equipmentJson = logEquipmentJson(newEquipment);
+        return equipmentJson;
+    }
+
+    private String logEquipmentJson(EquipmentModel newEquipment) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         String equipmentJson = mapper.writeValueAsString(newEquipment);
         Log.info("Equipment JSON: " + equipmentJson);
         return equipmentJson;
+    }
+
+
+    @Tool("Add boost macro to equipment.  Called after the createBoostMacro tool is called.")
+    public void addBoostMacro(String boostMacro) throws Exception {
+        Log.info("Adding boost macro to equipment: "  + boostMacro);
+        EquipmentModel equipment = context.getShared("currentEquipment", EquipmentModel.class);
+        if (equipment.boostMacro == null || equipment.boostMacro.isEmpty()) {
+            equipment.boostMacro = boostMacro;
+        } else {
+            equipment.boostMacro = equipment.boostMacro + ";" + boostMacro;
+        }
+        context.setShared("currentEquipment", equipment);
+        logEquipmentJson(equipment);
     }
 
 }

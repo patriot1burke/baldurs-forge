@@ -63,38 +63,32 @@ public class EquipmentQueryCommands {
 
     }
 
-    @Tool("Search show items in the equipment database based on a natural language query")
-    public void searchEquipmentDatabase(String query) {
+    @Tool("Search for armor or weapons in the equipment database based on a natural language query")
+    public String searchEquipmentDatabase(String query) {
         Log.info("Searching equipment database for: " + query);
         List<EquipmentModel> models = equipmentDB.ragSearch(query);
         if (models.isEmpty()) {
-            context.response().add(new MessageAction("Could not find equipment"));
+            return "Could not find equipment";
         } else {
             context.response().add(new ListEquipmentAction(models));
+            return "I found some possible matches for your query.";
         }
     }
 
-    @Tool("Find an item in the equipment database by name")
-    public void findEquipmentByName(String name) {
+    @Tool("Find armor or weapons in the equipment database by name")
+    public String findEquipmentByName(String name) {
         Log.info("Finding equipment by name: " + name);
         EquipmentModel model = equipmentDB.findByName(name);
         if (model == null) {
-            context.response().add(new MessageAction("Could not find equipment"));
+            throw new RuntimeException("Could not find the equipment.  Try searching the database");
         }
         context.response().add(new ShowEquipmentAction(model));
+        return "I found an exact match for your query.";
     }
 
-    @Tool("Create new equipment, for example, a new weapon or armor.")
+    @Tool("Create new armor or weapon.")
     public String createNewEquipment(String userMessage) {
         Log.info("Creating new equipment");
         return equipmentBuilder.chat(context.memoryId(), context.userMessage());
     }
-
-    @Tool("Generate a boost for equipment")
-    public void generateBoost(String userMessage) {
-        Log.info("Generating boost for equipment");
-        chatService.setChatFrame(context, BoostChat.class);
-        context.response().add(new MessageAction("What boosts do you want to add?"));
-    }
-
 }

@@ -3,6 +3,7 @@ package org.baldurs.forge.chat;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.baldurs.forge.builder.BoostBuilderChat;
 import org.baldurs.forge.builder.EquipmentBuilder;
 import org.baldurs.forge.builder.EquipmentBuilderAgent;
 import org.baldurs.forge.context.ChatContext;
@@ -28,14 +29,13 @@ public class ChatService {
     EquipmentBuilder equipmentBuilder;
 
     @Inject
-    BoostChat boostChat;
+    RenderService render;
 
     Map<String, BaldursChat> chatFrames = new HashMap<>();
 
     @PostConstruct
     public void init() {
         chatFrames.put(EquipmentBuilder.class.getName(), equipmentBuilder);
-        chatFrames.put(BoostChat.class.getName(), boostChat);
     }
 
     public void setChatFrame(ChatContext context, Class<? extends BaldursChat> chatFrame) {
@@ -50,18 +50,22 @@ public class ChatService {
         memoryStore.deleteMessages(context.memoryId());
     }
 
+    private MessageAction message(String message) {
+        return new MessageAction(render.markdownToHtml(message));
+    }
+
     public void chat(ChatContext context) {
         String chatFrame = context.getShared(CHAT_FRAME, String.class);
         if (chatFrame == null) {
             Log.info("Executing default chat");
-            context.response().add(new MessageAction(chat.chat(context.memoryId(), context.userMessage())));
+            context.response().add(message(chat.chat(context.memoryId(), context.userMessage())));
         } else if (chatFrames.containsKey(chatFrame)) {
             Log.info("Executing chat frame: " + chatFrame);
-            context.response().add(new MessageAction(chatFrames.get(chatFrame).chat(context.memoryId(), context.userMessage())));
+            context.response().add(message(chatFrames.get(chatFrame).chat(context.memoryId(), context.userMessage())));
         }
         else {
             Log.error("Unknown chat frame: " + chatFrame);
-            context.response().add(new MessageAction("I'm having issues at the moment. Can you retry?"));
+            context.response().add(new MessageAction("I'm having issues at the moment. Can you retry or rephrase your request?"));
         }
 
     }
