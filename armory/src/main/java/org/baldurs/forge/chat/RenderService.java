@@ -6,6 +6,8 @@ import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 
+import io.quarkus.logging.Log;
+
 @ApplicationScoped
 public class RenderService {
     Parser parser;
@@ -18,8 +20,13 @@ public class RenderService {
     }
 
     public String markdownToHtml(String markdown) {
-        Node document = parser.parse(markdown);
-        return "<p>" + renderer.render(document) + "</p>";
+        try {
+            Node document = parser.parse(markdown);
+            return "<p>" + renderer.render(document) + "</p>";
+        } catch (Exception e) {
+            Log.error("Error rendering markdown", e);
+            return markdown;
+        }
     }
 
 }

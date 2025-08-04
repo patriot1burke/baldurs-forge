@@ -21,8 +21,9 @@ public interface BaldursForgeChat extends BaldursChat {
                 If the user is doing a broader search for armor or weapons, then forward the request to the 'searchEquipmentDatabase' tool.
                 If the user is looking to create a new armor or weapon, then forward the request to the 'createNewEquipment' tool.
                 If 'findEquipmentByName' cannot find the equipment, then forward the request to the 'searchEquipmentDatabase' tool.
+                If the user is looking for data attribute values, then forward the request to the 'findDataAttributeValues' tool.
+                If the user is looking for unique icons for a given armor type, then forward the request to the 'findUniqueIconsForArmorType' tool.
 
-                If the user is looking for a specific boost by name, then forward the request to the 'findBoostByName' tool.
                 If you cannot determine the appropriate tool to invoke, then summarize the tool actions that are available to the user and
                 ask the user to clarify their request.
 
@@ -38,9 +39,18 @@ public interface BaldursForgeChat extends BaldursChat {
 
                 Input: I want to create new gloves
                 Action: invoke the 'createNewEquipment' tool with the argument 'I want to create new gloves'
+
+                Input: Find attribute values for ArmorType
+                Action: invoke the 'findDataAttributeValues' tool with the argument 'ArmorType'
+
+                Input: Find data values for ProficiencyGroup
+                Action: invoke the 'findDataAttributeValues' tool with the argument 'ProficiencyGroup'
+
+                Input: Find unique icons for armor type 'HalfPlate'
+                Action: invoke the 'findUniqueIconsForArmorType' tool with the argument 'HalfPlate'
  
     """)
-    @ToolBox({EquipmentQueryCommands.class})
+    @ToolBox({ChatCommands.class})
     String chat(@MemoryId String memoryId, @UserMessage String message);
 
     @SystemMessage(fromResource = "prompts/nl2boost.txt")

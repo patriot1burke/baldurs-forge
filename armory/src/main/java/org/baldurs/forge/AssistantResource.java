@@ -11,7 +11,6 @@ import java.util.UUID;
 
 import org.baldurs.forge.agents.ForgeAgent;
 import org.baldurs.forge.agents.MetadataAgent;
-import org.baldurs.forge.builder.EquipmentBuilder;
 import org.baldurs.forge.chat.BaldursForgeChat;
 import org.baldurs.forge.chat.ChatService;
 import org.baldurs.forge.context.ChatContext;
@@ -51,9 +50,6 @@ public class AssistantResource {
 
 	@Inject
 	EquipmentDB equipmentDB;
-
-	@Inject
-	EquipmentBuilder equipmentBuilder;
 
 	@Inject
 	@ToolBoxNLI({EquipmentDB.class, LibraryService.class, BoostService.class})

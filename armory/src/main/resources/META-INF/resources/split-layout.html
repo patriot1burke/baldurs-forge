@@ -73,8 +73,9 @@
         }
 
         .left-panel {
-            width: 70%;
+            width: 100%;
             border-right: 2px solid #BCAE79;
+            border-left: 1px solid #BCAE79;
             padding: 20px;
             overflow-y: auto;
         }
@@ -128,8 +129,8 @@
             bottom: 20px;
             left: 2%;
             /*transform: translateX(-50%)*/
-            width: 65%;
-            max-width: 1160px;
+            width: 95%;
+            /*max-width: 1160px;*/
             display: flex;
             background-color: #444750;
             border-radius: 25px;
@@ -626,12 +627,14 @@
                         <button id="ask-button" class="btn" title="Ask a question">
                             <i class="fas fa-comment"></i>
                         </button>
+                        <!--
                         <button id="data-button" class="btn" title="Get data">
                             <i class="fas fa-table"></i>
                         </button>
                         <button id="search-button" class="btn" title="Search">
                             <i class="fas fa-search"></i>
                         </button>
+                    -->
                     </div>
                 </div>
                         
@@ -639,8 +642,8 @@
             </div>
 
             <!-- Right Container (50% width, split vertically) -->
+             <!--
             <div class="right-container">
-                <!-- Top Right Panel (50% height of right side) -->
                 <div class="top-right-panel">
                     <div class="panel-title">Top Right Panel</div>
                     <div class="panel-content">
@@ -650,7 +653,6 @@
                      </div>
                 </div>
 
-                <!-- Bottom Right Panel (50% height of right side) -->
                 <div class="bottom-right-panel">
                     <div class="panel-title">Bottom Right Panel</div>
                     <div class="panel-content">
@@ -664,7 +666,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> rigtht panel -->
         </div>
     </div>
 
@@ -940,9 +942,11 @@
                     const $container = $('<div>');
                     createObjectTable(data, $container);
                     $messageDiv.append($container);
+                } else if (typeof data === 'string') {
+                    $messageDiv.html(data);
                 } else {
                     // Not an array or object
-                    $messageDiv.text(jsonData);
+                    $messageDiv.text(data);
                 }
         
                 $chatContainer.append($messageDiv);
@@ -1163,7 +1167,7 @@
                                 showEquipmentEvent(action.equipment);
                             } else if (action.type === 'Message') {
                                 console.log('Message');
-                                addMessage(action.message, false);
+                                addJsonMessage(action.message);
                             }
                         }
                     }

@@ -10,7 +10,9 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.baldurs.archivist.PackageReader;
 import org.baldurs.archivist.LS.Converter;
@@ -20,6 +22,7 @@ import org.baldurs.forge.scanner.BaldursArchive;
 import org.baldurs.forge.scanner.ModuleInfo;
 import org.baldurs.forge.scanner.RootTemplate;
 import org.baldurs.forge.scanner.StatsArchive;
+import org.baldurs.forge.scanner.StatsArchive.Stat;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import dev.langchain4j.agent.tool.P;
@@ -282,6 +285,18 @@ public class LibraryService {
         }
         Collections.sort(functions, Comparator.naturalOrder());
         return functions;
+    }
+
+    public List<RootTemplate> findRootIconsFrom(String name, String value) {
+        return archive.stats.getArmor().values().stream()
+                    .filter(stat -> stat.getField(name) != null && stat.getField(name).contains(value))
+                    .map(stat -> stat.getField("RootTemplate"))
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .map(archive.getRootTemplates()::getRootTemplate)
+                    .map(RootTemplate::resolveTemplateThatDefinesIcon)
+                    .distinct()
+                    .collect(Collectors.toList());
     }
 
 

@@ -7,19 +7,37 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-public record EquipmentModel(
-                String id,
-                EquipmentType type,
-                EquipmentSlot slot,
-                Rarity rarity,
-                String name,
-                String description,
-                String boostDescription,
-                int armorClass,
-                String weaponType,
-                String armorType,
-                Set<String> weaponProperties,
-                String icon) {
+public class EquipmentModel {
+        public String id;
+        public EquipmentType type;
+        public EquipmentSlot slot;
+        public Rarity rarity;
+        public String name;
+        public String description;
+        public String boostDescription;
+        public int armorClass;
+        public String weaponType;
+        public String armorType;
+        public Set<String> weaponProperties;
+        public String icon;
+
+        public EquipmentModel() {
+        }
+
+        public EquipmentModel(String id, EquipmentType type, EquipmentSlot slot, Rarity rarity, String name, String description, String boostDescription, int armorClass, String weaponType, String armorType, Set<String> weaponProperties, String icon) {
+                this.id = id;
+                this.type = type;
+                this.slot = slot;
+                this.rarity = rarity;
+                this.name = name;
+                this.description = description;
+                this.boostDescription = boostDescription;
+                this.armorClass = armorClass;
+                this.weaponType = weaponType;
+                this.armorType = armorType;
+                this.weaponProperties = weaponProperties;
+                this.icon = icon;
+        }
 
         public static String toJson(List<EquipmentModel> models) {
                 try {

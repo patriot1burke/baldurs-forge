@@ -230,6 +230,8 @@ public class BoostService {
         return this;
     }
 
+    
+
     public void macros(String macro, BoostWriter writer) {
         if (macro != null) {
             for (String boost : MacroService.splitMacro(macro)) {

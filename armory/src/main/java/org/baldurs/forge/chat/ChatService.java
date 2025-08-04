@@ -3,13 +3,10 @@ package org.baldurs.forge.chat;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.baldurs.forge.builder.BoostBuilderChat;
-import org.baldurs.forge.builder.EquipmentBuilder;
-import org.baldurs.forge.builder.EquipmentBuilderAgent;
+import org.baldurs.forge.builder.BodyArmorBuilder;
 import org.baldurs.forge.context.ChatContext;
 import org.baldurs.forge.context.ClientMemoryStore;
 
-import dev.langchain4j.model.chat.ChatModel;
 import io.quarkus.logging.Log;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -26,7 +23,7 @@ public class ChatService {
     ClientMemoryStore memoryStore;
 
     @Inject
-    EquipmentBuilder equipmentBuilder;
+    BodyArmorBuilder bodyArmorBuilder;
 
     @Inject
     RenderService render;
@@ -35,7 +32,7 @@ public class ChatService {
 
     @PostConstruct
     public void init() {
-        chatFrames.put(EquipmentBuilder.class.getName(), equipmentBuilder);
+        chatFrames.put(BodyArmorBuilder.class.getName(), bodyArmorBuilder);
     }
 
     public void setChatFrame(ChatContext context, Class<? extends BaldursChat> chatFrame) {

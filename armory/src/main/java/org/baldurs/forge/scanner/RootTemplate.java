@@ -38,4 +38,10 @@ public class RootTemplate {
             return null;
         }
     }
+
+    public RootTemplate resolveTemplateThatDefinesIcon() {
+        if (icon != null) return this;
+        if (ParentTemplateId == null) return null;
+        return archive.templates.get(ParentTemplateId).resolveTemplateThatDefinesIcon();
+    }
 }

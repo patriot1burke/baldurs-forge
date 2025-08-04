@@ -1,0 +1,144 @@
+package org.baldurs.forge.builder;
+
+import org.baldurs.forge.chat.BaldursChat;
+import org.baldurs.forge.chat.ChatService;
+import org.baldurs.forge.chat.RenderService;
+import org.baldurs.forge.chat.actions.ShowEquipmentAction;
+import org.baldurs.forge.context.ChatContext;
+import org.baldurs.forge.model.EquipmentModel;
+import org.baldurs.forge.model.EquipmentSlot;
+import org.baldurs.forge.model.EquipmentType;
+import org.baldurs.forge.scanner.RootTemplate;
+import org.baldurs.forge.scanner.StatsArchive;
+import org.baldurs.forge.toolbox.BoostService;
+import org.baldurs.forge.toolbox.LibraryService;
+import org.baldurs.forge.toolbox.BoostService.BoostWriter;
+
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dev.langchain4j.agent.tool.Tool;
+import dev.langchain4j.service.MemoryId;
+import io.quarkus.logging.Log;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
+@ApplicationScoped
+public class BodyArmorBuilder implements BaldursChat {
+    private static final String CURRENT_BODY_ARMOR = "currentBodyArmor";
+
+    @Inject
+    ArmorBuilderChat agent;
+
+    @Inject
+    ChatContext context;
+
+    ObjectMapper mapper;
+
+    @Inject
+    ChatService chatService;
+
+    @Inject
+    RenderService renderer;
+
+
+    @PostConstruct
+    public void init() {
+        mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(Include.NON_NULL);
+    }
+
+    public String chat(@MemoryId String memoryId, String userMessage) {
+        Log.info("BodyArmorBuilder.chat: " + memoryId + " " + userMessage);
+        chatService.setChatFrame(context, BodyArmorBuilder.class);
+        String currentJson = "{}";
+        BodyArmorModel current = null;
+        if ((current = context.getShared(CURRENT_BODY_ARMOR, BodyArmorModel.class)) != null) {
+            try {
+                currentJson = mapper.writeValueAsString(current);
+            } catch (Exception e) {
+                Log.warn("Error serializing body armor", e);
+            }
+        }
+        Log.info("Current JSON: " + currentJson);
+        String response = agent.buildBodyArmor(context.memoryId(), "body armor", "updateBodyArmor", "finishBodyArmor", BodyArmorModel.schema, currentJson, userMessage);
+        String html = renderer.markdownToHtml(response);
+        return html;
+    }
+
+    @Inject
+    BoostService boostService;
+
+    @Inject
+    LibraryService library;
+
+    public void addShowEquipmentAction(BodyArmorModel armor) {
+        if (armor == null || armor.type == null) {
+            return;
+        }
+        EquipmentModel equipment = new EquipmentModel();
+        equipment.type = EquipmentType.Armor;
+        equipment.slot = EquipmentSlot.Breast;
+        equipment.rarity = armor.rarity;
+        equipment.name = armor.name == null ? "New Body Armor" : armor.name;
+        equipment.description = armor.description;
+        if (armor.boosts != null) {
+            BoostWriter writer = boostService.html();
+            boostService.macros(armor.boosts, writer);
+            equipment.boostDescription = writer.toString();
+        }
+        StatsArchive.Stat stat = library.archive().getStats().getByName(armor.type.baseStat);
+        if (armor.armorClass == null) {
+            equipment.armorClass = Integer.parseInt(stat.getField("ArmorClass"));
+        } else {
+            equipment.armorClass = armor.armorClass;
+        }
+        RootTemplate template = library.archive().getRootTemplates().getRootTemplate(stat.getField("RootTemplate"));
+        equipment.icon = library.icons().get(template.resolveIcon());
+        context.response().add(new ShowEquipmentAction(equipment));
+    }
+
+    @Tool("Call this every time you change the body armor json document you are building.")
+    public void updateBodyArmor(BodyArmorModel armor) {
+        Log.info("Updating body armor");
+        logBodyArmorJson(armor);
+        context.setShared(CURRENT_BODY_ARMOR, armor);
+        addShowEquipmentAction(armor);
+    }
+
+    @Tool("When finished building body armor, call this tool to finish the body armor.")
+    public String finishBodyArmor(BodyArmorModel newArmor) throws Exception {
+        addShowEquipmentAction(newArmor);
+        chatService.popChatFrame(context);
+        context.setShared(CURRENT_BODY_ARMOR, null);
+        Log.info("Finishing body armor");
+        String armorJson = logBodyArmorJson(newArmor);
+        return armorJson;
+    }
+
+    private String logBodyArmorJson(BodyArmorModel armor)  {
+        try {
+        String armorJson = mapper.writeValueAsString(armor);
+        Log.info("Body Armor JSON: " + armorJson);
+        return armorJson;
+        } catch (Exception e) {
+            throw new RuntimeException("Error logging body armor json", e);
+        }
+    }
+
+
+    @Tool("Add boost macro to body armor.  Called after the createBoostMacro tool is called.")
+    public void addBodyArmorBoost(String boostMacro) throws Exception {
+        Log.info("Adding boost macro to body armor: "  + boostMacro);
+        BodyArmorModel armor = context.getShared(CURRENT_BODY_ARMOR, BodyArmorModel.class);
+        if (armor.boosts == null || armor.boosts.isEmpty()) {
+            armor.boosts = boostMacro;
+        }
+        armor.boosts += ";" + boostMacro;
+        context.setShared(CURRENT_BODY_ARMOR, armor);
+        addShowEquipmentAction(armor);
+        logBodyArmorJson(armor);
+    }
+
+}
