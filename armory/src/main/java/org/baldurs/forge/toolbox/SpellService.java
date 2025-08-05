@@ -1,39 +1,20 @@
 package org.baldurs.forge.toolbox;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.baldurs.forge.model.Spell;
-
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.baldurs.forge.agents.ForgeAgent;
-import org.baldurs.forge.agents.MetadataAgent;
-import org.baldurs.forge.model.Equipment;
-import org.baldurs.forge.model.EquipmentModel;
-import org.baldurs.forge.model.EquipmentSlot;
-import org.baldurs.forge.model.EquipmentType;
-import org.baldurs.forge.model.Rarity;
-import org.baldurs.forge.scanner.ArchiveSource;
-import org.baldurs.forge.scanner.RootTemplate;
+import org.baldurs.forge.model.Spell;
 import org.baldurs.forge.scanner.StatsArchive;
 import org.baldurs.forge.toolbox.BoostService.BoostWriter;
-import org.baldurs.forge.util.FilterExpression;
 
-import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
-import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingSearchResult;
 import dev.langchain4j.store.embedding.EmbeddingStore;
@@ -42,8 +23,6 @@ import dev.langchain4j.store.embedding.filter.Filter;
 import dev.langchain4j.store.embedding.filter.MetadataFilterBuilder;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.StartupEvent;
-import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 

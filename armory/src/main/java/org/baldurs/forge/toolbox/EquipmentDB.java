@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.baldurs.forge.agents.ForgeAgent;
 import org.baldurs.forge.agents.MetadataAgent;
 import org.baldurs.forge.model.Equipment;
 import org.baldurs.forge.model.EquipmentModel;
@@ -20,7 +19,6 @@ import org.baldurs.forge.scanner.ArchiveSource;
 import org.baldurs.forge.scanner.RootTemplate;
 import org.baldurs.forge.scanner.StatsArchive;
 import org.baldurs.forge.toolbox.BoostService.BoostWriter;
-import org.baldurs.forge.util.FilterExpression;
 
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.data.document.Document;
@@ -28,20 +26,17 @@ import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
-import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingSearchResult;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
 import dev.langchain4j.store.embedding.filter.Filter;
 import dev.langchain4j.store.embedding.filter.MetadataFilterBuilder;
-import dev.langchain4j.store.embedding.filter.logical.Not;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class EquipmentDB {
@@ -59,9 +54,6 @@ public class EquipmentDB {
 
     @Inject
     MetadataAgent metadataAgent;
-
-    @Inject
-    ForgeAgent forgeAgent;
 
     Map<String, Equipment> equipmentDB = new HashMap<>();
 
@@ -247,7 +239,6 @@ public class EquipmentDB {
         // load();
     }
 
-    @Tool("Find an item in the equipment database by name")
     public EquipmentModel findByName(String name) {
         Log.infof("Finding by name: %s", name);
         Equipment equipment = equipmentDB.values().stream().filter(e -> e.name().equals(name)).findFirst().orElse(null);
@@ -259,14 +250,6 @@ public class EquipmentDB {
     }
 
     public static record SearchResult(List<EquipmentModel> items, String summary) {
-    }
-
-    @Tool("Search or find or show items in the equipment database based on a natural language query")
-    public SearchResult searchAndSummary(@UserMessage String queryString) {
-        Log.infof("searchAndSummary for: %s", queryString);
-        List<EquipmentModel> models = ragSearch(queryString);
-        String summary = forgeAgent.queryEquipment(queryString, EquipmentModel.toJson(models));
-        return new SearchResult(models, summary);
     }
 
     public List<EquipmentModel> ragSearch(String queryString) {

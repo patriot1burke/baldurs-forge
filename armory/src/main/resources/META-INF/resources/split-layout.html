@@ -617,7 +617,7 @@
             <div class="left-panel">
                 <div class="chat-container" id="chat-container">
                     <div class="message assistant-message">
-                        Hello! I'm your Baldur's Forge Assistant. Ask me anything about Baldur's Gate 3 items. <a data-tooltip='{"title":"Helmet of Arcane Acuity","content":"<p>Dexterity Saving Throws +1</p>","footer":"Subtle magics are woven into the helmet&apos;s leather panes - for a powerful offence is sometimes still the best defence."}'>Helmet of Arcane Acuity</a>
+                        Hello! I'm your Baldur's Forge Assistant. Enter 'Help' to get a list of things I can do. 
                     </div>
                 </div>
                 <div class="input-container">
@@ -954,46 +954,6 @@
                 updateClearButtonVisibility();                
             }
         
-            // Function to add JSON data as a table
-            function addDataMessage(jsonData) {
-        
-                try {
-                    const data = JSON.parse(jsonData);
-                    addJsonMessage(data);
-                } catch (e) {
-                    // If parsing fails, just show the raw response
-                    addMessage(jsonData);
-                }
-            }
-
-            function searchAndSummary(data) {
-                const items = data.response.items;
-                const $resultDev = $('<div>', {
-                    class: `message assistant-message`
-                });
-      
-                const $list = $('<ul>', { class: 'tool-results-list' });
-                for (const item of items) {
-                    const $listItem = $('<li>');
-                    const $itemAnchor =  $('<a>', {
-                        text: item.name,
-                        class: `rarity-${item.rarity.toLowerCase()}`
-                    });
-                    $itemAnchor.data("equipment", item);
-                    $itemAnchor.attr('equipment-tooltip', item.name);
-                    $listItem.append($itemAnchor);
-                    $list.append($listItem);
-                }
-                const $paragraph = $('<p>');
-                $paragraph.append($list);
-                $resultDev.append($paragraph);
-
-                const $summaryDiv = $('<div>');                    
-                $summaryDiv.html(data.response.summary);
-                $resultDev.append($summaryDiv);
-                $chatContainer.append($resultDev);
-            }
-
             function listEquipmentEvent(items) {
                 const $resultDev = $('<div>', {
                     class: `message assistant-message`
@@ -1039,54 +999,6 @@
             }
 
 
-            function findByName(data) {
-                const equipment = data.response;
-                if (!equipment) {
-                    const $messageDiv = $('<div>', { class: 'message data-message' });
-                    const $notFoundDiv = $('<div>');
-                    $notFoundDiv.html('No equipment found');
-                    $messageDiv.append($notFoundDiv);
-                    $chatContainer.append($messageDiv);
-                    return;
-                }
-                console.log(equipment);
-                const $resultDev = $('<div>', {
-                    class: `message assistant-message`
-                });
-                const $equipmentPanel = $baseEquipmentPanel.clone();
-                $equipmentPanel.css('position', 'relative');
-                showEquipmentPanel($equipmentPanel, equipment);
-                $resultDev.append($equipmentPanel);
-                $equipmentPanel.addClass('show');
-                $chatContainer.append($resultDev);
-            }
-
-                       // Function to add JSON data as a table
-            function addToolMessage(jsonData) {
-        
-                try {
-                    const data = JSON.parse(jsonData);
-                    for (const toolResult of data) {
-                        if (toolResult.tool === 'searchAndSummary') {
-                            searchAndSummary(toolResult);
-                        } else if (toolResult.tool === 'findByName') {
-                            findByName(toolResult);
-                        } else {
-                            console.log('Unknown tool: ' + toolResult.tool);
-                            addJsonMessage(toolResult);
-                        }
-                    }
-                } catch (e) {
-                    // If parsing fails, just show the raw response
-                    const $messageDiv = $('<div>', { class: 'message data-message' });
-                    $messageDiv.text(jsonData);
-                    $chatContainer.append($messageDiv);
-                }
-        
-                $chatContainer.scrollTop($chatContainer[0].scrollHeight);
-                updateClearButtonVisibility();
-            }
-        
             // Show and hide loading indicator
             function showLoading() {
                 const $loadingDiv = $('<div>', {
@@ -1134,12 +1046,6 @@
     
                         
                 try {
-                    /*
-                    const response = await $.ajax({
-                        url: `/assistant/ask?query=${encodeURIComponent(message)}`,
-                        type: 'GET'
-                    });
-                    */
                     let postData = null;
                     let request = {
                         userMessage: message,
@@ -1180,59 +1086,10 @@
                 }
             }
         
-            // Send a message to the JSON API
-            async function sendDataMessage(message) {
-                if (message.trim() === '') return;
-        
-                addMessage(message, true);
-                $messageInput.val('');
-                showLoading();
-        
-                try {
-                    const data = await $.ajax({
-                        url: `/assistant/json?query=${encodeURIComponent(message)}`,
-                        type: 'GET'
-                    });
-        
-                    hideLoading();
-                    addDataMessage(data);
-                } catch (error) {
-                    hideLoading();
-                    addMessage(`Sorry, there was an error processing your request: ${error.statusText || error.message}`, false);
-                    console.error('Error:', error);
-                }
-            }
-
-            async function sendToolMessage(message) {
-                if (message.trim() === '') return;
-        
-                addMessage(message, true);
-                $messageInput.val('');
-                showLoading();
-        
-                try {
-                    const data = await $.ajax({
-                        url: `/assistant/json?query=${encodeURIComponent(message)}`,
-                        type: 'GET'
-                    });
-        
-                    hideLoading();
-                    addToolMessage(data);
-                } catch (error) {
-                    hideLoading();
-                    addMessage(`Sorry, there was an error processing your request: ${error.statusText || error.message}`, false);
-                    console.error('Error:', error);
-                }
-            }
-        
             // Clear chat history
             async function clearChat() {
                 try {
-                    await $.ajax({
-                        url: '/assistant/clear',
-                        type: 'GET'
-                    });
-        
+                    chatContext = null;
                     // Keep only the initial greeting
                     while ($chatContainer.children().length > 1) {
                         $chatContainer.children().last().remove();
@@ -1249,14 +1106,11 @@
                 sendAskMessage($messageInput.val());
             });
         
-            $('#data-button').on('click', function() {
-                sendDataMessage($messageInput.val());
+            // Event listeners
+            $('#clear-button').on('click', function() {
+                clearChat()
             });
         
-            $('#search-button').on('click', function() {
-                sendToolMessage($messageInput.val());
-            });
-
             $messageInput.on('keypress', function(e) {
                 if (e.which === 13) { // Enter key
                     // Default to "Ask" when pressing Enter
@@ -1323,36 +1177,6 @@
                         console.error('Upload error:', xhr.responseText);
                     }
                 });
-                /*    
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    console.log('reader.onload');
-                    const arrayBuffer = e.target.result;
-                    
-                    $.ajax({
-                        url: `/assistant/upload?filename=${encodeURIComponent(file.name)}`,
-                        type: 'POST',
-                        //data: arrayBuffer,
-                        processData: false,
-                        //contentType: 'application/octet-stream',
-                        success: function(response) {
-                            addMessage(`File uploaded successfully: ${file.name}`, false);
-                            // If the server returns data, display it
-                            if (response && typeof response === 'object') {
-                                addJsonMessage(response);
-                            } else if (response) {
-                                addMessage(response, false);
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            addMessage(`Error uploading file: ${error}`, false);
-                            console.error('Upload error:', xhr.responseText);
-                        }
-                    });
-                };
-                console.log('reader.readAsArrayBuffer');
-                reader.readAsArrayBuffer(file);
-                */
             }
 
             // Tooltip functionality

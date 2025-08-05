@@ -171,13 +171,11 @@ public class LibraryService {
         return source;
     }
 
-    @Tool("Find a localization by id")
     public String findLocalization(String handle) {
         return archive.localizations.getLocalization(handle);
     }
 
 
-    @Tool("Find a root template by stat name")
     public RootTemplate findRootTemplateByStatName(String statName) {
         //Log.infof("Finding root template for stat: %s", statName);
         for (ArchiveSource source : archives.values()) {
@@ -190,7 +188,6 @@ public class LibraryService {
         return null;
     }
 
-    @Tool("Get or find or show a stat by name")
     public StatModel getStatByName(String name, @P(value = "Add parent data?", required = false) boolean parentData) {
         for (ArchiveSource source : archives.values()) {
             StatsArchive.Stat stat = source.archive.stats.getByName(name);
@@ -205,7 +202,6 @@ public class LibraryService {
         return null;
     }
 
-    @Tool("Get all possible values for a Stat attribute")
     public List<String> getStatAttributeValues(String attributeName) {
         for (ArchiveSource source : archives.values()) {
             Set<String> values = source.archive.stats.collectAttributesValues(attributeName);
@@ -216,7 +212,6 @@ public class LibraryService {
         return Collections.emptyList();
     }
 
-    @Tool("Get all possible boost function signatures")
     public List<String> getAllBoostFunctionSignatures() {
         Map<String, Set<String>> boosts = new HashMap<>();
 

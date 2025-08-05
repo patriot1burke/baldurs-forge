@@ -4,29 +4,19 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
 import java.util.UUID;
 
-import org.baldurs.forge.agents.ForgeAgent;
-import org.baldurs.forge.agents.MetadataAgent;
-import org.baldurs.forge.chat.BaldursForgeChat;
 import org.baldurs.forge.chat.ChatService;
 import org.baldurs.forge.context.ChatContext;
-import org.baldurs.forge.model.Equipment;
-import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.nli.ToolBoxNLI;
 import org.baldurs.forge.nli.ToolBoxNLIInvoker;
 import org.baldurs.forge.toolbox.BoostService;
 import org.baldurs.forge.toolbox.EquipmentDB;
 import org.baldurs.forge.toolbox.LibraryService;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestForm;
 import org.jboss.resteasy.reactive.multipart.FileUpload;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
@@ -52,24 +42,8 @@ public class AssistantResource {
 	EquipmentDB equipmentDB;
 
 	@Inject
-	@ToolBoxNLI({EquipmentDB.class, LibraryService.class, BoostService.class})
-	ToolBoxNLIInvoker assistantCommandService;
-
-	@Inject
 	ChatService chat;
 	
-
-	/**
-	 * Executes a natural language query and returns data in JSON format.
-	 */
-	@GET
-	@Path("/json")
-	@Produces(MediaType.TEXT_PLAIN)
-	public String queryToJson(@QueryParam("query") String query) throws Exception {
-        LOG.info("QUERY: " + query);
-		return assistantCommandService.execute(query);
-	}
-
 
 	/**
 	 * Executes a natural language query and feeds back data into the LLM to provide a natural language response.
