@@ -87,6 +87,8 @@ public class BodyArmorBuilder implements BaldursChat {
             BoostWriter writer = boostService.html();
             boostService.macros(armor.boosts, writer);
             equipment.boostDescription = writer.toString();
+        } else {
+            equipment.boostDescription = "";
         }
         StatsArchive.Stat stat = library.archive().getStats().getByName(armor.type.baseStat);
         if (armor.armorClass == null) {
@@ -99,21 +101,51 @@ public class BodyArmorBuilder implements BaldursChat {
         context.response().add(new ShowEquipmentAction(equipment));
     }
 
-    @Tool("Call this every time you change the body armor json document you are building.")
-    public void updateBodyArmor(BodyArmorModel armor) {
-        Log.info("Updating body armor");
+    @Tool("Update the current body armor json document.")
+    public String updateBodyArmor(BodyArmorModel armor) {
+        Log.info("Updating body armor: ");
         logBodyArmorJson(armor);
-        context.setShared(CURRENT_BODY_ARMOR, armor);
-        addShowEquipmentAction(armor);
+        BodyArmorModel current = null;
+        if ((current = context.getShared(CURRENT_BODY_ARMOR, BodyArmorModel.class)) != null) {
+            if (armor.name != null) {
+                current.name = armor.name;
+            }
+            if (armor.description != null) {
+                current.description = armor.description;
+            }
+            if (armor.boosts != null) {
+                current.boosts = armor.boosts;
+            }
+            if (armor.armorClass != null) {
+                current.armorClass = armor.armorClass;
+            }
+            if (armor.type != null) {
+                current.type = armor.type;
+            }
+            if (armor.rarity != null) {
+                current.rarity = armor.rarity;
+            }
+        } else {
+            current = armor;
+        }
+        String json =logBodyArmorJson(current);
+        context.setShared(CURRENT_BODY_ARMOR, current);
+        Log.info("End of updateBodyArmor");
+        addShowEquipmentAction(current);
+        return json;
     }
 
     @Tool("When finished building body armor, call this tool to finish the body armor.")
-    public String finishBodyArmor(BodyArmorModel newArmor) throws Exception {
-        addShowEquipmentAction(newArmor);
+    public String finishBodyArmor() throws Exception {
+        BodyArmorModel current = null;
+        if ((current = context.getShared(CURRENT_BODY_ARMOR, BodyArmorModel.class)) == null) {
+            return "No body armor to finish";
+        }
+        addShowEquipmentAction(current);
         chatService.popChatFrame(context);
         context.setShared(CURRENT_BODY_ARMOR, null);
         Log.info("Finishing body armor");
-        String armorJson = logBodyArmorJson(newArmor);
+        String armorJson = logBodyArmorJson(current);
         return armorJson;
     }
 
@@ -134,8 +166,9 @@ public class BodyArmorBuilder implements BaldursChat {
         BodyArmorModel armor = context.getShared(CURRENT_BODY_ARMOR, BodyArmorModel.class);
         if (armor.boosts == null || armor.boosts.isEmpty()) {
             armor.boosts = boostMacro;
+        } else {
+            armor.boosts += ";" + boostMacro;
         }
-        armor.boosts += ";" + boostMacro;
         context.setShared(CURRENT_BODY_ARMOR, armor);
         addShowEquipmentAction(armor);
         logBodyArmorJson(armor);

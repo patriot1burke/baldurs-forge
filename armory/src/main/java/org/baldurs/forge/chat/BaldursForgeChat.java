@@ -19,7 +19,7 @@ public interface BaldursForgeChat extends BaldursChat {
 
                 If the user is looking for a specific armor or weapon by name, then forward the request to the 'findEquipmentByName' tool.
                 If the user is doing a broader search for armor or weapons, then forward the request to the 'searchEquipmentDatabase' tool.
-                If the user is looking to create a new armor or weapon, then forward the request to the 'createNewEquipment' tool.
+                If the user is looking to create a new body armor, then forward the request to the 'createNewBodyArmor' tool.
                 If 'findEquipmentByName' cannot find the equipment, then forward the request to the 'searchEquipmentDatabase' tool.
                 If the user is looking for data attribute values, then forward the request to the 'findDataAttributeValues' tool.
                 If the user is looking for unique icons for a given armor type, then forward the request to the 'findUniqueIconsForArmorType' tool.
@@ -34,11 +34,11 @@ public interface BaldursForgeChat extends BaldursChat {
                 Input: Show me all the armor in the database
                 Action: invoke the 'searchEquipmentDatabase' tool with the argument 'Show me all the armor in the database'
 
-                Input: Create a sword
-                Action: invoke the 'createNewEquipment' tool with the argument 'Create a sword'
+                Input: Create new leather armor
+                Action: invoke the 'createNewBodyArmor' tool with the argument 'Create new leather armor'
 
-                Input: I want to create new gloves
-                Action: invoke the 'createNewEquipment' tool with the argument 'I want to create new gloves'
+                Input: I want to create new chainmail armor
+                Action: invoke the 'createNewBodyArmor' tool with the argument 'I want to create new chainmail armor'
 
                 Input: Find attribute values for ArmorType
                 Action: invoke the 'findDataAttributeValues' tool with the argument 'ArmorType'

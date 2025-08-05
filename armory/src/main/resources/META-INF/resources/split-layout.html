@@ -488,16 +488,19 @@
         .tool-results-list {
             margin-left: 25px;
             padding-left: 15px;
-            list-style-type: disc;
+            list-style-type: none;
         }
 
         .tool-results-list li {
             margin-bottom: 8px;
             line-height: 1.4;
             color: #e8e8e8;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-               .rarity-legendary {
+        .rarity-legendary {
             color: #B7861D;
         }
 
@@ -968,6 +971,27 @@
                     });
                     $itemAnchor.data("equipment", item);
                     $itemAnchor.attr('equipment-tooltip', item.name);
+                    const $img = $('<img>', { src: item.icon, width: '32', height: '32' });
+                    $img.data("equipment", item);
+                    $img.attr('equipment-tooltip', item.name);
+ 
+                    // Set border color programmatically based on rarity
+                    const rarityColors = {
+                        'Legendary': '#B7861D',
+                        'VeryRare': '#D1017B', 
+                        'Rare': '#01BFFF',
+                        'Uncommon': '#01BD39',
+                        'Common': '#FFFFFF'
+                    };
+                    
+                    const rarityColor = rarityColors[item.rarity] || '#666';
+                    $img.css({
+                        'border': '2px solid ' + rarityColor,
+                        'border-radius': '50%',
+                        'object-fit': 'cover'
+                    });
+                    
+                    $listItem.append($img);
                     $listItem.append($itemAnchor);
                     $list.append($listItem);
                 }

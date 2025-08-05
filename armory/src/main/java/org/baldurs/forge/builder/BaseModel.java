@@ -18,7 +18,7 @@ import org.baldurs.forge.model.EquipmentType;
 import org.baldurs.forge.model.Rarity;
 
 public class BaseModel {
-    public Rarity rarity = Rarity.Common;
+    public Rarity rarity;
     public String name;
     public String description;
     public String boosts;
