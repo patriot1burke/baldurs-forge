@@ -1,7 +1,10 @@
 package org.baldurs.forge.builder;
 
+import java.util.List;
+
 import org.baldurs.forge.chat.BaldursChat;
 import org.baldurs.forge.chat.ChatService;
+import org.baldurs.forge.chat.MessageAction;
 import org.baldurs.forge.chat.RenderService;
 import org.baldurs.forge.chat.actions.ShowEquipmentAction;
 import org.baldurs.forge.context.ChatContext;
@@ -96,7 +99,12 @@ public class BodyArmorBuilder implements BaldursChat {
         } else {
             equipment.armorClass = armor.armorClass;
         }
-        RootTemplate template = library.archive().getRootTemplates().getRootTemplate(stat.getField("RootTemplate"));
+        RootTemplate template = null;
+        if (armor.parentModel != null) {
+            template = library.archive().getRootTemplates().getRootTemplate(armor.parentModel);
+        } else {
+            template = library.archive().getRootTemplates().getRootTemplate(stat.getField("RootTemplate"));
+        }
         equipment.icon = library.icons().get(template.resolveIcon());
         context.response().add(new ShowEquipmentAction(equipment));
     }
@@ -124,6 +132,9 @@ public class BodyArmorBuilder implements BaldursChat {
             }
             if (armor.rarity != null) {
                 current.rarity = armor.rarity;
+            }
+            if (armor.parentModel != null) {
+                current.parentModel = armor.parentModel;
             }
         } else {
             current = armor;
@@ -172,6 +183,23 @@ public class BodyArmorBuilder implements BaldursChat {
         context.setShared(CURRENT_BODY_ARMOR, armor);
         addShowEquipmentAction(armor);
         logBodyArmorJson(armor);
+    }
+
+    @Tool("List all available parent models for the current body armor type")
+    public String availableBodyArmorParentModels() {
+        BodyArmorModel armor = context.getShared(CURRENT_BODY_ARMOR, BodyArmorModel.class);
+        if (armor == null || armor.type == null) {
+            throw new RuntimeException("Cannot determine vailable parent models because body armor type is not set");
+        }
+        Log.info("Finding parent models for body armor type: " + armor.type.name());
+        List<RootTemplate> rootTemplates = library.findRootIconsFrom(stat -> stat.getField("ArmorType") != null && stat.getField("ArmorType").equals(armor.type.name()) && stat.getField("Slot") != null && stat.getField("Slot").equals("Breast"));
+        String html = "<ul>";
+        for (RootTemplate rootTemplate : rootTemplates) {
+            html += "<li><img src=\"" + library.icons().get(rootTemplate.resolveIcon()) + "\" height=\"64\" width=\"64\"/> " + rootTemplate.MapKey + "</li>";
+        }
+        html += "</ul>";
+        context.response().add(new MessageAction(html));
+        return "I found " + rootTemplates.size() + " unique root templates for armor type: " + armor.type.name();
     }
 
 }

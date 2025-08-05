@@ -28,9 +28,10 @@ public class BodyArmorModel extends BaseModel {
                 String name,
                 String description,
                 Integer armorClass, 
-                String boostMacro
+                String boosts,
+                String parentModel
                 ) {
-        super(rarity, name, description, boostMacro);
+        super(rarity, name, description, boosts, parentModel);
         this.armorClass = armorClass;
         this.type = type;
     }
@@ -49,6 +50,7 @@ public class BodyArmorModel extends BaseModel {
                                         .addStringProperty("description", "The description of the body armor")
                                         .addIntegerProperty("armorClass", "The armor class of the equipment.")
                                         .addStringProperty("boosts", "The boosts for the body armor.")
+                                        .addStringProperty("parentModel", "The parent visual model of the body armor.")
                                         .required(Arrays.asList("type", "rarity", "name"))
                                         .build();
         builder.name(BodyArmorModel.class.getSimpleName())

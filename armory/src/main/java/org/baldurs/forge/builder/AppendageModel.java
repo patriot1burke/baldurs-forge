@@ -23,9 +23,10 @@ public class AppendageModel extends BaseModel {
                 Rarity rarity,
                 String name,
                 String description,
-                String boostMacro
+                String boostMacro,
+                String parentModel
                 ) {
-        super(rarity, name, description, boostMacro);
+        super(rarity, name, description, boostMacro, parentModel);
         this.armorCategory = category;
     }
 

@@ -22,17 +22,20 @@ public class BaseModel {
     public String name;
     public String description;
     public String boosts;
+    public String parentModel;
 
     protected BaseModel(
                 Rarity rarity,
                 String name,
                 String description,
-                String boosts
+                String boosts,
+                String parentModel
                 ) {
         this.rarity = rarity;
         this.name = name;
         this.description = description;
         this.boosts = boosts;
+        this.parentModel = parentModel;
     }
 
     protected BaseModel() {

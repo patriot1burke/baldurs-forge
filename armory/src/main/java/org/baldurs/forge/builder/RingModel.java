@@ -12,8 +12,9 @@ public class RingModel extends BaseModel {
             Rarity rarity,
             String name,
             String description,
-            String boosts) {
-        super(rarity, name, description, boosts);
+            String boosts,
+            String parentModel) {
+        super(rarity, name, description, boosts, parentModel);
     }
 
     public static final String schema;
@@ -26,6 +27,7 @@ public class RingModel extends BaseModel {
                 .addStringProperty("name", "The name of the ring")
                 .addStringProperty("description", "The description of the ring")
                 .addStringProperty("boosts", "The boosts for the ring.")
+                .addStringProperty("parentModel", "The parent visual model of the ring.")
                 .required(Arrays.asList("rarity", "name"))
                 .build();
         builder.name(RingModel.class.getSimpleName())

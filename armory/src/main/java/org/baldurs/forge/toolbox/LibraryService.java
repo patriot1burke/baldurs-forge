@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.baldurs.archivist.PackageReader;
@@ -282,15 +283,32 @@ public class LibraryService {
         return functions;
     }
 
-    public List<RootTemplate> findRootIconsFrom(String name, String value) {
+    public List<RootTemplate> findRootIconsFrom(String... data) {
+        Predicate<? super Stat> predicate = stat -> {
+            for (int i = 0; i < data.length; i += 2) {
+                String name = data[i];
+                String value = data[i + 1];
+                if (stat.getField(name) == null || !stat.getField(name).contains(value)) {
+                    return false;
+                }
+            }
+            return true;
+        };
+        return findRootIconsFrom(predicate);
+    }
+
+    public List<RootTemplate> findRootIconsFrom(Predicate<? super Stat> predicate) {
         return archive.stats.getArmor().values().stream()
-                    .filter(stat -> stat.getField(name) != null && stat.getField(name).contains(value))
+                    .filter(predicate)
                     .map(stat -> stat.getField("RootTemplate"))
                     .filter(Objects::nonNull)
                     .distinct()
                     .map(archive.getRootTemplates()::getRootTemplate)
+                    .filter(Objects::nonNull)
                     .map(RootTemplate::resolveTemplateThatDefinesIcon)
+                    .filter(Objects::nonNull)
                     .distinct()
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
     }
 

@@ -12,8 +12,9 @@ public class AmuletModel extends BaseModel {
             Rarity rarity,
             String name,
             String description,
-            String boosts) {
-        super(rarity, name, description, boosts);
+            String boosts,
+            String parentModel) {
+        super(rarity, name, description, boosts, parentModel);
     }
 
     public static final String schema;
@@ -26,6 +27,7 @@ public class AmuletModel extends BaseModel {
                 .addStringProperty("name", "The name of the amulet")
                 .addStringProperty("description", "The description of the amulet")
                 .addStringProperty("boosts", "The boosts for the amulet.")
+                .addStringProperty("parentModel", "The parent visualmodel of the amulet.")
                 .required(Arrays.asList("rarity", "name"))
                 .build();
         builder.name(AmuletModel.class.getSimpleName())

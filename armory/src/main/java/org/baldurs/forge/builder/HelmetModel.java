@@ -13,8 +13,9 @@ public class HelmetModel extends AppendageModel {
             String name,
             String description,
             String boostMacro,
-            ArmorCategory category) {
-        super(category, rarity, name, description, boostMacro);
+            ArmorCategory category,
+            String parentModel) {
+        super(category, rarity, name, description, boostMacro, parentModel);
     }
 
     public static final String schema;
@@ -28,6 +29,7 @@ public class HelmetModel extends AppendageModel {
                 .addStringProperty("description", "The description of the helmet")
                 .addStringProperty("boosts", "The boosts for the helmet.")
                 .addEnumProperty("armorCategory", Arrays.stream(ArmorCategory.values()).map(ArmorCategory::name).toList(), "The armor category of the helmet")
+                .addStringProperty("parentModel", "The parent visual model of the helmet.")
                 .required(Arrays.asList("rarity", "name"))
                 .build();
         builder.name(HelmetModel.class.getSimpleName())
