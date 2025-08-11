@@ -49,7 +49,7 @@
             color: white;
             display: flex;
             align-items: center;
-            justify-content: left;
+            justify-content: space-between;
             font-size: 24px;
             font-weight: bold;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -73,8 +73,9 @@
         }
 
         .left-panel {
-            width: 70%;
+            width: 100%;
             border-right: 2px solid #BCAE79;
+            border-left: 1px solid #BCAE79;
             padding: 20px;
             overflow-y: auto;
         }
@@ -128,8 +129,8 @@
             bottom: 20px;
             left: 2%;
             /*transform: translateX(-50%)*/
-            width: 65%;
-            max-width: 1160px;
+            width: 95%;
+            /*max-width: 1160px;*/
             display: flex;
             background-color: #444750;
             border-radius: 25px;
@@ -167,6 +168,13 @@
             align-items: center;
             justify-content: center;
         }
+        #menu-button {
+            background-color: #333639;
+            margin-right: 15px;
+        }
+        #menu-button:hover {
+            background-color: #4a575c;
+        }
         #ask-button {
             background-color: #59666C;
         }
@@ -188,6 +196,49 @@
         }
         .btn i {
             font-size: 18px;
+        }
+
+        /* Dropdown menu styles */
+        .dropdown-menu {
+            position: absolute;
+            top: 70px;
+            right: 15px;
+            background-color: #444750;
+            border: 1px solid #BCAE79;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            min-width: 200px;
+            display: none;
+            overflow: hidden;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 12px 16px;
+            color: #e8e8e8;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+
+        .dropdown-item:hover {
+            background-color: #59666C;
+        }
+
+        .dropdown-item i {
+            font-size: 16px;
+            width: 20px;
+        }
+
+        .file-upload-input {
+            display: none;
         }
         .clear-btn {
             background: none;
@@ -319,7 +370,7 @@
             background-image: linear-gradient(to bottom, #54003299, #1B1A1999, #1B1A1999, #40295199);
             border: 1px solid #BCAE79;
             border-radius: 8px;
-            padding: 12px;
+            /*padding: 12px;*/
             max-width: 450px;
             min-width: 450px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
@@ -368,25 +419,50 @@
         }
 
         .tooltip-title {
-            /*font-weight: bold;*/
             color: #BCAE79;
+            padding: 12px;
             margin-bottom: 100px;
-            font-size: 20px;
+            font-size: 26px;
         }
 
         .tooltip-content {
             margin-bottom: 8px;
+            padding: 12px;
+            color: #f5ebc8;
             font-size:  16px;
             background-color: #3a3a3a;
         }
 
+        .item-properties {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            padding: 12px;
+        }
+
         .tooltip-footer {
+            display: grid;
+            justify-items: start;
+            align-items: start;
+            padding: 12px;
             font-size: 12px;
             font-style: italic;
             color: #aaa;
             border-top: 1px solid #444;
             padding-top: 8px;
             margin-top: 8px;
+            gap: 5px;
+            text-align: left;
+        }
+        .tooltip-footer > img {
+            grid-column-start: 1;
+            grid-row-start: 1;
+        }
+        .tooltip-footer > p {
+            grid-column-start: 2;
+            grid-row-start: 1;
+            text-align: left;
         }
 
         .tooltip-link {
@@ -412,16 +488,19 @@
         .tool-results-list {
             margin-left: 25px;
             padding-left: 15px;
-            list-style-type: disc;
+            list-style-type: none;
         }
 
         .tool-results-list li {
             margin-bottom: 8px;
             line-height: 1.4;
             color: #e8e8e8;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-               .rarity-legendary {
+        .rarity-legendary {
             color: #B7861D;
         }
 
@@ -479,6 +558,35 @@
             pointer-events: none;
             background-color: transparent;
         }
+        .boost {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .spell {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .spell-icon {
+            width: 32px;
+            height: 32px;
+        }
+        .boost-name {
+            font-weight: bold;
+            color: #f5ebb8;
+        }
+        .weapon-abilities {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .weapon-ability-icon {
+            width: 32px;
+            height: 32px;
+        }
 
 
     </style>
@@ -487,9 +595,23 @@
 <body>
     <!-- Banner across the top -->
     <div class="banner">
-        <img src="/favicon.ico" alt="Baldur's Gate 3 Logo">
-        Baldur's Forge Assistant
+        <div style="display: flex; align-items: center;">
+            <img src="/favicon.ico" alt="Baldur's Gate 3 Logo">
+            Baldur's Forge Assistant
+        </div>
+        <button id="menu-button" class="btn" title="Menu">
+            <i class="fa fa-bars" aria-hidden="true"></i>
+        </button>
     </div>
+
+    <!-- Dropdown menu -->
+    <div id="dropdown-menu" class="dropdown-menu">
+        <div class="dropdown-item" id="upload-file-item">
+            <i class="fas fa-upload"></i>
+            Upload Mod File
+        </div>
+    </div>
+    <input type="file" id="file-upload-input" class="file-upload-input" accept=".pak">
 
     <!-- Main content area -->
     <div class="main-content">
@@ -498,7 +620,7 @@
             <div class="left-panel">
                 <div class="chat-container" id="chat-container">
                     <div class="message assistant-message">
-                        Hello! I'm your Baldur's Forge Assistant. Ask me anything about Baldur's Gate 3 items. <a data-tooltip='{"title":"Helmet of Arcane Acuity","content":"<p>Dexterity Saving Throws +1</p>","footer":"Subtle magics are woven into the helmet&apos;s leather panes - for a powerful offence is sometimes still the best defence."}'>Helmet of Arcane Acuity</a>
+                        Hello! I'm your Baldur's Forge Assistant. Enter 'Help' to get a list of things I can do. 
                     </div>
                 </div>
                 <div class="input-container">
@@ -508,12 +630,14 @@
                         <button id="ask-button" class="btn" title="Ask a question">
                             <i class="fas fa-comment"></i>
                         </button>
+                        <!--
                         <button id="data-button" class="btn" title="Get data">
                             <i class="fas fa-table"></i>
                         </button>
                         <button id="search-button" class="btn" title="Search">
                             <i class="fas fa-search"></i>
                         </button>
+                    -->
                     </div>
                 </div>
                         
@@ -521,8 +645,8 @@
             </div>
 
             <!-- Right Container (50% width, split vertically) -->
+             <!--
             <div class="right-container">
-                <!-- Top Right Panel (50% height of right side) -->
                 <div class="top-right-panel">
                     <div class="panel-title">Top Right Panel</div>
                     <div class="panel-content">
@@ -532,7 +656,6 @@
                      </div>
                 </div>
 
-                <!-- Bottom Right Panel (50% height of right side) -->
                 <div class="bottom-right-panel">
                     <div class="panel-title">Bottom Right Panel</div>
                     <div class="panel-content">
@@ -546,7 +669,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> rigtht panel -->
         </div>
     </div>
 
@@ -561,7 +684,10 @@
             <div class="ac-value-comment"></div>
         </div>
         <div class="tooltip-content"></div>
-        <div class="tooltip-footer"></div>
+        <div class="tooltip-footer">
+            
+        </div>
+        <div class="item-properties"></div>
     </div>
 
     <script>
@@ -807,38 +933,31 @@
                 $tableContainer.append($table);
                 $container.append($tableContainer);
             }
-        
-            // Function to add JSON data as a table
-            function addDataMessage(jsonData) {
+
+            function addJsonMessage(data) {
                 const $messageDiv = $('<div>', { class: 'message data-message' });
         
-                try {
-                    const data = JSON.parse(jsonData);
-        
-                    if (Array.isArray(data)) {
-                        const $container = $('<div>');
-                        createArrayTable(data, $container);
-                        $messageDiv.append($container);
-                    } else if (typeof data === 'object' && data !== null) {
-                        const $container = $('<div>');
-                        createObjectTable(data, $container);
-                        $messageDiv.append($container);
-                    } else {
-                        // Not an array or object
-                        $messageDiv.text(jsonData);
-                    }
-                } catch (e) {
-                    // If parsing fails, just show the raw response
-                    $messageDiv.text(jsonData);
+                if (Array.isArray(data)) {
+                    const $container = $('<div>');
+                    createArrayTable(data, $container);
+                    $messageDiv.append($container);
+                } else if (typeof data === 'object' && data !== null) {
+                    const $container = $('<div>');
+                    createObjectTable(data, $container);
+                    $messageDiv.append($container);
+                } else if (typeof data === 'string') {
+                    $messageDiv.html(data);
+                } else {
+                    // Not an array or object
+                    $messageDiv.text(data);
                 }
         
                 $chatContainer.append($messageDiv);
                 $chatContainer.scrollTop($chatContainer[0].scrollHeight);
-                updateClearButtonVisibility();
+                updateClearButtonVisibility();                
             }
-
-            function searchAndSummary(data) {
-                const items = data.response.items;
+        
+            function listEquipmentEvent(items) {
                 const $resultDev = $('<div>', {
                     class: `message assistant-message`
                 });
@@ -852,21 +971,37 @@
                     });
                     $itemAnchor.data("equipment", item);
                     $itemAnchor.attr('equipment-tooltip', item.name);
+                    const $img = $('<img>', { src: item.icon, width: '32', height: '32' });
+                    $img.data("equipment", item);
+                    $img.attr('equipment-tooltip', item.name);
+ 
+                    // Set border color programmatically based on rarity
+                    const rarityColors = {
+                        'Legendary': '#B7861D',
+                        'VeryRare': '#D1017B', 
+                        'Rare': '#01BFFF',
+                        'Uncommon': '#01BD39',
+                        'Common': '#FFFFFF'
+                    };
+                    
+                    const rarityColor = rarityColors[item.rarity] || '#666';
+                    $img.css({
+                        'border': '2px solid ' + rarityColor,
+                        'border-radius': '50%',
+                        'object-fit': 'cover'
+                    });
+                    
+                    $listItem.append($img);
                     $listItem.append($itemAnchor);
                     $list.append($listItem);
                 }
                 const $paragraph = $('<p>');
                 $paragraph.append($list);
                 $resultDev.append($paragraph);
-
-                const $summaryDiv = $('<div>');                    
-                $summaryDiv.html(data.response.summary);
-                $resultDev.append($summaryDiv);
                 $chatContainer.append($resultDev);
             }
 
-            function findByName(data) {
-                const equipment = data.response;
+            function showEquipmentEvent(equipment) {
                 if (!equipment) {
                     const $messageDiv = $('<div>', { class: 'message data-message' });
                     const $notFoundDiv = $('<div>');
@@ -887,31 +1022,7 @@
                 $chatContainer.append($resultDev);
             }
 
-                       // Function to add JSON data as a table
-            function addToolMessage(jsonData) {
-        
-                try {
-                    const data = JSON.parse(jsonData);
-                    for (const toolResult of data) {
-                        if (toolResult.tool === 'searchAndSummary') {
-                            searchAndSummary(toolResult);
-                        } else if (toolResult.tool === 'findByName') {
-                            findByName(toolResult);
-                        } else {
-                            addDataMessage(toolResult);
-                        }
-                    }
-                } catch (e) {
-                    // If parsing fails, just show the raw response
-                    const $messageDiv = $('<div>', { class: 'message data-message' });
-                    $messageDiv.text(jsonData);
-                    $chatContainer.append($messageDiv);
-                }
-        
-                $chatContainer.scrollTop($chatContainer[0].scrollHeight);
-                updateClearButtonVisibility();
-            }
-        
+
             // Show and hide loading indicator
             function showLoading() {
                 const $loadingDiv = $('<div>', {
@@ -946,6 +1057,8 @@
                 }
                 return splitStr.join(' ');
             }
+
+            chatContext = null;
         
             // Send a message to the Ask API
             async function sendAskMessage(message) {
@@ -954,60 +1067,42 @@
                 addMessage(message, true);
                 $messageInput.val('');
                 showLoading();
-        
+    
+                        
                 try {
-                    const response = await $.ajax({
-                        url: `/assistant/ask?query=${encodeURIComponent(message)}`,
-                        type: 'GET'
-                    });
-        
-                    hideLoading();
-                    addMessage(response, false);
-                } catch (error) {
-                    hideLoading();
-                    addMessage(`Sorry, there was an error processing your request: ${error.statusText || error.message}`, false);
-                    console.error('Error:', error);
-                }
-            }
-        
-            // Send a message to the JSON API
-            async function sendDataMessage(message) {
-                if (message.trim() === '') return;
-        
-                addMessage(message, true);
-                $messageInput.val('');
-                showLoading();
-        
-                try {
-                    const data = await $.ajax({
-                        url: `/assistant/json?query=${encodeURIComponent(message)}`,
-                        type: 'GET'
-                    });
-        
-                    hideLoading();
-                    addDataMessage(data);
-                } catch (error) {
-                    hideLoading();
-                    addMessage(`Sorry, there was an error processing your request: ${error.statusText || error.message}`, false);
-                    console.error('Error:', error);
-                }
-            }
+                    let postData = null;
+                    let request = {
+                        userMessage: message,
+                        context: chatContext
+                    }
+                    postData = JSON.stringify(request);
 
-            async function sendToolMessage(message) {
-                if (message.trim() === '') return;
-        
-                addMessage(message, true);
-                $messageInput.val('');
-                showLoading();
-        
-                try {
-                    const data = await $.ajax({
-                        url: `/assistant/json?query=${encodeURIComponent(message)}`,
-                        type: 'GET'
+                    const response = await $.ajax({
+                        url: `/assistant/ask`,
+                        type: 'POST',
+                        data: postData,
+                        processData: false,
+                        contentType: false
                     });
-        
+
+                    console.log(response);
+                    const responseData = JSON.parse(response);
+                    if (responseData.response) {
+                        for (const action of responseData.response) {
+                            if (action.type === 'ListEquipment') {
+                                console.log('ListEquipment');
+                                listEquipmentEvent(action.equipment);
+                            } else if (action.type === 'ShowEquipment') {
+                                console.log('ShowEquipment');
+                                showEquipmentEvent(action.equipment);
+                            } else if (action.type === 'Message') {
+                                console.log('Message');
+                                addJsonMessage(action.message);
+                            }
+                        }
+                    }
+                    chatContext = responseData.context;        
                     hideLoading();
-                    addToolMessage(data);
                 } catch (error) {
                     hideLoading();
                     addMessage(`Sorry, there was an error processing your request: ${error.statusText || error.message}`, false);
@@ -1018,11 +1113,7 @@
             // Clear chat history
             async function clearChat() {
                 try {
-                    await $.ajax({
-                        url: '/assistant/clear',
-                        type: 'GET'
-                    });
-        
+                    chatContext = null;
                     // Keep only the initial greeting
                     while ($chatContainer.children().length > 1) {
                         $chatContainer.children().last().remove();
@@ -1039,14 +1130,11 @@
                 sendAskMessage($messageInput.val());
             });
         
-            $('#data-button').on('click', function() {
-                sendDataMessage($messageInput.val());
+            // Event listeners
+            $('#clear-button').on('click', function() {
+                clearChat()
             });
         
-            $('#search-button').on('click', function() {
-                sendToolMessage($messageInput.val());
-            });
-
             $messageInput.on('keypress', function(e) {
                 if (e.which === 13) { // Enter key
                     // Default to "Ask" when pressing Enter
@@ -1058,6 +1146,62 @@
         
             // Initialize
             updateClearButtonVisibility();
+
+            // Dropdown menu functionality
+            const $dropdownMenu = $('#dropdown-menu');
+            const $menuButton = $('#menu-button');
+            const $uploadFileItem = $('#upload-file-item');
+            const $fileUploadInput = $('#file-upload-input');
+
+            // Toggle dropdown menu
+            $menuButton.on('click', function(e) {
+                e.stopPropagation();
+                $dropdownMenu.toggleClass('show');
+            });
+
+            // Close dropdown when clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#menu-button, #dropdown-menu').length) {
+                    $dropdownMenu.removeClass('show');
+                }
+            });
+
+            // Handle file upload
+            $uploadFileItem.on('click', function() {
+                $fileUploadInput.click();
+            });
+
+            $fileUploadInput.on('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    handleFileUpload(file);
+                }
+                // Reset input
+                $(this).val('');
+                $dropdownMenu.removeClass('show');
+            });
+
+            function handleFileUpload(file) {
+                // Show loading message
+                addMessage(`Uploading file: ${file.name}...`, false);
+
+                const formData = new FormData();
+                formData.append('pak', file);
+                $.ajax({
+                    url: `/assistant/upload-pak?filename=${encodeURIComponent(file.name)}`,
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        addMessage(`File uploaded successfully: ${file.name}`, false);
+                    },
+                    error: function(xhr, status, error) {
+                        addMessage(`Error uploading file: ${error}`, false);
+                        console.error('Upload error:', xhr.responseText);
+                    }
+                });
+            }
 
             // Tooltip functionality
             const $tooltip = $('#tooltip');
@@ -1072,8 +1216,10 @@
                 const $tooltipFooter = tooltip.find('.tooltip-footer');
                 const $tooltipImage = tooltip.find('.tooltip-item-image');
 
+                console.log('showEquipmentPanel');
+                console.log(equipment);
                 if (equipment.icon) {
-                    $tooltipImage.attr('src', '/static/img/icons/items-tooltip/' + equipment.icon + '.144.png');
+                    $tooltipImage.attr('src', equipment.icon);
                 } else {
                     $tooltipImage.hide();
                 }
@@ -1091,11 +1237,20 @@
                 }
                 content = '';
                 content += `${equipment.boostDescription}`;
-
+ 
                  // Set content
                 $tooltipTitle.html(equipment.name || '');
                 $tooltipContent.html(content);
-                $tooltipFooter.html(equipment.description || '');
+                $tooltipFooter.empty();
+                if (equipment.description) {  
+                    $tooltipFooter.show();
+                    $tooltipFooter.append($('<img>', { src: '/static/img/icons/tooltips/scrollBox_icon.png', width: '16', height: '16' }));
+                    $footContent = $('<p>');
+                    $footContent.html(equipment.description || '');
+                    $tooltipFooter.append($footContent);
+                } else {
+                    $tooltipFooter.hide();
+                }
 
                 // Set tooltip title color programmatically
                 if (equipment.rarity === 'Legendary') {
@@ -1113,11 +1268,45 @@
                 } else if (equipment.rarity === 'Common') {
                     tooltip.css('background-image', 'linear-gradient(to bottom, #1B1A1999, #1B1A1999, #1B1A1999, #40295199')
                     $tooltipTitle.attr('class', 'rarity-common tooltip-title');
-                } // You can change this color as needed
-
+                } 
+                
+                $itemProperties = tooltip.find('.item-properties');
+                $itemProperties.empty();
+                $itemProperties.show();
+                if (equipment.type === 'Weapon') {
+                    if (equipment.weaponType) {
+                        addItemProperty($itemProperties, equipment.weaponType, '/static/img/icons/tooltips/ico_roll_attack.png');
+                    }
+                    for (const property of equipment.weaponProperties) {
+                        console.log(property);
+                        if (property === 'Twohanded') {
+                            addItemProperty($itemProperties, 'Two Handed', '/static/img/icons/tooltips/ico_handedness.png');
+                        } else if (property === 'Light') {
+                            addItemProperty($itemProperties, property, '/static/img/icons/tooltips/ico_lightWeight.png');
+                        } else if (property === 'Dippable') {
+                            addItemProperty($itemProperties, property, '/static/img/icons/tooltips/ico_dippable.png');
+                        } else if (property === 'Finesse') {
+                            addItemProperty($itemProperties, property, '/static/img/icons/tooltips/ico_finesse.png');
+                        } else if (property === 'Throwable') {
+                            addItemProperty($itemProperties, property, '/static/img/icons/tooltips/ico_throwable.png');
+                        } else if (property === 'Versatile') {
+                            addItemProperty($itemProperties, property, '/static/img/icons/tooltips/ico_handedness.png');
+                        }
+                    }
+                } else if (equipment.type === 'Armor') {
+                    if (equipment.armorType) {
+                        addItemProperty($itemProperties, equipment.armorType, '/static/img/icons/tooltips/ico_AC.png');
+                    }
+                } else {
+                    $itemProperties.hide();
+                }
 
             }
 
+            function addItemProperty(itemProperties, property, icon) {
+                itemProperties.append($('<img>', { src: icon, width: '16', height: '16' }));
+                itemProperties.append($('<span>', { text: property }));
+            }
             // Function to show tooltip
             function showTooltip(event, equipment) {
                 showEquipmentPanel($tooltip, equipment);
@@ -1129,8 +1318,8 @@
                 // Position tooltip near mouse
                 const mouseX = event.pageX;
                 const mouseY = event.pageY;
-                const tooltipWidth = 250; // Approximate width
-                const tooltipHeight = 150; // Approximate height
+                const tooltipWidth = $tooltip.width(); // Approximate width
+                const tooltipHeight = $tooltip.height(); // Approximate height
                 const windowWidth = $(window).width();
                 const windowHeight = $(window).height();
 
@@ -1142,7 +1331,7 @@
                     left = mouseX - tooltipWidth - 15;
                 }
                 if (top + tooltipHeight > windowHeight) {
-                    top = mouseY - tooltipHeight + 10;
+                    top = windowHeight - tooltipHeight - 15;
                 }
 
                 $tooltip.css({
