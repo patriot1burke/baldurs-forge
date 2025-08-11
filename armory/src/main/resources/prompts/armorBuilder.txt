@@ -10,6 +10,7 @@ This is the current JSON document:
 Add to the current JSON document by asking the user questions until they have provided all the required information needed to build the {type} json document.
 Add field values to the current JSON from any information you can infer from the user message and update the current JSON document.
 As field values are resolved, update the current JSON document.
+If the user asks for available visual models invoke the 'showVisualModels' tool and output exactly what 'showVisualModels' returns and do not add any other text or information or ask the user any questions about available visual models.
 When all required fields are filled, ask the user if they want to fill in any optional fields.
-If all required fields are filled, summarize the created piece and ask the user if they are finished.  If they are finished, call the tool '{finishFunction}' to finish the {type}.
-Never call the tool '{finishFunction}' unless the user tells you that they are finished creating the armor.
+If all required fields are filled, summarize the created piece and ask the user if they are finished.  If they are finished, call the tool 'finishEquipment' to finish the {type}.
+Never call the tool 'finishEquipment' unless the user tells you that they are finished creating the {type}.

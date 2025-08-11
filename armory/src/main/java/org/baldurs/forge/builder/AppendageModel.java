@@ -8,7 +8,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.output.structured.Description;
+import dev.langchain4j.service.output.JsonSchemas;
 
 import org.baldurs.forge.model.Equipment;
 import org.baldurs.forge.model.EquipmentSlot;
@@ -16,6 +18,7 @@ import org.baldurs.forge.model.EquipmentType;
 import org.baldurs.forge.model.Rarity;
 
 public class AppendageModel extends BaseModel {
+    @Description("The armor category.  Can be None, Light, Medium, or Heavy.")
     public ArmorCategory armorCategory = ArmorCategory.None;
 
     public AppendageModel(
@@ -32,5 +35,10 @@ public class AppendageModel extends BaseModel {
 
     public AppendageModel() {
     }
+
+    public static JsonObjectSchema schema() {
+        return (JsonObjectSchema)JsonSchemas.jsonSchemaFrom(AppendageModel.class).get().rootElement();
+    }
+
 
 }

@@ -18,5 +18,5 @@ public interface ArmorBuilderChat {
 
     @SystemMessage(fromResource = "prompts/armorBuilder.txt")
     @ToolBox({BodyArmorBuilder.class, BoostBuilderChat.class})
-    public String buildBodyArmor(@MemoryId String memoryId, String type, String updateFunction, String finishFunction, String schema, String currentJson, @UserMessage String userMessage);
+    public String buildBodyArmor(@MemoryId String memoryId, String type, String schema, String currentJson, @UserMessage String userMessage);
 }

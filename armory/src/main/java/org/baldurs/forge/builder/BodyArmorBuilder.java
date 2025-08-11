@@ -65,7 +65,7 @@ public class BodyArmorBuilder implements BaldursChat {
             }
         }
         Log.info("Current JSON: " + currentJson);
-        String response = agent.buildBodyArmor(context.memoryId(), "body armor", "updateBodyArmor", "finishBodyArmor", BodyArmorModel.schema, currentJson, userMessage);
+        String response = agent.buildBodyArmor(context.memoryId(), "body armor", BodyArmorModel.schema, currentJson, userMessage);
         String html = renderer.markdownToHtml(response);
         return html;
     }
@@ -147,7 +147,7 @@ public class BodyArmorBuilder implements BaldursChat {
     }
 
     @Tool("When finished building body armor, call this tool to finish the body armor.")
-    public String finishBodyArmor() throws Exception {
+    public String finishEquipment() throws Exception {
         BodyArmorModel current = null;
         if ((current = context.getShared(CURRENT_BODY_ARMOR, BodyArmorModel.class)) == null) {
             return "No body armor to finish";
@@ -186,7 +186,7 @@ public class BodyArmorBuilder implements BaldursChat {
     }
 
     @Tool("Summarizes available visual models for the current body armor type.")
-    public String showBodyArmorVisualModels() {
+    public String showVisualModels() {
         BodyArmorModel armor = context.getShared(CURRENT_BODY_ARMOR, BodyArmorModel.class);
         if (armor == null || armor.type == null) {
             throw new RuntimeException("Cannot determine vailable visual models because body armor type is not set");
@@ -199,12 +199,7 @@ public class BodyArmorBuilder implements BaldursChat {
         }
         html += "</ul>";
         context.response().add(new MessageAction(html));
-        String message = "There are " + rootTemplates.size() + " visual models available.  Here are a few of them, a full list is available above.";
-        for (int i = 0; i < rootTemplates.size() && i < 3; i++) {
-            String name = library.archive().localizations.getLocalization(rootTemplates.get(i).DisplayName);
-
-            message += name + ", ";
-        }
+        String message = "There are " + rootTemplates.size() + " visual models available. Choose one of the parent ids from the list above if you want a different look for your body armor.";
         context.response().add(new MessageAction(message));
 
         // Had to return something because AI would specify that nothing was found.
