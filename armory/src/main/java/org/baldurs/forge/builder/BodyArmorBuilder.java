@@ -110,34 +110,34 @@ public class BodyArmorBuilder implements BaldursChat {
     }
 
     @Tool("Update the current body armor json document.")
-    public String updateBodyArmor(BodyArmorModel armor) {
+    public String updateBodyArmor(BodyArmorModel bodyArmor) {
         Log.info("Updating body armor: ");
-        logBodyArmorJson(armor);
+        logBodyArmorJson(bodyArmor);
         BodyArmorModel current = null;
         if ((current = context.getShared(CURRENT_BODY_ARMOR, BodyArmorModel.class)) != null) {
-            if (armor.name != null) {
-                current.name = armor.name;
+            if (bodyArmor.name != null) {
+                current.name = bodyArmor.name;
             }
-            if (armor.description != null) {
-                current.description = armor.description;
+            if (bodyArmor.description != null) {
+                current.description = bodyArmor.description;
             }
-            if (armor.boosts != null) {
-                current.boosts = armor.boosts;
+            if (bodyArmor.boosts != null) {
+                current.boosts = bodyArmor.boosts;
             }
-            if (armor.armorClass != null) {
-                current.armorClass = armor.armorClass;
+            if (bodyArmor.armorClass != null) {
+                current.armorClass = bodyArmor.armorClass;
             }
-            if (armor.type != null) {
-                current.type = armor.type;
+            if (bodyArmor.type != null) {
+                current.type = bodyArmor.type;
             }
-            if (armor.rarity != null) {
-                current.rarity = armor.rarity;
+            if (bodyArmor.rarity != null) {
+                current.rarity = bodyArmor.rarity;
             }
-            if (armor.parentModel != null) {
-                current.parentModel = armor.parentModel;
+            if (bodyArmor.parentModel != null) {
+                current.parentModel = bodyArmor.parentModel;
             }
         } else {
-            current = armor;
+            current = bodyArmor;
         }
         String json =logBodyArmorJson(current);
         context.setShared(CURRENT_BODY_ARMOR, current);
@@ -185,8 +185,8 @@ public class BodyArmorBuilder implements BaldursChat {
         logBodyArmorJson(armor);
     }
 
-    @Tool("List all available parent models for the current body armor type")
-    public String availableBodyArmorParentModels() {
+    @Tool("Summarizes available parent models for the current body armor type.")
+    public String showBodyArmorParentModels() {
         BodyArmorModel armor = context.getShared(CURRENT_BODY_ARMOR, BodyArmorModel.class);
         if (armor == null || armor.type == null) {
             throw new RuntimeException("Cannot determine vailable parent models because body armor type is not set");
@@ -199,7 +199,17 @@ public class BodyArmorBuilder implements BaldursChat {
         }
         html += "</ul>";
         context.response().add(new MessageAction(html));
-        return "I found " + rootTemplates.size() + " unique root templates for armor type: " + armor.type.name();
+        String message = "There are " + rootTemplates.size() + " parent models available.  Here are a few of them, a full list is available above.";
+        for (int i = 0; i < rootTemplates.size() && i < 3; i++) {
+            String name = library.archive().localizations.getLocalization(rootTemplates.get(i).DisplayName);
+
+            message += name + ", ";
+        }
+        context.response().add(new MessageAction(message));
+
+        // Had to return something because AI would specify that nothing was found.
+        // I really wanted to just return html via the context.response() and output nothing and let the client render the html however it wants.
+        return message;
     }
 
 }

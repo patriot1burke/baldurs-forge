@@ -1,7 +1,11 @@
 package org.baldurs.forge.builder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -10,8 +14,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import dev.langchain4j.model.output.structured.Description;
+import dev.langchain4j.service.output.JsonSchemas;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
+import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
 
 import org.baldurs.forge.model.Equipment;
 import org.baldurs.forge.model.EquipmentSlot;
@@ -19,7 +25,10 @@ import org.baldurs.forge.model.EquipmentType;
 import org.baldurs.forge.model.Rarity;
 
 public class BodyArmorModel extends BaseModel {
+    @Description("The type of body armor")
+    @JsonProperty(required = true)
     public BodyArmorType type;
+    @Description("The armor class of the body armor.  This will default to the base armor class of the body armor type.")
     public Integer armorClass;
 
     public BodyArmorModel(
@@ -42,18 +51,20 @@ public class BodyArmorModel extends BaseModel {
     public static final String schema;
 
     static {
+        // TODO:  can call JsonSchemas.jsonSchemaFrom(BodyArmorModel.class) directly after my langchain4j patch is merged and released
+        // right now langchain4j does not look at super classes for the schema
+        JsonObjectSchema baseModelSchema = BaseModel.schema();
+        JsonObjectSchema bodyArmorSchema = (JsonObjectSchema)JsonSchemas.jsonSchemaFrom(BodyArmorModel.class).get().rootElement();
+        Set<String> required = new HashSet<>(baseModelSchema.required());
+        required.addAll(bodyArmorSchema.required());
+        Map<String, JsonSchemaElement> properties = new HashMap<>(baseModelSchema.properties());
+        properties.putAll(bodyArmorSchema.properties());
         JsonSchema.Builder builder = JsonSchema.builder();
         JsonObjectSchema rootElement = JsonObjectSchema.builder()
-                                        .addEnumProperty("type", Arrays.stream(BodyArmorType.values()).map(BodyArmorType::name).toList(), "The type of body armor")
-                                        .addEnumProperty("rarity", Arrays.stream(Rarity.values()).map(Rarity::name).toList(), "The rarity of the bodyarmor")
-                                        .addStringProperty("name", "The name of the body armor")
-                                        .addStringProperty("description", "The description of the body armor")
-                                        .addIntegerProperty("armorClass", "The armor class of the equipment.")
-                                        .addStringProperty("boosts", "The boosts for the body armor.")
-                                        .addStringProperty("parentModel", "The parent visual model of the body armor.")
-                                        .required(Arrays.asList("type", "rarity", "name"))
+                                        .addProperties(properties)
+                                        .required(new ArrayList<>(required))
                                         .build();
-        builder.name(BodyArmorModel.class.getSimpleName())
+        builder.name("bodyArmor")
                .rootElement(rootElement);
         schema = builder.build().toString();
     }

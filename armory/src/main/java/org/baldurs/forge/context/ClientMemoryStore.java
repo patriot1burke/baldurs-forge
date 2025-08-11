@@ -114,13 +114,13 @@ public class ClientMemoryStore {
             @Override
             public void deleteMessages(Object memoryId) {
                 ClientMemoryStore clientMemoryStore = null;
+                clientMemoryStore = CDI.current().select(ClientMemoryStore.class).get();
                 try {
-                    clientMemoryStore = CDI.current().select(ClientMemoryStore.class).get();
                     clientMemoryStore.ping(); // ping forces CDI to reference the instance
                 } catch (Exception e) {
                     return;
                 }
-
+                clientMemoryStore.deleteMessages(memoryId);
             }
 
             @Override

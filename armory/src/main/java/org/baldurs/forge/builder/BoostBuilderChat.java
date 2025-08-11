@@ -16,6 +16,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 public interface BoostBuilderChat extends BaldursChat {
 
     @SystemMessage(fromResource = "prompts/nl2boost.txt")
-    @Tool(name="createBoostMacro", value="Translates a boost description into a boost macro.  Boosts add abilities to armor and weapons.")
+    @Tool(name="createBoostMacro", value="Translates a boost description into a boost macro.  Boosts add abilities and stat bonuses and enchantments to armor and weapons.")
     String chat(@MemoryId String memoryId, @UserMessage String message);
 }
