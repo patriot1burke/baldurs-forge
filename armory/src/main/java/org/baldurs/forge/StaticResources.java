@@ -7,7 +7,7 @@ import io.vertx.ext.web.handler.FileSystemAccess;
 import io.vertx.ext.web.handler.StaticHandler;
 import jakarta.inject.Inject;
 
-import org.baldurs.forge.toolbox.LibraryService;
+import org.baldurs.forge.services.LibraryService;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 public class StaticResources {

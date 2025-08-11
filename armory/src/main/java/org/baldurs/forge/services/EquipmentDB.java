@@ -1,4 +1,4 @@
-package org.baldurs.forge.toolbox;
+package org.baldurs.forge.services;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import org.baldurs.forge.model.Rarity;
 import org.baldurs.forge.scanner.ArchiveSource;
 import org.baldurs.forge.scanner.RootTemplate;
 import org.baldurs.forge.scanner.StatsArchive;
-import org.baldurs.forge.toolbox.BoostService.BoostWriter;
+import org.baldurs.forge.services.BoostService.BoostWriter;
 
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.data.document.Document;

@@ -1,4 +1,4 @@
-package org.baldurs.forge.toolbox;
+package org.baldurs.forge.services;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.baldurs.forge.scanner.StatsArchive.Stat;
-import org.baldurs.forge.toolbox.BoostService.BoostWriter;
+import org.baldurs.forge.services.BoostService.BoostWriter;
 
 import io.quarkus.logging.Log;
 import jakarta.annotation.PostConstruct;

@@ -13,9 +13,9 @@ import org.baldurs.forge.model.EquipmentSlot;
 import org.baldurs.forge.model.EquipmentType;
 import org.baldurs.forge.scanner.RootTemplate;
 import org.baldurs.forge.scanner.StatsArchive;
-import org.baldurs.forge.toolbox.BoostService;
-import org.baldurs.forge.toolbox.LibraryService;
-import org.baldurs.forge.toolbox.BoostService.BoostWriter;
+import org.baldurs.forge.services.BoostService;
+import org.baldurs.forge.services.LibraryService;
+import org.baldurs.forge.services.BoostService.BoostWriter;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;

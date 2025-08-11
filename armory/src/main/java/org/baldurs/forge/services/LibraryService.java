@@ -1,4 +1,4 @@
-package org.baldurs.forge.toolbox;
+package org.baldurs.forge.services;
 
 import java.io.IOException;
 import java.nio.file.Files;

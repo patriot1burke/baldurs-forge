@@ -12,8 +12,8 @@ import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.scanner.BaldursArchive;
 import org.baldurs.forge.scanner.RootTemplate;
 import org.baldurs.forge.scanner.StatsArchive.Stat;
-import org.baldurs.forge.toolbox.EquipmentDB;
-import org.baldurs.forge.toolbox.LibraryService;
+import org.baldurs.forge.services.EquipmentDB;
+import org.baldurs.forge.services.LibraryService;
 
 import dev.langchain4j.agent.tool.Tool;
 import io.quarkus.logging.Log;

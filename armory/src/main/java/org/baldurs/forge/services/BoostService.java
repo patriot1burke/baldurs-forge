@@ -1,4 +1,4 @@
-package org.baldurs.forge.toolbox;
+package org.baldurs.forge.services;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.baldurs.forge.scanner.StatsArchive;
-import org.baldurs.forge.toolbox.MacroService.Macro;
+import org.baldurs.forge.services.MacroService.Macro;
 
 import dev.langchain4j.agent.tool.Tool;
 import io.quarkus.logging.Log;

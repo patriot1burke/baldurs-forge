@@ -1,4 +1,4 @@
-package org.baldurs.forge.toolbox;
+package org.baldurs.forge.services;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.baldurs.forge.model.Spell;
 import org.baldurs.forge.scanner.StatsArchive;
-import org.baldurs.forge.toolbox.BoostService.BoostWriter;
+import org.baldurs.forge.services.BoostService.BoostWriter;
 
 import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.document.Metadata;
