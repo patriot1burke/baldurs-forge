@@ -22,7 +22,7 @@ public class BaseModel {
     @Description("The boosts and stat bonuses and enchantments for the item.  This is a semicolon separated list of boost functions.")
     public String boosts;
     @Description("The visual model of the item inherited from an existing parent item in the database.  Change this if you want a different look for your item other than the default.")
-    public String parentModel;
+    public String visualModel;
 
     protected BaseModel(
                 Rarity rarity,
@@ -35,7 +35,7 @@ public class BaseModel {
         this.name = name;
         this.description = description;
         this.boosts = boosts;
-        this.parentModel = parentModel;
+        this.visualModel = parentModel;
     }
 
     protected BaseModel() {

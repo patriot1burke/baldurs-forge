@@ -100,8 +100,8 @@ public class BodyArmorBuilder implements BaldursChat {
             equipment.armorClass = armor.armorClass;
         }
         RootTemplate template = null;
-        if (armor.parentModel != null) {
-            template = library.archive().getRootTemplates().getRootTemplate(armor.parentModel);
+        if (armor.visualModel != null) {
+            template = library.archive().getRootTemplates().getRootTemplate(armor.visualModel);
         } else {
             template = library.archive().getRootTemplates().getRootTemplate(stat.getField("RootTemplate"));
         }
@@ -133,8 +133,8 @@ public class BodyArmorBuilder implements BaldursChat {
             if (bodyArmor.rarity != null) {
                 current.rarity = bodyArmor.rarity;
             }
-            if (bodyArmor.parentModel != null) {
-                current.parentModel = bodyArmor.parentModel;
+            if (bodyArmor.visualModel != null) {
+                current.visualModel = bodyArmor.visualModel;
             }
         } else {
             current = bodyArmor;
@@ -185,13 +185,13 @@ public class BodyArmorBuilder implements BaldursChat {
         logBodyArmorJson(armor);
     }
 
-    @Tool("Summarizes available parent models for the current body armor type.")
-    public String showBodyArmorParentModels() {
+    @Tool("Summarizes available visual models for the current body armor type.")
+    public String showBodyArmorVisualModels() {
         BodyArmorModel armor = context.getShared(CURRENT_BODY_ARMOR, BodyArmorModel.class);
         if (armor == null || armor.type == null) {
-            throw new RuntimeException("Cannot determine vailable parent models because body armor type is not set");
+            throw new RuntimeException("Cannot determine vailable visual models because body armor type is not set");
         }
-        Log.info("Finding parent models for body armor type: " + armor.type.name());
+        Log.info("Finding visual models for body armor type: " + armor.type.name());
         List<RootTemplate> rootTemplates = library.findRootIconsFrom(stat -> stat.getField("ArmorType") != null && stat.getField("ArmorType").equals(armor.type.name()) && stat.getField("Slot") != null && stat.getField("Slot").equals("Breast"));
         String html = "<ul>";
         for (RootTemplate rootTemplate : rootTemplates) {
@@ -199,7 +199,7 @@ public class BodyArmorBuilder implements BaldursChat {
         }
         html += "</ul>";
         context.response().add(new MessageAction(html));
-        String message = "There are " + rootTemplates.size() + " parent models available.  Here are a few of them, a full list is available above.";
+        String message = "There are " + rootTemplates.size() + " visual models available.  Here are a few of them, a full list is available above.";
         for (int i = 0; i < rootTemplates.size() && i < 3; i++) {
             String name = library.archive().localizations.getLocalization(rootTemplates.get(i).DisplayName);
 
