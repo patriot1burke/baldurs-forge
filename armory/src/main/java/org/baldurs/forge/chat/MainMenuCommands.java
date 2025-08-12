@@ -1,24 +1,18 @@
 package org.baldurs.forge.chat;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.baldurs.forge.builder.BodyArmorBuilder;
 import org.baldurs.forge.chat.actions.ListEquipmentAction;
 import org.baldurs.forge.chat.actions.ShowEquipmentAction;
 import org.baldurs.forge.context.ChatContext;
 import org.baldurs.forge.model.EquipmentModel;
-import org.baldurs.forge.scanner.BaldursArchive;
-import org.baldurs.forge.scanner.RootTemplate;
-import org.baldurs.forge.scanner.StatsArchive.Stat;
 import org.baldurs.forge.services.EquipmentDB;
 import org.baldurs.forge.services.LibraryService;
 
 import dev.langchain4j.agent.tool.Tool;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 
 @ApplicationScoped

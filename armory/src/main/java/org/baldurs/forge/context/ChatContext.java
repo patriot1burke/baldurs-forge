@@ -1,8 +1,6 @@
 package org.baldurs.forge.context;
 
-import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +11,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.context.RequestScoped;
-import jakarta.inject.Inject;
 
 /**
  * Can be marshalled to and from JSON with the {@link ChatContextReader} class.
