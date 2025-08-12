@@ -18,8 +18,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import io.quarkus.logging.Log;
-
 public class IconCollector {
     public static void extractIcons(String srcXml, String imagePath, String destdir) throws Exception {
         Path imagePathPath = Path.of(imagePath);

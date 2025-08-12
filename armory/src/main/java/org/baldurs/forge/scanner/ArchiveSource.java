@@ -1,33 +1,20 @@
 package org.baldurs.forge.scanner;
 
-import java.util.Map;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.baldurs.archivist.PackageReader;
 import org.baldurs.archivist.LS.Converter;
-import org.baldurs.forge.model.StatModel;
-import org.baldurs.forge.scanner.ArchiveSource;
-import org.baldurs.forge.scanner.BaldursArchive;
-import org.baldurs.forge.scanner.ModuleInfo;
-import org.baldurs.forge.scanner.RootTemplate;
-import org.baldurs.forge.scanner.StatsArchive;
-
-import io.quarkus.logging.Log;
-
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.quarkus.logging.Log;
 
 public class ArchiveSource {
     public String name;
