@@ -17,7 +17,7 @@ public class ChatService {
     public static final String CHAT_FRAME = "chatFrame";
 
     @Inject
-    BaldursForgeChat chat;
+    MainMenuChat chat;
 
     @Inject
     ClientMemoryStore memoryStore;
@@ -28,14 +28,14 @@ public class ChatService {
     @Inject
     RenderService render;
 
-    Map<String, BaldursChat> chatFrames = new HashMap<>();
+    Map<String, ChatFrame> chatFrames = new HashMap<>();
 
     @PostConstruct
     public void init() {
         chatFrames.put(BodyArmorBuilder.class.getName(), bodyArmorBuilder);
     }
 
-    public void setChatFrame(ChatContext context, Class<? extends BaldursChat> chatFrame) {
+    public void setChatFrame(ChatContext context, Class<? extends ChatFrame> chatFrame) {
         Log.info("Setting chat frame: " + chatFrame.getName());
         context.setShared(CHAT_FRAME, chatFrame.getName());
     }
@@ -62,6 +62,7 @@ public class ChatService {
         }
         else {
             Log.error("Unknown chat frame: " + chatFrame);
+            popChatFrame(context);
             context.response().add(new MessageAction("I'm having issues at the moment. Can you retry or rephrase your request?"));
         }
 

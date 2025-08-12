@@ -2,7 +2,7 @@ package org.baldurs.forge.builder;
 
 import java.util.List;
 
-import org.baldurs.forge.chat.BaldursChat;
+import org.baldurs.forge.chat.ChatFrame;
 import org.baldurs.forge.chat.ChatService;
 import org.baldurs.forge.chat.MessageAction;
 import org.baldurs.forge.chat.RenderService;
@@ -28,7 +28,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 @ApplicationScoped
-public class BodyArmorBuilder implements BaldursChat {
+public class BodyArmorBuilder implements ChatFrame {
     private static final String CURRENT_BODY_ARMOR = "currentBodyArmor";
 
     @Inject
@@ -44,6 +44,12 @@ public class BodyArmorBuilder implements BaldursChat {
 
     @Inject
     RenderService renderer;
+    
+    @Inject
+    BoostService boostService;
+
+    @Inject
+    LibraryService library;
 
 
     @PostConstruct
@@ -70,11 +76,6 @@ public class BodyArmorBuilder implements BaldursChat {
         return html;
     }
 
-    @Inject
-    BoostService boostService;
-
-    @Inject
-    LibraryService library;
 
     public void addShowEquipmentAction(BodyArmorModel armor) {
         if (armor == null || armor.type == null) {

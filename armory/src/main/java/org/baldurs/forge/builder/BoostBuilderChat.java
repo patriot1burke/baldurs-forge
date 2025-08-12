@@ -1,6 +1,6 @@
 package org.baldurs.forge.builder;
 
-import org.baldurs.forge.chat.BaldursChat;
+import org.baldurs.forge.chat.ChatFrame;
 import org.baldurs.forge.context.MessageWindowClientMemoryProvider;
 
 import dev.langchain4j.agent.tool.Tool;
@@ -13,7 +13,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 @RegisterAiService(chatMemoryProviderSupplier = MessageWindowClientMemoryProvider.class)
-public interface BoostBuilderChat extends BaldursChat {
+public interface BoostBuilderChat extends ChatFrame {
 
     @SystemMessage(fromResource = "prompts/nl2boost.txt")
     @Tool(name="createBoostMacro", value="Translates a boost description into a boost macro.  Boosts add abilities and stat bonuses and enchantments to items.")

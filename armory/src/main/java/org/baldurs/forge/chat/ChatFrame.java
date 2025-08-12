@@ -1,6 +1,6 @@
 package org.baldurs.forge.chat;
 
-public interface BaldursChat {
+public interface ChatFrame {
 
     String chat(String memoryId, String message);
 
