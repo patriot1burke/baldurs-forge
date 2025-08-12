@@ -1,14 +1,12 @@
 package org.baldurs.forge.agents;
 
-import jakarta.enterprise.context.ApplicationScoped;
-
 import org.baldurs.forge.model.EquipmentSlot;
 import org.baldurs.forge.model.EquipmentType;
 
-import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.RegisterAiService;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 @RegisterAiService(chatLanguageModelSupplier = StrictJsonSchemaChatModelProvider.class)

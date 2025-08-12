@@ -15,19 +15,15 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.baldurs.archivist.PackageReader;
-import org.baldurs.archivist.LS.Converter;
 import org.baldurs.forge.model.StatModel;
 import org.baldurs.forge.scanner.ArchiveSource;
 import org.baldurs.forge.scanner.BaldursArchive;
-import org.baldurs.forge.scanner.ModuleInfo;
 import org.baldurs.forge.scanner.RootTemplate;
 import org.baldurs.forge.scanner.StatsArchive;
 import org.baldurs.forge.scanner.StatsArchive.Stat;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import dev.langchain4j.agent.tool.P;
-import dev.langchain4j.agent.tool.Tool;
 import io.quarkus.logging.Log;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;

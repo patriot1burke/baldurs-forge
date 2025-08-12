@@ -96,7 +96,6 @@ public class SpellService {
             BoostWriter boostWriter = boostService.text();
             StatsArchive.Stat stat = libraryService.archive().stats.getByName(item.id());
             boostService.stat(stat, boostWriter);
-            String boost = boostWriter.toString();
             Metadata metadata = Metadata.from(Map.of(
                     "id", item.id(),
                     "type", "Spell"));

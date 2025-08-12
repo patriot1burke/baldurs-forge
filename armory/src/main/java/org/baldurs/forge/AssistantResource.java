@@ -9,9 +9,6 @@ import java.util.UUID;
 
 import org.baldurs.forge.chat.ChatService;
 import org.baldurs.forge.context.ChatContext;
-import org.baldurs.forge.nli.ToolBoxNLI;
-import org.baldurs.forge.nli.ToolBoxNLIInvoker;
-import org.baldurs.forge.services.BoostService;
 import org.baldurs.forge.services.EquipmentDB;
 import org.baldurs.forge.services.LibraryService;
 import org.jboss.logging.Logger;
@@ -21,7 +18,6 @@ import org.jboss.resteasy.reactive.multipart.FileUpload;
 import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -45,24 +41,11 @@ public class AssistantResource {
 	ChatService chat;
 	
 
-	/**
-	 * Executes a natural language query and feeds back data into the LLM to provide a natural language response.
-	 */
 	@POST
 	@Path("/ask")
 	@Produces(MediaType.TEXT_PLAIN)
 	public ChatContext naturalLanguage(ChatContext context) throws Exception {
-		/* 
-		List<EquipmentModel> items = equipmentDB.search(query);
 
-        String response = "";
-        if (items.isEmpty()) {
-            response = "I couldn't find any items that match your query.";
-        } else {
-           response = forgeAgent.queryEquipment(query, EquipmentModel.toJson(items));
-		   LOG.info("RESPONSE:\n " + response + "\n");
-        }
-		*/
 		Log.info("CHAT: " + context.memoryId());
 		chat.chat(context);
 		return context;

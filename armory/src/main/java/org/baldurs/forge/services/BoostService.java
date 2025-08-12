@@ -3,15 +3,10 @@ package org.baldurs.forge.services;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
 
 import org.baldurs.forge.scanner.StatsArchive;
-import org.baldurs.forge.services.MacroService.Macro;
 
-import dev.langchain4j.agent.tool.Tool;
-import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 

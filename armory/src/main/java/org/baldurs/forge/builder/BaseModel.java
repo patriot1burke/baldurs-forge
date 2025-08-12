@@ -1,13 +1,10 @@
 package org.baldurs.forge.builder;
 
-import java.util.Optional;
-
 import org.baldurs.forge.model.Rarity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
-import dev.langchain4j.model.chat.request.json.JsonSchema;
 import dev.langchain4j.model.output.structured.Description;
 import dev.langchain4j.service.output.JsonSchemas;
 

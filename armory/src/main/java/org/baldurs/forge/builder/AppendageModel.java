@@ -1,21 +1,10 @@
 package org.baldurs.forge.builder;
 
-import java.util.List;
-import java.util.Set;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import org.baldurs.forge.model.Rarity;
 
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.output.structured.Description;
 import dev.langchain4j.service.output.JsonSchemas;
-
-import org.baldurs.forge.model.Equipment;
-import org.baldurs.forge.model.EquipmentSlot;
-import org.baldurs.forge.model.EquipmentType;
-import org.baldurs.forge.model.Rarity;
 
 public class AppendageModel extends BaseModel {
     @Description("The armor category.  Can be None, Light, Medium, or Heavy.")

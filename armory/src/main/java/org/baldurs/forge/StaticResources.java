@@ -1,14 +1,13 @@
 package org.baldurs.forge;
 
-import io.quarkus.logging.Log;
+import org.baldurs.forge.services.LibraryService;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
 import io.quarkus.vertx.web.Route;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.FileSystemAccess;
 import io.vertx.ext.web.handler.StaticHandler;
 import jakarta.inject.Inject;
-
-import org.baldurs.forge.services.LibraryService;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 public class StaticResources {
 

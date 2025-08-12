@@ -1,28 +1,20 @@
 package org.baldurs.forge.builder;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import org.baldurs.forge.model.Rarity;
 
-import dev.langchain4j.model.output.structured.Description;
-import dev.langchain4j.service.output.JsonSchemas;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
-
-import org.baldurs.forge.model.Equipment;
-import org.baldurs.forge.model.EquipmentSlot;
-import org.baldurs.forge.model.EquipmentType;
-import org.baldurs.forge.model.Rarity;
+import dev.langchain4j.model.output.structured.Description;
+import dev.langchain4j.service.output.JsonSchemas;
 
 public class BodyArmorModel extends BaseModel {
     @Description("The type of body armor")
