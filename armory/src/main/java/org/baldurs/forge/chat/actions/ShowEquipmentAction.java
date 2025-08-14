@@ -4,7 +4,7 @@ import org.baldurs.forge.chat.Action;
 import org.baldurs.forge.model.EquipmentModel;
 
 public class ShowEquipmentAction extends Action {
-    EquipmentModel equipment;
+    protected EquipmentModel equipment;
 
     public ShowEquipmentAction(EquipmentModel equipment) {
         super("ShowEquipment");

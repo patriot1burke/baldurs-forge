@@ -1,7 +1,7 @@
 package org.baldurs.forge.chat;
 
 public class Action {
-    String type;
+    protected String type;
 
     public Action(String name) {
         this.type = name;

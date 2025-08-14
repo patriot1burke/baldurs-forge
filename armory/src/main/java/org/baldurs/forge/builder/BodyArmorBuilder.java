@@ -1,10 +1,12 @@
 package org.baldurs.forge.builder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.baldurs.forge.chat.ChatFrame;
 import org.baldurs.forge.chat.ChatService;
-import org.baldurs.forge.chat.MessageAction;
+import org.baldurs.forge.chat.actions.MessageAction;
+import org.baldurs.forge.chat.actions.UpdateNewEquipmentAction;
 import org.baldurs.forge.chat.RenderService;
 import org.baldurs.forge.chat.actions.ShowEquipmentAction;
 import org.baldurs.forge.context.ChatContext;
@@ -18,6 +20,7 @@ import org.baldurs.forge.services.LibraryService;
 import org.baldurs.forge.services.BoostService.BoostWriter;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.langchain4j.agent.tool.Tool;
@@ -30,6 +33,7 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class BodyArmorBuilder implements ChatFrame {
     private static final String CURRENT_BODY_ARMOR = "currentBodyArmor";
+    private static final String NEW_BODY_ARMOR = "newBodyArmor";
 
     @Inject
     ArmorBuilderChat agent;
@@ -156,6 +160,13 @@ public class BodyArmorBuilder implements ChatFrame {
         addShowEquipmentAction(current);
         chatService.popChatFrame(context);
         context.setShared(CURRENT_BODY_ARMOR, null);
+        List<BodyArmorModel> bodyArmors = context.getShared(NEW_BODY_ARMOR, new TypeReference<List<BodyArmorModel>>() {});
+        if (bodyArmors == null) {
+            bodyArmors = new ArrayList<>();
+        }
+        bodyArmors.add(current);
+        context.setShared(NEW_BODY_ARMOR, bodyArmors);
+        context.response().add(new UpdateNewEquipmentAction("To create and export a mod containing your newly built body armor, tell me to 'Export mod'"));
         Log.info("Finishing body armor");
         String armorJson = logBodyArmorJson(current);
         return armorJson;

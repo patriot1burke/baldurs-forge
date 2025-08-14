@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.baldurs.forge.builder.BodyArmorBuilder;
 import org.baldurs.forge.chat.actions.ListEquipmentAction;
+import org.baldurs.forge.chat.actions.MessageAction;
 import org.baldurs.forge.chat.actions.ShowEquipmentAction;
 import org.baldurs.forge.context.ChatContext;
 import org.baldurs.forge.model.EquipmentModel;

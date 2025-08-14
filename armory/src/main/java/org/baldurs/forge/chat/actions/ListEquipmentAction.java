@@ -6,7 +6,7 @@ import org.baldurs.forge.chat.Action;
 import org.baldurs.forge.model.EquipmentModel;
 
 public  class ListEquipmentAction extends Action {
-    List<EquipmentModel> equipment;
+    protected List<EquipmentModel> equipment;
 
     public ListEquipmentAction(List<EquipmentModel> equipment) {
         super("ListEquipment");

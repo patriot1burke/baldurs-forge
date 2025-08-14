@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.baldurs.forge.builder.BodyArmorBuilder;
+import org.baldurs.forge.chat.actions.MessageAction;
 import org.baldurs.forge.context.ChatContext;
 import org.baldurs.forge.context.ClientMemoryStore;
 
