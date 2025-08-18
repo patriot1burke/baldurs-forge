@@ -8,6 +8,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
+
 /**
  * Binary utilities for reading/writing binary data
  * Ported from C# BinUtils.cs
@@ -241,7 +242,7 @@ public class BinUtils {
     /**
      * Write an attribute to a BinaryWriter
      */
-    public static void writeAttribute(DataOutputStream writer, NodeAttribute attr) throws IOException {
+    public static void writeAttribute(DataOutput writer, NodeAttribute attr) throws IOException {
         switch (attr.getType()) {
             case None:
                 break;
@@ -255,7 +256,7 @@ public class BinUtils {
                 break;
                 
             case UShort:
-                writer.writeShort((Integer) attr.getValue());
+                writer.writeShort((Short) attr.getValue());
                 break;
                 
             case Int:
@@ -263,7 +264,7 @@ public class BinUtils {
                 break;
                 
             case UInt:
-                writer.writeInt((int) ((Long) attr.getValue() & 0xFFFFFFFFL));
+                writer.writeInt((Integer) attr.getValue());
                 break;
                 
             case Float:
@@ -310,8 +311,7 @@ public class BinUtils {
                 break;
                 
             case ULongLong:
-                writer.writeLong((Long) attr.getValue());
-                break;
+                throw new InvalidFormatException("ULongLong is not supported");
                 
             case Long:
             case Int64:

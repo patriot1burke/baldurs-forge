@@ -17,12 +17,16 @@ import org.baldurs.archivist.LS.Node;
 import org.baldurs.archivist.LS.Region;
 import org.baldurs.archivist.LS.Resource;
 import org.baldurs.archivist.LS.Resources.LSF.LSFReader;
+import org.baldurs.archivist.LS.Resources.LSF.LSFWriter;
 import org.baldurs.archivist.LS.Resources.LSX.LSXReader;
 import org.baldurs.archivist.LS.Resources.LSX.LSXWriter;
     
 public class LSFTest {
     @Test
-    public void testLSF() throws Exception {
+    public void testLSFtoLSX() throws Exception {
+        System.out.println("////////////////////////////////////////////////");
+        System.out.println("////////////////////////////////////////////////");
+        System.out.println("testLSFtoLSX");
         URL resourceUrl = getClass().getClassLoader().getResource("merged.lsf");
         Path resourcePath = Paths.get(resourceUrl.toURI());
         assertTrue(resourcePath.toFile().exists());
@@ -57,5 +61,56 @@ public class LSFTest {
                 assertEquals(children1.size(), children2.size());
             }
         }
-     }   
+     }
+     
+     @Test
+     public void testLSFWriter() throws Exception {
+        System.out.println("////////////////////////////////////////////////");
+        System.out.println("testLSFWriter");
+        System.out.println("////////////////////////////////////////////////");
+        URL resourceUrl = getClass().getClassLoader().getResource("merged.lsf");
+        Path resourcePath = Paths.get(resourceUrl.toURI());
+        assertTrue(resourcePath.toFile().exists());
+        LSFReader reader = new LSFReader(resourcePath);
+        Resource resource = reader.read();
+        Path lsfPath = resourcePath.resolveSibling("merged2.lsf");
+        LSFWriter lsfWriter = new LSFWriter(new FileOutputStream(lsfPath.toFile()));
+        lsfWriter.write(resource);
+
+        System.out.flush();
+        System.out.println("************************************************");
+        System.out.println("************************************************"); 
+        System.out.println("************************************************"); 
+        System.out.println("************************************************"); 
+        System.out.println("************************************************"); 
+        System.out.flush();
+
+        LSFReader lsfReader = new LSFReader(lsfPath);
+        System.out.flush();
+        System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++");
+        Resource resource3 = lsfReader.read();
+        System.out.println("------------------------------------------------");
+        System.out.println("------------------------------------------------"); 
+        assertEquals(resource.metadataFormat, resource3.metadataFormat);
+        assertEquals(resource.metadata.majorVersion, resource3.metadata.majorVersion);
+        assertEquals(resource.metadata.minorVersion, resource3.metadata.minorVersion);
+        assertEquals(resource.metadata.revision, resource3.metadata.revision);
+        assertEquals(resource.metadata.buildNumber, resource3.metadata.buildNumber);
+        assertEquals(resource.metadata.timestamp, resource3.metadata.timestamp);
+        assertEquals(resource.metadataFormat, resource3.metadataFormat);
+        assertTrue(resource.regions.size() == resource3.regions.size());
+        assertTrue(resource.regions.keySet().containsAll(resource3.regions.keySet()));
+        for (String regionName : resource.regions.keySet()) {
+            Region region1 = resource.regions.get(regionName);
+            Region region2 = resource3.regions.get(regionName);
+            assertEquals(region1.regionName, region2.regionName);
+            assertEquals(region1.children.size(), region2.children.size());
+            assertTrue(region1.children.keySet().containsAll(region2.children.keySet()));
+            for (String childName : region1.children.keySet()) {
+                List<Node> children1 = region1.children.get(childName);
+                List<Node> children2 = region2.children.get(childName);
+                assertEquals(children1.size(), children2.size());
+            }
+        }
+     }
 } 

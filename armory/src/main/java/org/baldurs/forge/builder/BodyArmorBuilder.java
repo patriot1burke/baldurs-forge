@@ -33,10 +33,9 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class BodyArmorBuilder implements ChatFrame {
     private static final String CURRENT_BODY_ARMOR = "currentBodyArmor";
-    private static final String NEW_BODY_ARMOR = "newBodyArmor";
 
     @Inject
-    ArmorBuilderChat agent;
+    EquipmentBuilderChat agent;
 
     @Inject
     ChatContext context;
@@ -160,12 +159,15 @@ public class BodyArmorBuilder implements ChatFrame {
         addShowEquipmentAction(current);
         chatService.popChatFrame(context);
         context.setShared(CURRENT_BODY_ARMOR, null);
-        List<BodyArmorModel> bodyArmors = context.getShared(NEW_BODY_ARMOR, new TypeReference<List<BodyArmorModel>>() {});
-        if (bodyArmors == null) {
-            bodyArmors = new ArrayList<>();
+        NewModModel newEquipment = context.getShared(NewModModel.NEW_EQUIPMENT, NewModModel.class);
+        if (newEquipment == null) {
+            newEquipment = new NewModModel();
         }
-        bodyArmors.add(current);
-        context.setShared(NEW_BODY_ARMOR, bodyArmors);
+        if (newEquipment.bodyArmors == null) {
+            newEquipment.bodyArmors = new ArrayList<>();
+        }
+        newEquipment.bodyArmors.add(current);
+        context.setShared(NewModModel.NEW_EQUIPMENT, newEquipment);
         context.response().add(new UpdateNewEquipmentAction("To create and export a mod containing your newly built body armor, tell me to 'Export mod'"));
         Log.info("Finishing body armor");
         String armorJson = logBodyArmorJson(current);

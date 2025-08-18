@@ -9,6 +9,8 @@ import java.util.*;
 import org.baldurs.archivist.LS.*;
 import org.baldurs.archivist.LS.Enums.*;
 
+import com.google.common.io.LittleEndianDataOutputStream;
+
 /**
  * LSF (Larian Save Format) writer
  * Ported from C# LSFWriter.cs
@@ -18,23 +20,23 @@ public class LSFWriter implements AutoCloseable {
     private static final int STRING_HASH_MAP_SIZE = 0x200;
     
     private final OutputStream stream;
-    private DataOutputStream writer;
+    private LittleEndianDataOutputStream writer;
     private LSMetadata meta;
     
     private ByteArrayOutputStream nodeStream;
-    private DataOutputStream nodeWriter;
+    private LittleEndianDataOutputStream nodeWriter;
     private int nextNodeIndex = 0;
     private Map<Node, Integer> nodeIndices;
     
     private ByteArrayOutputStream attributeStream;
-    private DataOutputStream attributeWriter;
+    private LittleEndianDataOutputStream attributeWriter;
     private int nextAttributeIndex = 0;
     
     private ByteArrayOutputStream valueStream;
-    private DataOutputStream valueWriter;
+    private LittleEndianDataOutputStream valueWriter;
     
     private ByteArrayOutputStream keyStream;
-    private DataOutputStream keyWriter;
+    private LittleEndianDataOutputStream keyWriter;
     
     private List<List<String>> stringHashMap;
     private List<Integer> nextSiblingIndices;
@@ -57,15 +59,15 @@ public class LSFWriter implements AutoCloseable {
         
         meta = resource.metadata;
         
-        this.writer = new DataOutputStream(stream);
+        this.writer = new LittleEndianDataOutputStream(stream);
         this.nodeStream = new ByteArrayOutputStream();
-        this.nodeWriter = new DataOutputStream(nodeStream);
+        this.nodeWriter = new LittleEndianDataOutputStream(nodeStream);
         this.attributeStream = new ByteArrayOutputStream();
-        this.attributeWriter = new DataOutputStream(attributeStream);
+        this.attributeWriter = new LittleEndianDataOutputStream(attributeStream);
         this.valueStream = new ByteArrayOutputStream();
-        this.valueWriter = new DataOutputStream(valueStream);
+        this.valueWriter = new LittleEndianDataOutputStream(valueStream);
         this.keyStream = new ByteArrayOutputStream();
-        this.keyWriter = new DataOutputStream(keyStream);
+        this.keyWriter = new LittleEndianDataOutputStream(keyStream);
         
         try {
             
@@ -86,7 +88,7 @@ public class LSFWriter implements AutoCloseable {
             
             byte[] stringBuffer = null;
             try (ByteArrayOutputStream stringStream = new ByteArrayOutputStream();
-                 DataOutputStream stringWriter = new DataOutputStream(stringStream)) {
+                 LittleEndianDataOutputStream stringWriter = new LittleEndianDataOutputStream(stringStream)) {
                 writeStaticStrings(stringWriter);
                 stringBuffer = stringStream.toByteArray();
             }
@@ -137,6 +139,10 @@ public class LSFWriter implements AutoCloseable {
                 meta.nodesUncompressedSize = nodeBuffer.length;
                 meta.attributesUncompressedSize = attributeBuffer.length;
                 meta.valuesUncompressedSize = valueBuffer.length;
+                //System.out.println("meta.stringsUncompressedSize: " + meta.stringsUncompressedSize);
+                //System.out.println("meta.nodesUncompressedSize: " + meta.nodesUncompressedSize);
+                //System.out.println("meta.attributesUncompressedSize: " + meta.attributesUncompressedSize);
+                //System.out.println("meta.valuesUncompressedSize: " + meta.valuesUncompressedSize);
                 
                 if (compression == CompressionMethod.None) {
                     meta.stringsSizeOnDisk = 0;
@@ -163,6 +169,11 @@ public class LSFWriter implements AutoCloseable {
                 meta.nodesUncompressedSize = nodeBuffer.length;
                 meta.attributesUncompressedSize = attributeBuffer.length;
                 meta.valuesUncompressedSize = valueBuffer.length;
+                //System.out.println("meta.stringsUncompressedSize: " + meta.stringsUncompressedSize);
+                //System.out.println("meta.keysUncompressedSize: " + meta.keysUncompressedSize);
+                //System.out.println("meta.nodesUncompressedSize: " + meta.nodesUncompressedSize);
+                //System.out.println("meta.attributesUncompressedSize: " + meta.attributesUncompressedSize);
+                //System.out.println("meta.valuesUncompressedSize: " + meta.valuesUncompressedSize);
                 
                 if (compression == CompressionMethod.None) {
                     meta.stringsSizeOnDisk = 0;
@@ -236,6 +247,12 @@ public class LSFWriter implements AutoCloseable {
     
     private void writeRegions(Resource resource) throws IOException {
         nextNodeIndex = 0;
+        if (version.getValue() >= LSFVersion.VER_EXTENDED_NODES.getValue() 
+                && metadataFormat == LSFMetadataFormat.KEYS_AND_ADJACENCY) {
+            //System.out.println("writing regions V3");
+        } else {
+            //System.out.println("writing regions V2");
+        }
         for (Region region : resource.regions.values()) {
             if (version.getValue() >= LSFVersion.VER_EXTENDED_NODES.getValue() 
                 && metadataFormat == LSFMetadataFormat.KEYS_AND_ADJACENCY) {
@@ -359,7 +376,7 @@ public class LSFWriter implements AutoCloseable {
         writeNodeChildren(node);
     }
     
-    private void writeTranslatedFSString(DataOutputStream writer, TranslatedFSString fs) throws IOException {
+    private void writeTranslatedFSString(LittleEndianDataOutputStream writer, TranslatedFSString fs) throws IOException {
         if (version.getValue() >= LSFVersion.VER_BG3.getValue() ||
             (meta.majorVersion > 4 ||
             (meta.majorVersion == 4 && meta.revision > 0) ||
@@ -379,7 +396,7 @@ public class LSFWriter implements AutoCloseable {
         }
     }
     
-    private void writeAttributeValue(DataOutputStream writer, NodeAttribute attr) throws IOException {
+    private void writeAttributeValue(LittleEndianDataOutputStream writer, NodeAttribute attr) throws IOException {
         switch (attr.getType()) {
             case String:
             case Path:
@@ -393,7 +410,7 @@ public class LSFWriter implements AutoCloseable {
             case TranslatedString:
                 TranslatedString ts = (TranslatedString) attr.getValue();
                 if (version.getValue() >= LSFVersion.VER_BG3.getValue()) {
-                    writer.writeInt(ts.version);
+                    writer.writeShort(ts.version);
                 } else {
                     writeStringWithLength(writer, ts.value != null ? ts.value : "");
                 }
@@ -429,7 +446,7 @@ public class LSFWriter implements AutoCloseable {
         return (bucket << 16) | (stringHashMap.get(bucket).size() - 1);
     }
     
-    private void writeStaticStrings(DataOutputStream writer) throws IOException {
+    private void writeStaticStrings(LittleEndianDataOutputStream writer) throws IOException {
         writer.writeInt(stringHashMap.size());
         for (List<String> entry : stringHashMap) {
             writer.writeShort(entry.size());
@@ -439,26 +456,26 @@ public class LSFWriter implements AutoCloseable {
         }
     }
     
-    private void writeStaticString(DataOutputStream writer, String s) throws IOException {
+    private void writeStaticString(LittleEndianDataOutputStream writer, String s) throws IOException {
         byte[] utf = s.getBytes(StandardCharsets.UTF_8);
         writer.writeShort(utf.length);
         writer.write(utf);
     }
     
-    private void writeStringWithLength(DataOutputStream writer, String s) throws IOException {
+    private void writeStringWithLength(LittleEndianDataOutputStream writer, String s) throws IOException {
         byte[] utf = s.getBytes(StandardCharsets.UTF_8);
         writer.writeInt(utf.length + 1);
         writer.write(utf);
         writer.write(0);
     }
     
-    private void writeString(DataOutputStream writer, String s) throws IOException {
+    private void writeString(LittleEndianDataOutputStream writer, String s) throws IOException {
         byte[] utf = s.getBytes(StandardCharsets.UTF_8);
         writer.write(utf);
         writer.write(0);
     }
     
-    private void writeStruct(DataOutputStream writer, Object struct) throws IOException {
+    private void writeStruct(LittleEndianDataOutputStream writer, Object struct) throws IOException {
         // This is a simplified version - in a real implementation, you'd use reflection
         // or generate specific write methods for each struct type
         if (struct instanceof LSFMagic) {
@@ -481,46 +498,46 @@ public class LSFWriter implements AutoCloseable {
             writer.writeInt(meta.attributesSizeOnDisk);
             writer.writeInt(meta.valuesUncompressedSize);
             writer.writeInt(meta.valuesSizeOnDisk);
-            writer.writeInt(meta.compressionFlags);
-            writer.writeInt(meta.unknown2);
-            writer.writeInt(meta.unknown3);
+            writer.writeByte(meta.compressionFlags);
+            writer.writeByte(meta.unknown2);
+            writer.writeShort(meta.unknown3);
             writer.writeInt(meta.metadataFormat.getValue());
         } else if (struct instanceof LSFMetadataV6) {
             LSFMetadataV6 meta = (LSFMetadataV6) struct;
             writer.writeInt(meta.stringsUncompressedSize);
-            writer.writeInt(meta.keysUncompressedSize);
-            writer.writeInt(meta.nodesUncompressedSize);
-            writer.writeInt(meta.attributesUncompressedSize);
-            writer.writeInt(meta.valuesUncompressedSize);
             writer.writeInt(meta.stringsSizeOnDisk);
+            writer.writeInt(meta.keysUncompressedSize);
             writer.writeInt(meta.keysSizeOnDisk);
+            writer.writeInt(meta.nodesUncompressedSize);
             writer.writeInt(meta.nodesSizeOnDisk);
+            writer.writeInt(meta.attributesUncompressedSize);
             writer.writeInt(meta.attributesSizeOnDisk);
+            writer.writeInt(meta.valuesUncompressedSize);
             writer.writeInt(meta.valuesSizeOnDisk);
-            writer.writeInt(meta.compressionFlags);
-            writer.writeInt(meta.unknown2);
-            writer.writeInt(meta.unknown3);
+            writer.writeByte(meta.compressionFlags);
+            writer.writeByte(meta.unknown2);
+            writer.writeShort(meta.unknown3);
             writer.writeInt(meta.metadataFormat.getValue());
         } else if (struct instanceof LSFNodeEntryV2) {
             LSFNodeEntryV2 node = (LSFNodeEntryV2) struct;
-            writer.writeInt(node.parentIndex);
             writer.writeInt(node.nameHashTableIndex);
             writer.writeInt(node.firstAttributeIndex);
+            writer.writeInt(node.parentIndex);
         } else if (struct instanceof LSFNodeEntryV3) {
             LSFNodeEntryV3 node = (LSFNodeEntryV3) struct;
-            writer.writeInt(node.parentIndex);
             writer.writeInt(node.nameHashTableIndex);
+            writer.writeInt(node.parentIndex);
             writer.writeInt(node.nextSiblingIndex);
             writer.writeInt(node.firstAttributeIndex);
         } else if (struct instanceof LSFAttributeEntryV2) {
             LSFAttributeEntryV2 attr = (LSFAttributeEntryV2) struct;
-            writer.writeInt(attr.typeAndLength);
             writer.writeInt(attr.nameHashTableIndex);
+            writer.writeInt(attr.typeAndLength);
             writer.writeInt(attr.nodeIndex);
         } else if (struct instanceof LSFAttributeEntryV3) {
             LSFAttributeEntryV3 attr = (LSFAttributeEntryV3) struct;
-            writer.writeInt(attr.typeAndLength);
             writer.writeInt(attr.nameHashTableIndex);
+            writer.writeInt(attr.typeAndLength);
             writer.writeInt(attr.nextAttributeIndex);
             writer.writeInt(attr.offset);
         } else if (struct instanceof LSFKeyEntry) {

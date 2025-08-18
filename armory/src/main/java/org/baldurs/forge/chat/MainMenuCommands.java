@@ -3,6 +3,7 @@ package org.baldurs.forge.chat;
 import java.util.List;
 
 import org.baldurs.forge.builder.BodyArmorBuilder;
+import org.baldurs.forge.builder.ModPackager;
 import org.baldurs.forge.chat.actions.ListEquipmentAction;
 import org.baldurs.forge.chat.actions.MessageAction;
 import org.baldurs.forge.chat.actions.ShowEquipmentAction;
@@ -33,7 +34,8 @@ public class MainMenuCommands {
     @Inject
     LibraryService library;
 
- 
+    @Inject
+    ModPackager modPackager;
 
    
 
@@ -76,5 +78,11 @@ public class MainMenuCommands {
             context.response().add(new MessageAction(values));
             return "Query was successful";
         }
+    }
+
+    @Tool("Package mod with any new equipment the user has created.")
+    public String packageMod() {
+        Log.info("packageMod");
+        return modPackager.chat(context.memoryId(), context.userMessage());
     }
 }

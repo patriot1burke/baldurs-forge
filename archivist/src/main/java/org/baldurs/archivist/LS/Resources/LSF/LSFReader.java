@@ -108,7 +108,7 @@ public class LSFReader implements AutoCloseable {
                 buffer.get(bytes);
                 String name = new String(bytes, StandardCharsets.UTF_8);
                 hash.add(name);
-                // System.out.printf("%3X/%d: %s%n", names.size() - 1, hash.size() - 1, name);
+                //System.out.printf("%3X/%d: %s%n", names.size() - 1, hash.size() - 1, name);
             }
         }
     }
@@ -117,11 +117,13 @@ public class LSFReader implements AutoCloseable {
      * Reads the structure headers for the LSOF resource
      */
     private void readNodes(ByteBuffer buffer, boolean longNodes) throws IOException {
-        if (DEBUG_LSF_SERIALIZATION) {
-            System.out.println(" ----- DUMP OF NODE TABLE -----");
-        }
 
         int index = 0;
+        if (longNodes) {
+            //System.out.println("reading nodes V3");
+        } else {
+            //System.out.println("reading nodes V2");
+        }
 
         while (buffer.hasRemaining()) {
             //System.out.println("Adding node " + index);
@@ -150,13 +152,14 @@ public class LSFReader implements AutoCloseable {
             nodes.add(resolved);
             index++;
         }
+        //System.out.println("nodes.size(): " + nodes.size());
     }
 
     /**
      * Reads the V2 attribute headers for the LSOF resource
      */
     private void readAttributesV2(ByteBuffer buffer) throws IOException {
-
+        //System.out.println("reading attributesV2");
         if (DEBUG_LSF_SERIALIZATION) {
             List<LSFAttributeEntryV2> rawAttributes = new ArrayList<>();
         }
@@ -203,6 +206,7 @@ public class LSFReader implements AutoCloseable {
      * Reads the V3 attribute headers for the LSOF resource
      */
     private void readAttributesV3(ByteBuffer buffer) throws IOException {
+        //System.out.println("reading attributesV3");
 
         while (buffer.hasRemaining()) {
             LSFAttributeEntryV3 attribute = LSFAttributeEntryV3.fromBuffer(buffer);
@@ -223,10 +227,6 @@ public class LSFReader implements AutoCloseable {
      * Reads the key attribute definitions
      */
     private void readKeys(ByteBuffer buffer) throws IOException {
-
-        if (DEBUG_LSF_SERIALIZATION) {
-            System.out.println(" ----- DUMP OF KEY TABLE -----");
-        }
 
         while (buffer.hasRemaining()) {
             LSFKeyEntry key = LSFKeyEntry.fromBuffer(buffer);
@@ -355,6 +355,9 @@ public class LSFReader implements AutoCloseable {
         //System.out.println("attributesSizeOnDisk: " + metadata.attributesSizeOnDisk);
         //System.out.println("attributesUncompressedSize: " + metadata.attributesUncompressedSize);
         //System.out.println("valuesSizeOnDisk: " + metadata.valuesSizeOnDisk);
+        //System.out.println("valuesUncompressedSize: " + metadata.valuesUncompressedSize);
+        //System.out.println("keysSizeOnDisk: " + metadata.keysSizeOnDisk);
+        //System.out.println("keysUncompressedSize: " + metadata.keysUncompressedSize);
         //System.out.println("--------------------------------");
         names = new ArrayList<>();
         //System.out.println("reading names");
@@ -409,7 +412,7 @@ public class LSFReader implements AutoCloseable {
 
     private void readRegions(Resource resource, ByteBuffer attrReader) throws IOException {
         nodeInstances = new ArrayList<>();
-        //System.out.println("nodes.size(): " + nodes.size());
+        //System.out.println("READ REGIONS: nodes.size(): " + nodes.size());
  
         for (int i = 0; i < nodes.size(); i++) {
             //System.out.println("i: " + i);
@@ -437,6 +440,7 @@ public class LSFReader implements AutoCloseable {
                 nodeInstances.add(node);
             }
         }
+        //System.out.println("FINISHEDREAD REGIONS: nodeInstances.size(): " + nodeInstances.size());
     }
 
     private void readNode(LSFNodeInfo defn, Node node, ByteBuffer attributeReader) throws IOException {
