@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <save>
   <version major="4" minor="0" revision="9" build="328"/>
-  <region id="REPLACE">
-    <node id="root">
+  <region id="Templates">
+    <node id="Templates">
       <children>
+{GAME_OBJECTS}
       </children>
     </node>
   </region>

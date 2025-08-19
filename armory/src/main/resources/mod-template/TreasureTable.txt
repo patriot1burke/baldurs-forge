@@ -1,0 +1,3 @@
+treasure itemtypes "Common","Uncommon","Rare","Epic","Legendary","Divine","Unique"
+new treasuretable "Gabe_ItemBagTT"
+CanMerge 1

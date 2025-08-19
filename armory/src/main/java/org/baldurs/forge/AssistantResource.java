@@ -1,5 +1,6 @@
 package org.baldurs.forge;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,6 +8,8 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
+import org.baldurs.forge.builder.ModPackager;
+import org.baldurs.forge.builder.NewModModel;
 import org.baldurs.forge.chat.ChatService;
 import org.baldurs.forge.context.ChatContext;
 import org.baldurs.forge.services.EquipmentDB;
@@ -143,6 +146,21 @@ public class AssistantResource {
 				.entity("{\"error\": \"Failed to upload file: " + e.getMessage() + "\"}")
 				.build();
 		}
+	}
+
+	@Inject
+	ModPackager modPackager;
+
+	@POST
+	@Path("/package-mod")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response packageMod(NewModModel newMod) throws Exception {
+		LOG.info("Packaging mod");
+		File file = modPackager.packageMod(newMod);
+		return Response.ok(file)
+			.header("Content-Disposition", "attachment; filename=" + file.getName())
+			.build();
 	}
 
 

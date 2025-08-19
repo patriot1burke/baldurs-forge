@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import org.baldurs.archivist.LS.Converter;
 import org.baldurs.archivist.LS.Node;
 import org.baldurs.archivist.LS.Region;
 import org.baldurs.archivist.LS.Resource;
@@ -112,5 +113,12 @@ public class LSFTest {
                 assertEquals(children1.size(), children2.size());
             }
         }
+     }
+     @Test
+     public void test2() throws Exception {
+        URL resourceUrl = getClass().getClassLoader().getResource("test2.lsx");
+        Path resourcePath = Paths.get(resourceUrl.toURI());
+        Converter.lsxToLsf(resourcePath, resourcePath.resolveSibling("test2.lsf"));
+
      }
 } 

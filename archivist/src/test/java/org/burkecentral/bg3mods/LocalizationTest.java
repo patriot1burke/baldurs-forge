@@ -27,4 +27,13 @@ public class LocalizationTest {
         writer.write(resource);
     }
 
+    @Test
+    public void testXmlToLoca() throws Exception {
+        URL resourceUrl = getClass().getClassLoader().getResource("english.xml");
+        Path resourcePath = Paths.get(resourceUrl.toURI());
+        assertTrue(resourcePath.toFile().exists());
+        Localization.LocaXmlReader reader = new Localization.LocaXmlReader(new FileInputStream(resourcePath.toFile()));
+        Localization.LocaResource resource = reader.read();
+    }
+
 }

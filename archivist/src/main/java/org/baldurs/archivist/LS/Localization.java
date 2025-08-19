@@ -245,7 +245,7 @@ public class Localization {
                 }
                 
             } catch (ParserConfigurationException | SAXException e) {
-                throw new InvalidFormatException("Failed to parse XML: " + e.getMessage());
+                throw new InvalidFormatException(e);
             }
             
             return resource;

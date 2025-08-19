@@ -3,7 +3,7 @@ package org.bg3.forge;
 import java.io.StringWriter;
 import java.util.List;
 
-import org.baldurs.forge.chat.MessageAction;
+import org.baldurs.forge.chat.actions.MessageAction;
 import org.baldurs.forge.context.ChatContext;
 import org.baldurs.forge.context.ChatContextWriter;
 import org.baldurs.forge.context.ClientMemoryStore;

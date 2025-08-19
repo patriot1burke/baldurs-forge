@@ -205,7 +205,9 @@ public class LSXReader implements AutoCloseable {
 
                     TranslatedString ts = (TranslatedString) attr.getValue();
                     ts.handle = reader.getAttributeValue(null, "handle");
-                    assert ts.handle != null;
+                    if (ts.handle == null) {
+                        throw new InvalidFormatException("TranslatedString handle is null for attribute " + attrName);
+                    }
 
                     if (attrValue == null) {
                         ts.version = Short.parseShort(reader.getAttributeValue(null, "version"));

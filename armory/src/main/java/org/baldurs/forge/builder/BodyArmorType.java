@@ -26,5 +26,8 @@ public enum BodyArmorType {
     public ArmorCategory getCategory() {
         return category;
     }
+    public String getBaseStat() {
+        return baseStat;
+    }
 
 }

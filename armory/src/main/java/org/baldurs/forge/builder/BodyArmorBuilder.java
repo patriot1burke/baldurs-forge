@@ -168,7 +168,7 @@ public class BodyArmorBuilder implements ChatFrame {
         }
         newEquipment.bodyArmors.add(current);
         context.setShared(NewModModel.NEW_EQUIPMENT, newEquipment);
-        context.response().add(new UpdateNewEquipmentAction("To create and export a mod containing your newly built body armor, tell me to 'Export mod'"));
+        context.response().add(new UpdateNewEquipmentAction("To create and export a mod containing your newly built body armor, tell me to '" + ModPackager.PACKAGE_MODE_CHAT_COMMAND + "'"));
         Log.info("Finishing body armor");
         String armorJson = logBodyArmorJson(current);
         return armorJson;

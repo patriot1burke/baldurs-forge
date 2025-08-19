@@ -7,4 +7,8 @@ public class InvalidFormatException extends RuntimeException {
     public InvalidFormatException(String message) {
         super(message);
     }
+
+    public InvalidFormatException(Throwable cause) {
+        super(cause);
+    }
 } 
