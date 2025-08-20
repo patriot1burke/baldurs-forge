@@ -218,7 +218,7 @@ public class EquipmentDB {
         Log.info("Ingested " + equipment.size() + " items");
     }
 
-    public void uploadMod(Path pak) throws Exception {
+    public String uploadMod(Path pak) throws Exception {
         ArchiveSource source = libraryService.uploadMod(pak);
         Log.info("Importing mod " + source.name);
         Map<String, Equipment> newEquipment = new HashMap<>();
@@ -232,10 +232,8 @@ public class EquipmentDB {
         }
         Log.info("Added " + newEquipment.size() + " to equipment database");
         equipmentDB.putAll(newEquipment);
-        // TODO: This doesn't seem to work. Older ingestions seem to disappear.
-        // instead re-ingest everything
         ingest(newEquipment.values());
-        // load();
+        return "Imported mod <i>" + source.name + "</i> with " + newEquipment.size() + " items";
     }
 
     public EquipmentModel findByName(String name) {

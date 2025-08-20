@@ -81,25 +81,6 @@
             overflow-y: auto;
         }
 
-        .right-container {
-            width: 30%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .top-right-panel {
-            height: 50%;
-            border-bottom: 2px solid #BCAE79;
-            padding: 20px;
-            overflow-y: auto;
-        }
-
-        .bottom-right-panel {
-            height: 50%;
-            padding: 20px;
-            overflow-y: auto;
-        }
-
         .panel-title {
             font-size: 18px;
             font-weight: bold;
@@ -108,14 +89,6 @@
 
         .panel-content {
             line-height: 1.6;
-        }
-
-        /* Optional: Add some sample content styling */
-        .sample-content {
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .chat-container {
@@ -176,16 +149,6 @@
             justify-content: center;
         }
 
-        #menu-button {
-            background-color: #333639;
-            margin-right: 15px;
-            position: relative;
-        }
-
-        #menu-button:hover {
-            background-color: #4a575c;
-        }
-
         /* Red dot indicator for save notification */
         .save-indicator {
             position: absolute;
@@ -208,6 +171,40 @@
             font-size: 10px;
             font-weight: bold;
             line-height: 1;
+        }
+
+        .save-indicator-tooltip {
+            background-color: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            max-width: 20ch;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            pointer-events: none;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        .save-indicator-tooltip::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-right: 6px solid #333;
+        }
+
+        .save-indicator-tooltip.tooltip-left::before {
+            left: auto;
+            right: -6px;
+            border-right: none;
+            border-left: 6px solid #333;
         }
 
         @keyframes pulse {
@@ -257,44 +254,6 @@
             font-size: 18px;
         }
 
-        /* Dropdown menu styles */
-        .dropdown-menu {
-            position: absolute;
-            top: 70px;
-            right: 15px;
-            background-color: #444750;
-            border: 1px solid #BCAE79;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            min-width: 200px;
-            display: none;
-            overflow: hidden;
-        }
-
-        .dropdown-menu.show {
-            display: block;
-        }
-
-        .dropdown-item {
-            padding: 12px 16px;
-            color: #e8e8e8;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: background-color 0.2s;
-            cursor: pointer;
-        }
-
-        .dropdown-item:hover {
-            background-color: #59666C;
-        }
-
-        .dropdown-item i {
-            font-size: 16px;
-            width: 20px;
-        }
 
         .file-upload-input {
             display: none;
@@ -685,18 +644,8 @@
             <img src="/favicon.ico" alt="Baldur's Gate 3 Logo">
             Baldur's Forge Assistant
         </div>
-        <button id="menu-button" class="btn" title="Menu">
-            <i class="fa fa-bars" aria-hidden="true"></i>
-        </button>
     </div>
 
-    <!-- Dropdown menu -->
-    <div id="dropdown-menu" class="dropdown-menu">
-        <div class="dropdown-item" id="upload-file-item">
-            <i class="fas fa-upload"></i>
-            Upload Mod File
-        </div>
-    </div>
     <input type="file" id="file-upload-input" class="file-upload-input" accept=".pak">
 
     <!-- Main content area -->
@@ -719,14 +668,6 @@
                                 <span class="save-count">0</span>
                             </div>
                         </button>
-                        <!--
-                        <button id="data-button" class="btn" title="Get data">
-                            <i class="fas fa-table"></i>
-                        </button>
-                        <button id="search-button" class="btn" title="Search">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    -->
                     </div>
                 </div>
 
@@ -833,8 +774,8 @@
             // Function to update save indicator visibility
             function updateSaveIndicator() {
                 let saveCount = 0;
-                if (chatContext && chatContext.shared) {
-                    const newBodyArmor = chatContext.shared.newBodyArmor;
+                if (chatContext && chatContext.shared && chatContext.shared.newEquipment && chatContext.shared.newEquipment.bodyArmors) {
+                    const newBodyArmor = chatContext.shared.newEquipment.bodyArmors;
                     if (newBodyArmor) {
                         saveCount = newBodyArmor.length;
                     }
@@ -851,6 +792,62 @@
             }
             // Initialize save indicator
             updateSaveIndicator();
+
+            // Add mouse over event to save indicator
+            $('#save-indicator').on('mouseenter', function() {
+                // Create and show tooltip
+                const tooltip = $('<div>', {
+                    class: 'save-indicator-tooltip',
+                    text: "Items created. Enter 'Package mod' to export your new equipment."
+                });
+                
+                $('body').append(tooltip);
+                
+                // Position tooltip near the save indicator
+                const $this = $(this);
+                const offset = $this.offset();
+                const windowWidth = $(window).width();
+                const windowHeight = $(window).height();
+                
+                // Calculate initial position (to the right of the indicator)
+                let left = offset.left + $this.width() + 10;
+                let top = offset.top - 45;
+                
+                // Check if tooltip would go off the right edge
+                const tooltipWidth = tooltip.outerWidth();
+                if (left + tooltipWidth > windowWidth - 20) {
+                    // Position to the left of the indicator instead
+                    left = offset.left - tooltipWidth - 10;
+                    tooltip.addClass('tooltip-left');
+                }
+                
+                // Check if tooltip would go off the bottom edge
+                const tooltipHeight = tooltip.outerHeight();
+                if (top + tooltipHeight > windowHeight - 20) {
+                    top = windowHeight - tooltipHeight - 20;
+                }
+                
+                // Check if tooltip would go off the top edge
+                if (top < 20) {
+                    top = 20;
+                }
+                
+                // Check if tooltip would go off the left edge
+                if (left < 20) {
+                    left = 20;
+                }
+                
+                tooltip.css({
+                    position: 'absolute',
+                    left: left + 'px',
+                    top: top + 'px',
+                    zIndex: 1000
+                });
+            });
+            
+            $('#save-indicator').on('mouseleave', function() {
+                $('.save-indicator-tooltip').remove();
+            });
 
             // Add clear button to chat container
             const $clearButton = $('<button>', {
@@ -1261,6 +1258,9 @@
                             } else if (action.type === 'PackageMod') {
                                 console.log('PackageMod');
                                 packageModEvent(action.filename);
+                            } else if (action.type === 'ImportMod') {
+                                console.log('ImportMod');
+                                importModEvent();
                             }
                         }
                     }
@@ -1309,38 +1309,24 @@
             // Initialize
             updateClearButtonVisibility();
 
-            // Dropdown menu functionality
-            const $dropdownMenu = $('#dropdown-menu');
-            const $menuButton = $('#menu-button');
-            const $uploadFileItem = $('#upload-file-item');
             const $fileUploadInput = $('#file-upload-input');
 
-            // Toggle dropdown menu
-            $menuButton.on('click', function (e) {
-                e.stopPropagation();
-                $dropdownMenu.toggleClass('show');
-            });
+        
 
-            // Close dropdown when clicking outside
-            $(document).on('click', function (e) {
-                if (!$(e.target).closest('#menu-button, #dropdown-menu').length) {
-                    $dropdownMenu.removeClass('show');
-                }
-            });
+            function importModEvent(filename) {
+                $fileUploadInput.click();
+            }
 
             // Handle file upload
-            $uploadFileItem.on('click', function () {
-                $fileUploadInput.click();
-            });
-
+ 
             $fileUploadInput.on('change', function (e) {
+                console.log('fileUploadInput change');
                 const file = e.target.files[0];
                 if (file) {
                     handleFileUpload(file);
                 }
                 // Reset input
                 $(this).val('');
-                $dropdownMenu.removeClass('show');
             });
 
             function handleFileUpload(file) {
@@ -1356,7 +1342,8 @@
                     processData: false,
                     contentType: false,
                     success: function (response) {
-                        addMessage(`File uploaded successfully: ${file.name}`, false);
+                        addMessage(`File uploaded successfully: <i>${file.name}</i>.`, false);
+                        addMessage(response, false);
                     },
                     error: function (xhr, status, error) {
                         addMessage(`Error uploading file: ${error}`, false);

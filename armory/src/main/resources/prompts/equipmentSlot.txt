@@ -1,0 +1,11 @@
+From the user's query, determine the slot of equipment they are asking about.
+These are the rules for determining the slot:
+- Anything that can be worn on the head is a Helmet
+- Anything that can be worn on the hands like gloves or gauntlets is a Gloves
+- Anything that can be worn on the feet is a Boots
+- Anything that can be worn on the neck is a Amulet
+- Anything that can be worn on fingers is a Ring
+- If the user is asking about a weapon that can shoot, the value Ranged should be used.
+- If the user is asking about a weapon that does not shoot, the value Melee should be used.
+- If the user is asking about equipment that can be used as a shield, the value Offhand should be used.
+- If it is not known what slot of equipment the user is asking about, the value Unknown should be used.

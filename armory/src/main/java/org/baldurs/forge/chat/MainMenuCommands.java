@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.baldurs.forge.builder.BodyArmorBuilder;
 import org.baldurs.forge.builder.ModPackager;
+import org.baldurs.forge.chat.actions.ImportModAction;
 import org.baldurs.forge.chat.actions.ListEquipmentAction;
 import org.baldurs.forge.chat.actions.MessageAction;
 import org.baldurs.forge.chat.actions.ShowEquipmentAction;
@@ -84,5 +85,12 @@ public class MainMenuCommands {
     public String packageMod() {
         Log.info("packageMod");
         return modPackager.chat(context.memoryId(), context.userMessage());
+    }
+
+    @Tool("Import a mod from a file.")
+    public String importMod() {
+        Log.info("importMod");
+        context.response().add(new ImportModAction());
+        return "Please select a file to import.";
     }
 }

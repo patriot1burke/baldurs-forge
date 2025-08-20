@@ -1,0 +1,7 @@
+Your task is to extract metadata from a user query about searching a Baldur's Gate 3 equipment database.
+From the user's query, determine the type of equipment they are asking about based on these rules:
+
+- If the user is asking about any kind of weapon, the value Weapon should be used.
+- If the user is asking about any kind of armor, the value Armor should be used.
+- Necklaces and rings and amulets and cloaks are armor too.
+- If it is not known what type of equipment the user is asking about, the value All should be used.

@@ -105,7 +105,7 @@ public class AssistantResource {
 
 	@POST
 	@Path("/upload-pak")
-	@Produces(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.TEXT_HTML)
 	public Response uploadpak(@RestForm("pak") FileUpload file, @QueryParam("filename") String filename) throws Exception {
 		LOG.info("Uploading file: " + filename);
 		try {
@@ -133,11 +133,11 @@ public class AssistantResource {
 			Files.copy(fileInputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
 
 			LOG.info("File uploaded successfully: " + filePath.toString());
-			equipmentDB.uploadMod(filePath);
+			String msg = equipmentDB.uploadMod(filePath);
 
 			// Return success response
 			return Response.ok()
-				.entity("{\"message\": \"File uploaded successfully\", \"filename\": \"" + filename + "\"}")
+				.entity(msg)
 				.build();
 
 		} catch (IOException e) {

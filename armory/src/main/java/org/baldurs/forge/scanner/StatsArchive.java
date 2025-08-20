@@ -50,13 +50,29 @@ public class StatsArchive {
             this.data = data;
         }
 
+        protected String getParentField(String field, Set<String> seen) {
+            if (using == null) {
+                return null;
+            }
+            if (seen.contains(using)) {
+                return null;
+            }
+            seen.add(using);
+            Stat parent = library.getByName(using);
+            if (parent != null) {
+                String val = parent.data.get(field);
+                if (val != null) {
+                    return val;
+                }
+                return parent.getParentField(field, seen);
+            }
+            return null;
+        }
+
         public String getField(String field) {
             String val = data.get(field);
             if (val == null) {
-                Stat parent = library.getByName(using);
-                if (parent != null) {
-                    val = parent.getField(field);
-                }
+                return getParentField(field, new HashSet<>());
             }
             return val;
         }
