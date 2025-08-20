@@ -814,6 +814,7 @@
                     const blobUrl = URL.createObjectURL(blob);
                     saveFile(blobUrl, filename);
                     URL.revokeObjectURL(blobUrl);
+                    addMessage("Mod packaged and downloaded to " + filename, false);
                 } catch (err) {
                     console.error("Error in fetching and downloading file:", err);
                 }

@@ -113,9 +113,9 @@ public class ModPackager implements ChatFrame {
         String modUUID = IdMaker.uuid();
         String baseFileName = toAlphaNumericUnderscore(newEquipment.name);
         Path modDir = Files.createDirectory(tempDir.resolve(baseFileName));
-        Path localizationDir = Files.createDirectories(modDir.resolve("Localization/English"));
         String folder = baseFileName + "_" + modUUID;
         Path modsDir = Files.createDirectories(modDir.resolve("Mods").resolve(folder));
+        Path localizationDir = Files.createDirectories(modsDir.resolve("Localization/English"));
         Path publicDir = Files.createDirectories(modDir.resolve("Public").resolve(folder));
         Path rootTemplatesDir = Files.createDirectories(publicDir.resolve("RootTemplates"));
         Path statsDir = Files.createDirectories(publicDir.resolve("Stats/Generated"));
@@ -173,7 +173,7 @@ public class ModPackager implements ChatFrame {
             gameObjects += tab + "  <attribute id=\"DisplayName\" type=\"TranslatedString\" handle=\"" + nameHandle + "\" version=\"1\"/>\n";
             gameObjects += tab + "  <attribute id=\"Description\" type=\"TranslatedString\" handle=\"" + descriptionHandle + "\" version=\"1\"/>\n";
             gameObjects += tab + "  <attribute id=\"LevelName\" type=\"FixedString\" value=\"\"/>\n";
-            gameObjects += tab + "  <attribute id=\"MapKey\" type=\"LSString\" value=\"" + MapKey + "\"/>\n";
+            gameObjects += tab + "  <attribute id=\"MapKey\" type=\"FixedString\" value=\"" + MapKey + "\"/>\n";
             gameObjects += tab + "  <attribute id=\"Name\" type=\"LSString\" value=\"" + statName + "\"/>\n";
             gameObjects += tab + "  <attribute id=\"ParentTemplateId\" type=\"FixedString\" value=\"" + parentTemplateId + "\"/>\n";
             gameObjects += tab + "  <attribute id=\"Stats\" type=\"FixedString\" value=\"" + statName + "\"/>\n";
@@ -215,7 +215,7 @@ public class ModPackager implements ChatFrame {
         Files.writeString(statsDir.resolve("TreasureTable.txt"), treasureTable);
         
         localizations = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-                       + "<contentList>"
+                       + "<contentList>\n"
                        + localizations
                        + "</contentList>";
         Path locaXmlPath = localizationDir.resolve("english.xml");
