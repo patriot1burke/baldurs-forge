@@ -1,25 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <save>
-  <version major="4" minor="0" revision="9" build="328" />
+  <version major="4" minor="0" revision="7" build="2" />
   <region id="Config">
     <node id="root">
       <children>
-        <node id="Dependencies">
-            <children>
-              <node id="ModuleShortDesc">
-                <attribute id="Folder" type="LSString" value="GabesAutodepositor_c37d6364-49bd-b4aa-8a91-8a58ae601f9a"/>
-                <attribute id="MD5" type="LSString" value="1b328f59cb05ed53d3950d7e6e6d6011"/>
-                <attribute id="Name" type="LSString" value="Gabes Auto Depositor (Modders Resource)"/>
-                <attribute id="PublishHandle" type="uint64" value="4405090"/>
-                <attribute id="UUID" type="guid" value="c37d6364-49bd-b4aa-8a91-8a58ae601f9a"/>
-                <attribute id="Version64" type="int64" value="36028797018963976"/>
-              </node>
-            </children>
-        </node>
+        <node id="Dependencies" />
         <node id="ModuleInfo">
-          <attribute id="Author" type="LSString" value="{AUTHOR}"/>
+          <attribute id="Author" type="LSWString" value="{AUTHOR}"/>
           <attribute id="CharacterCreationLevelName" type="FixedString" value=""/>
-          <attribute id="Description" type="LSString" value="{DESCRIPTION}"/>
+          <attribute id="Description" type="LSWString" value="{DESCRIPTION}"/>
           <attribute id="Folder" type="LSString" value="{FOLDER}"/>
           <attribute id="GMTemplate" type="FixedString" value=""/>
           <attribute id="LobbyLevelName" type="FixedString" value=""/>
@@ -30,7 +19,7 @@
           <attribute id="NumPlayers" type="uint8" value="4"/>
           <attribute id="PhotoBooth" type="FixedString" value=""/>
           <attribute id="StartupLevelName" type="FixedString" value=""/>
-          <attribute id="Tags" type="LSString" value=""/>
+          <attribute id="Tags" type="LSWString" value=""/>
           <attribute id="Type" type="FixedString" value="Add-on"/>
           <attribute id="UUID" type="FixedString" value="{UUID}"/>
           <attribute id="Version64" type="int64" value="{VERSION64}"/> 

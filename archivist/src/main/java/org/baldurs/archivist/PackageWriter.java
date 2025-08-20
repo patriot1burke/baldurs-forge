@@ -57,8 +57,8 @@ public class PackageWriter {
         headerBuf.putInt(18);
         headerBuf.putLong(fileListOffset);
         headerBuf.putInt(compressedFileListSize);
-        headerBuf.put((byte)0x12);
         headerBuf.put((byte)0);
+        headerBuf.put((byte)30);
         for (int i = 0; i < 16; i++) {
             headerBuf.put((byte)0);
         }

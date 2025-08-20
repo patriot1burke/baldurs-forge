@@ -130,7 +130,7 @@ public class PackageReader {
             int version = map.getInt(4);
             //System.out.println("Version: " + version);
             header = new PackageHeader(map, (int)4);
-            //System.out.println("Header: " + header);
+            System.out.println("Header: " + header);
             fileListOffset = (int)header.FileListOffset;
             LZ4Factory factory = LZ4Factory.fastestInstance();
             LZ4SafeDecompressor decompressor = factory.safeDecompressor();

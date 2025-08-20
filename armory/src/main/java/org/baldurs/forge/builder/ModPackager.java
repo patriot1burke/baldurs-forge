@@ -170,8 +170,8 @@ public class ModPackager implements ChatFrame {
                 parentTemplateId = rootTemplate.MapKey;
             }
             gameObjects += tab + "<node id=\"GameObjects\">\n";
-            gameObjects += tab + "  <attribute id=\"DisplayName\" type=\"TranslatedString\" handle=\"" + nameHandle + "\" version=\"1\"/>\n";
             gameObjects += tab + "  <attribute id=\"Description\" type=\"TranslatedString\" handle=\"" + descriptionHandle + "\" version=\"1\"/>\n";
+            gameObjects += tab + "  <attribute id=\"DisplayName\" type=\"TranslatedString\" handle=\"" + nameHandle + "\" version=\"1\"/>\n";
             gameObjects += tab + "  <attribute id=\"LevelName\" type=\"FixedString\" value=\"\"/>\n";
             gameObjects += tab + "  <attribute id=\"MapKey\" type=\"FixedString\" value=\"" + MapKey + "\"/>\n";
             gameObjects += tab + "  <attribute id=\"Name\" type=\"LSString\" value=\"" + statName + "\"/>\n";
@@ -192,6 +192,10 @@ public class ModPackager implements ChatFrame {
             if (bodyArmor.armorClass != null) {
                 armorData += "data \"ArmorClass\" \"" + bodyArmor.armorClass + "\"\n";
             }
+            if (bodyArmor.boosts != null) {
+                armorData += "data \"Boosts\" \"" + bodyArmor.boosts + "\"\n";
+            }
+            armorData += "data \"MinLevel\" \"1\"\n";
             armorData += "\n";
 
             treasure += "new subtable \"1,1\"\n";
