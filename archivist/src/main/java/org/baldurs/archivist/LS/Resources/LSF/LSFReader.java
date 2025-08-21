@@ -310,10 +310,12 @@ public class LSFReader implements AutoCloseable {
         }
 
         version = LSFVersion.fromInt((int) magic.version);
+        System.out.println("version: " + version);
 
         if (version.getValue() >= LSFVersion.VER_BG3_EXTENDED_HEADER.getValue()) {
             LSFHeaderV5 hdr = LSFHeaderV5.fromBuffer(map);
             gameVersion = PackedVersion.fromInt64(hdr.engineVersion);
+            System.out.println("LSFHeaderV5: " + hdr.engineVersion);
 
             // Workaround for merged LSF files with missing engine version number
             if (gameVersion.major == 0) {
@@ -325,10 +327,12 @@ public class LSFReader implements AutoCloseable {
         } else {
             LSFHeader hdr = LSFHeader.fromBuffer(map);
             gameVersion = PackedVersion.fromInt32(hdr.engineVersion);
+            System.out.println("LSFHeader: " + hdr.engineVersion);
         }
         //System.out.println("version: " + version);
         if (version.getValue() < LSFVersion.VER_BG3_NODE_KEYS.getValue()) {
             LSFMetadataV5 meta = LSFMetadataV5.fromBuffer(map);
+            System.out.println("LSFMetadataV5");
             metadata = new LSFMetadataV6();
             metadata.stringsUncompressedSize = meta.stringsUncompressedSize;
             metadata.stringsSizeOnDisk = meta.stringsSizeOnDisk;
@@ -342,7 +346,20 @@ public class LSFReader implements AutoCloseable {
             metadata.metadataFormat = meta.metadataFormat;
         } else {
             metadata = LSFMetadataV6.fromBuffer(map);
+            System.out.println("LSFMetadataV6");
         }
+        System.out.println("metadata.metadataFormat: " + metadata.metadataFormat);
+        System.out.println("metadata.compressionFlags: " + metadata.compressionFlags);
+        System.out.println("metadata.stringsSizeOnDisk: " + metadata.stringsSizeOnDisk);
+        System.out.println("metadata.stringsUncompressedSize: " + metadata.stringsUncompressedSize);
+        System.out.println("metadata.nodesSizeOnDisk: " + metadata.nodesSizeOnDisk);
+        System.out.println("metadata.nodesUncompressedSize: " + metadata.nodesUncompressedSize);
+        System.out.println("metadata.attributesSizeOnDisk: " + metadata.attributesSizeOnDisk);
+        System.out.println("metadata.attributesUncompressedSize: " + metadata.attributesUncompressedSize);
+        System.out.println("metadata.valuesSizeOnDisk: " + metadata.valuesSizeOnDisk);
+        System.out.println("metadata.valuesUncompressedSize: " + metadata.valuesUncompressedSize);
+        System.out.println("metadata.keysSizeOnDisk: " + metadata.keysSizeOnDisk);
+        System.out.println("metadata.keysUncompressedSize: " + metadata.keysUncompressedSize);
     }
 
     public Resource read() throws IOException {

@@ -152,7 +152,7 @@ public class PackageReader {
             fileList = new FileEntry[numFiles];
             for (int i = 0; i < numFiles; i++) {
                 FileEntry fileEntry = new FileEntry(fileListBuf);
-                //System.out.println("File entry: " + fileEntry.Name);
+                System.out.println("File entry: " + fileEntry.Name);
                 fileList[i] = fileEntry;
             }
             channel.close();

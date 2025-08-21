@@ -78,7 +78,7 @@ public class CompressionHelpers {
         switch (method) {
             case None:
                 flags |= 0x00;
-                break;
+                return 0;
             case Zlib:
                 flags |= 0x01;
                 break;

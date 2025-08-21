@@ -41,7 +41,7 @@ public class LSFWriter implements AutoCloseable {
     private List<List<String>> stringHashMap;
     private List<Integer> nextSiblingIndices;
     
-    public LSFVersion version = LSFVersion.MAX_WRITE_VERSION;
+    public LSFVersion version = LSFVersion.VER_BG3_PATCH3;
     public LSFMetadataFormat metadataFormat = LSFMetadataFormat.NONE;
     public CompressionMethod compression = CompressionMethod.None;
     public LSCompressionLevel compressionLevel = LSCompressionLevel.Default;
