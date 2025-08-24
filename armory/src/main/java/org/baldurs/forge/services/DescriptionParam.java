@@ -36,6 +36,7 @@ public class DescriptionParam {
         String function = paramString.substring(0, index).trim();
         descriptionParam.function = function;
         String params = paramString.substring(index + 1, paramString.lastIndexOf(")"));
+        //System.out.println("params: " + params);
         if (params.isEmpty()) {
             return descriptionParam;
         }
@@ -47,10 +48,20 @@ public class DescriptionParam {
                 depth++;
             } else if (params.charAt(index) == ')') {
                 depth--;
-            } else if (depth == 0 && (params.charAt(index) == ',' || index + 1 == params.length())) {
-                argList.add(params.substring(paramIndex, index).trim());
+            } else if (depth == 0) {
+                if (params.charAt(index) == ',') {
+                    String paramValue = params.substring(paramIndex, index).trim();
+                    paramValue = param(paramValue);
+                    argList.add(paramValue);
+                    paramIndex = index + 1;
+                } else if (index + 1 == params.length()) {
+                    String paramValue = params.substring(paramIndex, index + 1).trim();
+                    paramValue = param(paramValue); 
+                    argList.add(paramValue);
+                }
             }
         }
+            
         descriptionParam.args = argList.toArray(new String[argList.size()]);
         DescriptionTransformer descriptionTransformer = transformers.get(function);
         if (descriptionTransformer != null) {
@@ -64,7 +75,7 @@ public class DescriptionParam {
 
     static {
         transformers.put("DealDamage", (param) -> {
-            return param.args[0] + " " + param.args[1];
+            return param.args[0] + " " + param.args[1] + " damage";
         });
         transformers.put("RegainHitPoints", (param) -> {
             return param.args[0] + " hit points";
@@ -75,5 +86,13 @@ public class DescriptionParam {
         transformers.put("GainTemporaryHitPoints", (param) -> {
             return param.args[0] + " temporary hit points";
         });
+        transformers.put("max", (param) -> {
+            String min = param.args[0];
+            String max = param.args[1];
+            int index = max.indexOf("Modifier");
+            max = max.substring(0, index) + " Modifier";
+            return max + " (min " + min + ")";
+        });
+
     }
 }

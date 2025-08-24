@@ -1,0 +1,9 @@
+RAG Improvements:
+* Review created documents that are being fed into vector DB
+* Create a SQL DB of equipment items, generate a SQL query based on that
+* RAG Fusion: Do multiple queries in parallel (AI and SQL)  fuse results together based on ranking (how many times does item show up in each query)
+* HyDE: Generate a hypothetical document that answers the question well.  Then use the embeddings to do a search.
+
+Don't think we can use these RAG techniques:
+* Router:  Multiple datasources (vectorDB, RDBMs)  WRite a prompt that analyzes user messages and chooses where to send data.
+* Summary Vector DBs.  Summarize a document and store each summary in a vector db with metadata to point to original documents.
