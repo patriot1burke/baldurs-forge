@@ -5,6 +5,9 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.baldurs.archivist.IdMaker;
 import org.baldurs.archivist.PackageWriter;
@@ -12,8 +15,10 @@ import org.baldurs.archivist.LS.Converter;
 import org.baldurs.archivist.LS.PackedVersion;
 import org.baldurs.forge.chat.ChatFrame;
 import org.baldurs.forge.chat.ChatService;
+import org.baldurs.forge.chat.actions.ListEquipmentAction;
 import org.baldurs.forge.chat.actions.PackageModAction;
 import org.baldurs.forge.context.ChatContext;
+import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.scanner.RootTemplate;
 import org.baldurs.forge.services.LibraryService;
 
@@ -42,6 +47,9 @@ public class ModPackager implements ChatFrame {
 
     @Inject
     LibraryService library;
+
+    @Inject
+    BodyArmorBuilder bodyArmorBuilder;
 
     ObjectMapper mapper;
 
@@ -105,6 +113,22 @@ public class ModPackager implements ChatFrame {
 
         context.response().add(new PackageModAction(baseFileName + ".pak"));
         return "The mod is finished.";
+    }
+    public List<EquipmentModel> listBuiltEquipment() {
+        NewModModel newEquipment = context.getShared(NewModModel.NEW_EQUIPMENT, NewModModel.class);
+        if (newEquipment == null) {
+            return Collections.EMPTY_LIST;
+        }
+        List<EquipmentModel> equipment = new ArrayList<>();
+        for (BodyArmorModel bodyArmor : newEquipment.bodyArmors) {
+            equipment.add(bodyArmorBuilder.bodyArmorModelToEquipmentModel(bodyArmor));
+        }
+        return equipment;
+    }
+
+    public void showNewEquipment() {
+        List<EquipmentModel> equipment = listBuiltEquipment();
+        context.response().add(new ListEquipmentAction(equipment));
     }
 
     public File packageMod(NewModModel newEquipment) throws Exception {

@@ -81,6 +81,13 @@ public class MainMenuCommands {
         }
     }
 
+    @Tool("Show all equipment the user has created.")
+    public String showNewEquipment() {
+        Log.info("showNewEquipment");
+        modPackager.showNewEquipment();
+        return "Here is all the equipment the user has created.";
+    }
+
     @Tool("Package mod with any new equipment the user has created.")
     public String packageMod() {
         Log.info("packageMod");

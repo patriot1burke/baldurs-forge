@@ -8,6 +8,7 @@ If 'findEquipmentByName' cannot find the equipment, then forward the request to 
 If the user is looking for data attribute values, then forward the request to the 'findDataAttributeValues' tool.
 If the user is looking to import a mod, then forward the request to the 'importMod' tool.
 If the user is looking to package a mod, then forward the request to the 'packageMod' tool.
+If the user asks to show all new equipment, then forward the request to 'showNewEquipment' tool.
 
 If you cannot determine the appropriate tool to invoke, then summarize the tool actions that are available to the user and
 ask the user to clarify their request.
@@ -36,3 +37,12 @@ Action: invoke the 'importMod' tool
 
 Input: Package mod
 Action: invoke the 'packageMod' tool 
+
+Input: Show new equipment
+Action: invoke the 'showNewEquipment' tool
+
+Input: What equipment did I create?
+Action: invoke the 'showNewEquipment' tool
+
+Input: List new equipment
+Action: invoke the 'ShowNewEquipment' Tool

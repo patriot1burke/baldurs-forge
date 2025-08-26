@@ -84,6 +84,11 @@ public class BodyArmorBuilder implements ChatFrame {
         if (armor == null || armor.type == null) {
             return;
         }
+        EquipmentModel equipment = bodyArmorModelToEquipmentModel(armor);
+        context.response().add(new ShowEquipmentAction(equipment));
+    }
+
+    public EquipmentModel bodyArmorModelToEquipmentModel(BodyArmorModel armor) {
         EquipmentModel equipment = new EquipmentModel();
         equipment.type = EquipmentType.Armor;
         equipment.slot = EquipmentSlot.Breast;
@@ -110,7 +115,7 @@ public class BodyArmorBuilder implements ChatFrame {
             template = library.archive().getRootTemplates().getRootTemplate(stat.getField("RootTemplate"));
         }
         equipment.icon = library.icons().get(template.resolveIcon());
-        context.response().add(new ShowEquipmentAction(equipment));
+        return equipment;
     }
 
     @Tool("Update the current body armor json document.")
@@ -185,7 +190,7 @@ public class BodyArmorBuilder implements ChatFrame {
     }
 
 
-    @Tool("Add boost macro to body armor.  Called after the createBoostMacro tool is called.")
+    @Tool("Add boost macro to body armor.  May be called after the createBoostMacro tool.")
     public void addBodyArmorBoost(String boostMacro) throws Exception {
         Log.info("Adding boost macro to body armor: "  + boostMacro);
         BodyArmorModel armor = context.getShared(CURRENT_BODY_ARMOR, BodyArmorModel.class);
@@ -197,6 +202,15 @@ public class BodyArmorBuilder implements ChatFrame {
         context.setShared(CURRENT_BODY_ARMOR, armor);
         addShowEquipmentAction(armor);
         logBodyArmorJson(armor);
+    }
+
+    @Tool("Set boost macro for body armor.  May be called after the createBoostMacro tool.")
+    public void setBodyArmorBoost(String boostMacro) throws Exception {
+        Log.info("setBodyArmorBoost: "  + boostMacro);
+        BodyArmorModel armor = context.getShared(CURRENT_BODY_ARMOR, BodyArmorModel.class);
+        armor.boosts = boostMacro;
+        context.setShared(CURRENT_BODY_ARMOR, armor);
+        addShowEquipmentAction(armor);
     }
 
     @Tool("Summarizes available visual models for the current body armor type.")
