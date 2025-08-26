@@ -88,6 +88,18 @@ public class MainMenuCommands {
         return "Here is all the equipment the user has created.";
     }
 
+    @Tool("Delete equipment item by name.")
+    public String deleteNewEquipmentByName(String name) {
+        Log.info("deleteNewEquipment: " + name);
+        return modPackager.deleteNewEquipment(name);
+    }
+
+    @Tool("Delete all equipment the user has created.")
+    public void deleteAllNewEquipment() {
+        Log.info("deleteAllNewEquipment");
+        modPackager.deleteAllNewEquipment();
+    }
+
     @Tool("Package mod with any new equipment the user has created.")
     public String packageMod() {
         Log.info("packageMod");

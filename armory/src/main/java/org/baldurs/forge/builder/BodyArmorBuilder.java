@@ -13,6 +13,7 @@ import org.baldurs.forge.context.ChatContext;
 import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.model.EquipmentSlot;
 import org.baldurs.forge.model.EquipmentType;
+import org.baldurs.forge.model.Rarity;
 import org.baldurs.forge.scanner.RootTemplate;
 import org.baldurs.forge.scanner.StatsArchive;
 import org.baldurs.forge.services.BoostService;
@@ -147,6 +148,9 @@ public class BodyArmorBuilder implements ChatFrame {
             }
         } else {
             current = bodyArmor;
+            if (current.rarity == null) {
+                current.rarity = Rarity.Common;
+            }
         }
         String json =logBodyArmorJson(current);
         context.setShared(CURRENT_BODY_ARMOR, current);
@@ -164,6 +168,9 @@ public class BodyArmorBuilder implements ChatFrame {
         addShowEquipmentAction(current);
         chatService.popChatFrame(context);
         context.setShared(CURRENT_BODY_ARMOR, null);
+        if (current.rarity == null) {
+            current.rarity = Rarity.Common;
+        }
         NewModModel newEquipment = context.getShared(NewModModel.NEW_EQUIPMENT, NewModModel.class);
         if (newEquipment == null) {
             newEquipment = new NewModModel();

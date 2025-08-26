@@ -16,7 +16,9 @@ import org.baldurs.archivist.LS.PackedVersion;
 import org.baldurs.forge.chat.ChatFrame;
 import org.baldurs.forge.chat.ChatService;
 import org.baldurs.forge.chat.actions.ListEquipmentAction;
+import org.baldurs.forge.chat.actions.MessageAction;
 import org.baldurs.forge.chat.actions.PackageModAction;
+import org.baldurs.forge.chat.actions.UpdateNewEquipmentAction;
 import org.baldurs.forge.context.ChatContext;
 import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.scanner.RootTemplate;
@@ -128,7 +130,46 @@ public class ModPackager implements ChatFrame {
 
     public void showNewEquipment() {
         List<EquipmentModel> equipment = listBuiltEquipment();
+        if (!equipment.isEmpty()) {
+            context.response().add(new ListEquipmentAction(equipment));
+        } else {
+            context.response().add(new MessageAction("No new equipment."));
+        }
         context.response().add(new ListEquipmentAction(equipment));
+    }
+
+    public void deleteAllNewEquipment() {
+        context.setShared(NewModModel.NEW_EQUIPMENT, null);
+        context.response().add(new UpdateNewEquipmentAction(null));
+    }
+
+    public String deleteNewEquipment(String name) {
+        NewModModel newEquipment = context.getShared(NewModModel.NEW_EQUIPMENT, NewModModel.class);
+        if (newEquipment == null || newEquipment.isEmpty()) {
+            return "No equipment to delete.";
+        }
+        boolean found = false;
+        for (BodyArmorModel bodyArmor : newEquipment.bodyArmors) {
+            if (bodyArmor.name.equals(name)) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            showNewEquipment();
+            return "Equipment with name not found.";
+        }
+        newEquipment.bodyArmors.removeIf(bodyArmor -> bodyArmor.name.equals(name));
+        if (!newEquipment.isEmpty()) {
+            context.setShared(NewModModel.NEW_EQUIPMENT, newEquipment);
+            showNewEquipment();
+        } else {
+            context.setShared(NewModModel.NEW_EQUIPMENT, null);
+        }
+
+        context.response().add(new UpdateNewEquipmentAction(null));
+
+        return "Equipment deleted.";
     }
 
     public File packageMod(NewModModel newEquipment) throws Exception {

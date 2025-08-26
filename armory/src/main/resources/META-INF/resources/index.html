@@ -767,7 +767,9 @@
             }
 
             function updateNewEquipmentEvent(message) {
-                addJsonMessage(message);
+                if (message) {
+                    addJsonMessage(message);
+                }
                 updateSaveIndicator();
             }
 
