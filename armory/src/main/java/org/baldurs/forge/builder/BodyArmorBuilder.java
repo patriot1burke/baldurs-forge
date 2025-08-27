@@ -1,6 +1,7 @@
 package org.baldurs.forge.builder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.baldurs.forge.chat.ChatFrame;
@@ -33,7 +34,7 @@ import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class BodyArmorBuilder implements ChatFrame {
-    private static final String CURRENT_BODY_ARMOR = "currentBodyArmor";
+    public static final String CURRENT_BODY_ARMOR = "currentBodyArmor";
 
     @Inject
     EquipmentBuilderChat agent;
@@ -176,9 +177,13 @@ public class BodyArmorBuilder implements ChatFrame {
             newEquipment = new NewModModel();
         }
         if (newEquipment.bodyArmors == null) {
-            newEquipment.bodyArmors = new ArrayList<>();
+            newEquipment.bodyArmors = new HashMap<>();
         }
-        newEquipment.bodyArmors.add(current);
+        // for updates
+        if (!newEquipment.bodyArmors.containsKey(current.name)) {
+            newEquipment.count++;
+        }
+        newEquipment.bodyArmors.put(current.name, current);
         context.setShared(NewModModel.NEW_EQUIPMENT, newEquipment);
         context.response().add(new UpdateNewEquipmentAction("To create and export a mod containing your newly built body armor, tell me to '" + ModPackager.PACKAGE_MODE_CHAT_COMMAND + "'"));
         Log.info("Finishing body armor");

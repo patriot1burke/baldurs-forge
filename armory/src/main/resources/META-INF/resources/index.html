@@ -776,11 +776,8 @@
             // Function to update save indicator visibility
             function updateSaveIndicator() {
                 let saveCount = 0;
-                if (chatContext && chatContext.shared && chatContext.shared.newEquipment && chatContext.shared.newEquipment.bodyArmors) {
-                    const newBodyArmor = chatContext.shared.newEquipment.bodyArmors;
-                    if (newBodyArmor) {
-                        saveCount = newBodyArmor.length;
-                    }
+                if (chatContext && chatContext.shared && chatContext.shared.newEquipment) {
+                    saveCount = chatContext.shared.newEquipment.count;
                 }
                 let canSaveFile = saveCount > 0;
                 const $saveIndicator = $('#save-indicator');
@@ -1166,7 +1163,7 @@
                     $chatContainer.append($messageDiv);
                     return;
                 }
-                console.log(equipment);
+                //console.log(equipment);
                 const $resultDev = $('<div>', {
                     class: `message assistant-message`
                 });
@@ -1240,7 +1237,7 @@
                         contentType: false
                     });
 
-                    console.log(response);
+                    //console.log(response);
                     const responseData = JSON.parse(response);
                     chatContext = responseData.context;
                     if (responseData.response) {
@@ -1255,7 +1252,7 @@
                                 console.log('Message');
                                 addJsonMessage(action.message);
                             } else if (action.type === 'UpdateNewEquipment') {
-                                console.log('NewEquipment');
+                                console.log('UpdateNewEquipment');
                                 updateNewEquipmentEvent(action.message);
                             } else if (action.type === 'PackageMod') {
                                 console.log('PackageMod');
@@ -1322,7 +1319,7 @@
             // Handle file upload
  
             $fileUploadInput.on('change', function (e) {
-                console.log('fileUploadInput change');
+                //console.log('fileUploadInput change');
                 const file = e.target.files[0];
                 if (file) {
                     handleFileUpload(file);
@@ -1367,8 +1364,8 @@
                 const $tooltipFooter = tooltip.find('.tooltip-footer');
                 const $tooltipImage = tooltip.find('.tooltip-item-image');
 
-                console.log('showEquipmentPanel');
-                console.log(equipment);
+                //console.log('showEquipmentPanel');
+                //console.log(equipment);
                 if (equipment.icon) {
                     $tooltipImage.attr('src', equipment.icon);
                 } else {
@@ -1429,7 +1426,7 @@
                         addItemProperty($itemProperties, equipment.weaponType, '/static/img/icons/tooltips/ico_roll_attack.png');
                     }
                     for (const property of equipment.weaponProperties) {
-                        console.log(property);
+                        //console.log(property);
                         if (property === 'Twohanded') {
                             addItemProperty($itemProperties, 'Two Handed', '/static/img/icons/tooltips/ico_handedness.png');
                         } else if (property === 'Light') {

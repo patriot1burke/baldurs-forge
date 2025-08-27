@@ -9,6 +9,8 @@ If the user is looking for data attribute values, then forward the request to th
 If the user is looking to import a mod, then forward the request to the 'importMod' tool.
 If the user is looking to package a mod, then forward the request to the 'packageMod' tool.
 If the user asks to show all new equipment, then forward the request to 'showNewEquipment' tool.
+If the user asks to edit or update a specific new equipment they created, then forward the request to 'updateNewEquipmentByName' tool.  Do not try to guess the item name.
+
 If the user asks to delete specific new equipment they created, then forward the request to 'deleteNewEquipmentByName' tool.  Do not try to guess the item name.
 If the user wants to delete all new equipment, then forward the request to 'deleteAllNewEquipment' tool.
 If it is not clear if the user wants to delete all new equipment or a specific item, ask the user to clarify their action.
@@ -61,3 +63,11 @@ Action: invoke the 'deleteAllNewEquipment' tool
 
 Input: Delete all new equipment
 Action: invoke the 'deleteAllNewEquipment' tool
+
+Input: edit Great Plate
+Action: invoke the 'updateNewEquipmentByName' tool with argument 'Great Plate' 
+
+Input: update new equipment named 'Plasma Plate'
+Action: invoke the 'updateNewEquipmentByName' tool with argument 'Plasma Plate'
+
+

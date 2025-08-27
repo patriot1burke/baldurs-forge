@@ -81,20 +81,26 @@ public class MainMenuCommands {
         }
     }
 
-    @Tool("Show all equipment the user has created.")
+    @Tool("Show all new equipment the user has created.")
     public String showNewEquipment() {
         Log.info("showNewEquipment");
         modPackager.showNewEquipment();
         return "Here is all the equipment the user has created.";
     }
 
-    @Tool("Delete equipment item by name.")
+    @Tool("Delete new equipment item by name.")
     public String deleteNewEquipmentByName(String name) {
         Log.info("deleteNewEquipment: " + name);
         return modPackager.deleteNewEquipment(name);
     }
 
-    @Tool("Delete all equipment the user has created.")
+    @Tool("Update new equipment item by name.")
+    public String updateNewEquipmentByName(String name) {
+        Log.info("updateNewEquipment: " + name);
+        return modPackager.updateNewEquipment(name);
+    }
+
+    @Tool("Delete all new equipment the user has created.")
     public void deleteAllNewEquipment() {
         Log.info("deleteAllNewEquipment");
         modPackager.deleteAllNewEquipment();
