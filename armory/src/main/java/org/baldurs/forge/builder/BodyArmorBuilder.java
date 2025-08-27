@@ -87,7 +87,7 @@ public class BodyArmorBuilder implements ChatFrame {
             return;
         }
         EquipmentModel equipment = bodyArmorModelToEquipmentModel(armor);
-        context.response().add(new ShowEquipmentAction(equipment));
+        ShowEquipmentAction.addResponse(context, equipment);
     }
 
     public EquipmentModel bodyArmorModelToEquipmentModel(BodyArmorModel armor) {

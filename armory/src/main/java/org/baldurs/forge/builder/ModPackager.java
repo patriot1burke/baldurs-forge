@@ -114,7 +114,7 @@ public class ModPackager implements ChatFrame {
         chatService.popChatFrame(context);
         String baseFileName = toAlphaNumericUnderscore(newEquipment.name);
 
-        context.response().add(new PackageModAction(baseFileName + ".pak"));
+        PackageModAction.addResponse(context, baseFileName + ".pak");
         return "The mod is finished.";
     }
 
@@ -135,7 +135,7 @@ public class ModPackager implements ChatFrame {
     public void showNewEquipment() {
         List<EquipmentModel> equipment = listBuiltEquipment();
         if (!equipment.isEmpty()) {
-            context.response().add(new ListEquipmentAction(equipment));
+            ListEquipmentAction.addResponse(context, equipment);
         } else {
             context.response().add(new MessageAction("No new equipment."));
         }

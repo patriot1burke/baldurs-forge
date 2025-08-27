@@ -47,7 +47,7 @@ public class MainMenuCommands {
         if (models.isEmpty()) {
             return "Could not find equipment";
         } else {
-            context.response().add(new ListEquipmentAction(models));
+            ListEquipmentAction.addResponse(context, models);
             return "I found some possible matches for your query.";
         }
     }
@@ -59,7 +59,7 @@ public class MainMenuCommands {
         if (model == null) {
             throw new RuntimeException("Could not find the equipment.  Try searching the database");
         }
-        context.response().add(new ShowEquipmentAction(model));
+        ShowEquipmentAction.addResponse(context, model);
         return "I found an exact match for your query.";
     }
 
@@ -115,7 +115,7 @@ public class MainMenuCommands {
     @Tool("Import a mod from a file.")
     public String importMod() {
         Log.info("importMod");
-        context.response().add(new ImportModAction());
+        ImportModAction.addResponse(context);
         return "Please select a file to import.";
     }
 }
