@@ -144,7 +144,11 @@ public class EquipmentDB {
                 }
             }
         }
-        Set<String> weaponProperties = new HashSet<>();
+        // weapons only
+        String damage = item.getField("Damage");
+        String damageType = item.getField("Damage Type");
+        String versatileDamage = item.getField("Versatile Damage");
+        List<String> weaponProperties = new ArrayList<>();
         if (type == EquipmentType.Weapon) {
             String properties = item.getField("Weapon Properties");
             if (properties != null) {
@@ -155,7 +159,7 @@ public class EquipmentDB {
             }
         }
         Equipment equipment = new Equipment(id, type, slot, rarity, name, description, boost, icon, weaponType,
-                armorType, armorClass, weaponProperties, rootTemplate, item);
+                armorType, armorClass, weaponProperties, rootTemplate, item, damage, damageType, versatileDamage);
         db.put(id, equipment);
     }
 

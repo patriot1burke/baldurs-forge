@@ -37,7 +37,7 @@ public class BodyArmorBuilder implements ChatFrame {
     public static final String CURRENT_BODY_ARMOR = "currentBodyArmor";
 
     @Inject
-    EquipmentBuilderChat agent;
+    BodyArmorBuilderChat agent;
 
     @Inject
     ChatContext context;
@@ -55,6 +55,9 @@ public class BodyArmorBuilder implements ChatFrame {
 
     @Inject
     LibraryService library;
+
+    @Inject
+    BoostBuilderChat boostBuilder;
 
 
     @PostConstruct
@@ -204,12 +207,21 @@ public class BodyArmorBuilder implements ChatFrame {
 
     @Tool("Add boost macro to body armor.  May be called after the createBoostMacro tool.")
     public void addBodyArmorBoost(String boostMacro) throws Exception {
-        Log.info("Adding boost macro to body armor: "  + boostMacro);
+        // keep the boostMacro parameter as tool invocation is flaky otherwise
+        // AI gets confused
+        Log.info("addBodyArmorBoost: "  + boostMacro);
+        String enchantment = boostBuilder.createBoostMacro(context.userMessage());
+        Log.info("Enchantment: " + enchantment);
+        if (enchantment.indexOf('(') < 0) {
+            context.response().add(new MessageAction(enchantment));
+            context.response().add(new MessageAction("Could not create a boost macro from your description."));
+            return;
+        }
         BodyArmorModel armor = context.getShared(CURRENT_BODY_ARMOR, BodyArmorModel.class);
         if (armor.boosts == null || armor.boosts.isEmpty()) {
-            armor.boosts = boostMacro;
+            armor.boosts = enchantment;
         } else {
-            armor.boosts += ";" + boostMacro;
+            armor.boosts += ";" + enchantment;
         }
         context.setShared(CURRENT_BODY_ARMOR, armor);
         addShowEquipmentAction(armor);
@@ -218,9 +230,19 @@ public class BodyArmorBuilder implements ChatFrame {
 
     @Tool("Set boost macro for body armor.  May be called after the createBoostMacro tool.")
     public void setBodyArmorBoost(String boostMacro) throws Exception {
+        // keep the boostMacro parameter as tool invocation is flaky otherwise
+        // AI gets confused
         Log.info("setBodyArmorBoost: "  + boostMacro);
+        String enchantment = boostBuilder.createBoostMacro(context.userMessage());
+        Log.info("Enchantment: " + enchantment);
+        if (enchantment.indexOf('(') < 0) {
+            context.response().add(new MessageAction(enchantment));
+            context.response().add(new MessageAction("Could not create a boost macro from your description."));
+            return;
+        }
+
         BodyArmorModel armor = context.getShared(CURRENT_BODY_ARMOR, BodyArmorModel.class);
-        armor.boosts = boostMacro;
+        armor.boosts = enchantment;
         context.setShared(CURRENT_BODY_ARMOR, armor);
         addShowEquipmentAction(armor);
     }

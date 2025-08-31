@@ -22,6 +22,7 @@ import org.baldurs.forge.chat.actions.UpdateNewEquipmentAction;
 import org.baldurs.forge.context.ChatContext;
 import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.scanner.RootTemplate;
+import org.baldurs.forge.scanner.StatsArchive;
 import org.baldurs.forge.services.LibraryService;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -186,6 +187,41 @@ public class ModPackager implements ChatFrame {
         return bodyArmorBuilder.chat(context.memoryId(), context.userMessage());
     }
 
+    public void addGameObject(StringBuilder localizations, StringBuilder gameObjects, String name, String description,
+            String visualModel, String baseStat, String statName, String MapKey) {
+        String nameHandle = IdMaker.handle();
+        localizations.append("    <content contentuid=\"" + nameHandle + "\" version=\"1\">" + name
+                + "</content>\n");
+        String descriptionHandle = "";
+        if (description != null) {
+            descriptionHandle = IdMaker.handle();
+            localizations.append("    <content contentuid=\"" + descriptionHandle + "\" version=\"1\">"
+                    + description + "</content>\n");
+        }
+        String parentTemplateId = visualModel;
+        if (parentTemplateId == null) {
+            RootTemplate rootTemplate = library.findRootTemplateByStatName(baseStat);
+            parentTemplateId = rootTemplate.MapKey;
+        }
+        gameObjects.append("        <node id=\"GameObjects\">\n");
+        gameObjects.append("          <attribute id=\"Description\" type=\"TranslatedString\" handle=\""
+                + descriptionHandle + "\" version=\"1\"/>\n");
+        gameObjects.append("          <attribute id=\"DisplayName\" type=\"TranslatedString\" handle=\"" + nameHandle
+                + "\" version=\"1\"/>\n");
+        gameObjects.append("          <attribute id=\"LevelName\" type=\"FixedString\" value=\"\"/>\n");
+        gameObjects.append("          <attribute id=\"MapKey\" type=\"FixedString\" value=\"" + MapKey + "\"/>\n");
+        gameObjects.append("          <attribute id=\"Name\" type=\"LSString\" value=\"" + statName + "\"/>\n");
+        gameObjects.append("          <attribute id=\"ParentTemplateId\" type=\"FixedString\" value=\""
+                + parentTemplateId + "\"/>\n");
+        gameObjects.append("          <attribute id=\"Stats\" type=\"FixedString\" value=\"" + statName + "\"/>\n");
+        gameObjects.append(
+                "          <attribute id=\"TechnicalDescription\" type=\"TranslatedString\" handle=\"\" version=\"0\"/>\n");
+        gameObjects.append("          <attribute id=\"Type\" type=\"FixedString\" value=\"item\"/>\n");
+        gameObjects.append(
+                "          <attribute id=\"_OriginalFileVersion_\" type=\"int64\" value=\"144115207403209023\"/>\n");
+        gameObjects.append("        </node>\n");
+    }
+
     public File packageMod(NewModModel newEquipment) throws Exception {
         Path tempDir = Files.createTempDirectory("mod");
         Log.info("Packaging mod in temp directory: " + tempDir.toString());
@@ -222,50 +258,25 @@ public class ModPackager implements ChatFrame {
 
         String tab = "        ";
 
-        String gameObjects = "";
+        StringBuilder gameObjects = new StringBuilder();
 
         String armorData = "";
 
         String treasure = "";
 
-        String localizations = "";
+        StringBuilder localizations = new StringBuilder();
 
         if (newEquipment.bodyArmors != null) {
 
             for (BodyArmorModel bodyArmor : newEquipment.bodyArmors.values()) {
-                String nameHandle = IdMaker.handle();
-                localizations += "    <content contentuid=\"" + nameHandle + "\" version=\"1\">" + bodyArmor.name
-                        + "</content>\n";
-                String descriptionHandle = "";
-                if (bodyArmor.description != null) {
-                    descriptionHandle = IdMaker.handle();
-                    localizations += "    <content contentuid=\"" + descriptionHandle + "\" version=\"1\">"
-                            + bodyArmor.description + "</content>\n";
-                }
+                String name = bodyArmor.name;
+                String description = bodyArmor.description;
+                String visualModel = bodyArmor.visualModel;
+                String baseStat = bodyArmor.type.getBaseStat();
+                String statName = statPrefix + "_" + toAlphaNumericUnderscore(name);
                 String MapKey = IdMaker.uuid();
-                String statName = statPrefix + "_" + toAlphaNumericUnderscore(bodyArmor.name);
-                String parentTemplateId = bodyArmor.visualModel;
-                if (parentTemplateId == null) {
-                    RootTemplate rootTemplate = library.findRootTemplateByStatName(bodyArmor.type.getBaseStat());
-                    parentTemplateId = rootTemplate.MapKey;
-                }
-                gameObjects += tab + "<node id=\"GameObjects\">\n";
-                gameObjects += tab + "  <attribute id=\"Description\" type=\"TranslatedString\" handle=\""
-                        + descriptionHandle + "\" version=\"1\"/>\n";
-                gameObjects += tab + "  <attribute id=\"DisplayName\" type=\"TranslatedString\" handle=\"" + nameHandle
-                        + "\" version=\"1\"/>\n";
-                gameObjects += tab + "  <attribute id=\"LevelName\" type=\"FixedString\" value=\"\"/>\n";
-                gameObjects += tab + "  <attribute id=\"MapKey\" type=\"FixedString\" value=\"" + MapKey + "\"/>\n";
-                gameObjects += tab + "  <attribute id=\"Name\" type=\"LSString\" value=\"" + statName + "\"/>\n";
-                gameObjects += tab + "  <attribute id=\"ParentTemplateId\" type=\"FixedString\" value=\""
-                        + parentTemplateId + "\"/>\n";
-                gameObjects += tab + "  <attribute id=\"Stats\" type=\"FixedString\" value=\"" + statName + "\"/>\n";
-                gameObjects += tab
-                        + "  <attribute id=\"TechnicalDescription\" type=\"TranslatedString\" handle=\"\" version=\"0\"/>\n";
-                gameObjects += tab + "  <attribute id=\"Type\" type=\"FixedString\" value=\"item\"/>\n";
-                gameObjects += tab
-                        + "  <attribute id=\"_OriginalFileVersion_\" type=\"int64\" value=\"144115207403209023\"/>\n";
-                gameObjects += tab + "</node>\n";
+
+                addGameObject(localizations, gameObjects, name, description, visualModel, baseStat, statName, MapKey);
 
                 armorData += "new entry \"" + statName + "\"\n";
                 armorData += "type \"Armor\"\n";
@@ -288,6 +299,43 @@ public class ModPackager implements ChatFrame {
 
             }
         }
+        String weaponData = "";
+
+        if (newEquipment.weapons != null) {
+            for (WeaponModel weapon : newEquipment.weapons.values()) {
+                String statName = statPrefix + "_" + toAlphaNumericUnderscore(weapon.name);
+                String mapKey = IdMaker.uuid();
+                addGameObject(localizations, gameObjects, weapon.name, weapon.description, weapon.visualModel,
+                        weapon.type.getBaseStat(), statName, mapKey);
+                weaponData += "new entry \"" + statName + "\"\n";
+                weaponData += "type \"Weapon\"\n";
+                weaponData += "using \"" + weapon.type.getBaseStat() + "\"\n";
+                weaponData += "data \"RootTemplate\" \"" + mapKey + "\"\n";
+                if (weapon.rarity != null) {
+                    weaponData += "data \"Rarity\" \"" + weapon.rarity.name() + "\"\n";
+                }
+                String boosts = weapon.boosts;
+                if (boosts != null && weapon.magical) {
+                    boosts = boosts + ";" + "WeaponProperty(Magical)";
+                } else if (weapon.magical) {
+                    boosts = "WeaponProperty(Magical)";
+                }
+                if (boosts != null) {
+                    weaponData += "data \"DefaultBoosts\" \"" + boosts + "\"\n";
+                }
+                if (weapon.magical) {
+                    StatsArchive.Stat stat = library.archive().getStats().getByName(weapon.type.baseStat);
+                    String properties = stat.getField("Weapon Properties");
+                    properties += ";Magical";
+                    weaponData += "data \"Weapon Properties\" \"" + properties + "\"\n";
+                }
+                weaponData += "data \"MinLevel\" \"1\"\n";
+                weaponData += "\n";
+
+                treasure += "new subtable \"1,1\"\n";
+                treasure += "object category \"I_" + statName + "\",1,0,0,0,0,0,0,0\n";
+            }
+        }
 
         inputStream = getClass().getResourceAsStream("/mod-template/LsxBoilerplate.lsx");
         String lsxBoilerplate = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
@@ -296,18 +344,19 @@ public class ModPackager implements ChatFrame {
         Converter.lsxToLsf(lsxBoilerplateFile, rootTemplatesDir.resolve("Merged.lsf"));
 
         Files.writeString(statsDataDir.resolve("Armor.txt"), armorData);
+        Files.writeString(statsDataDir.resolve("Weapon.txt"), weaponData);
 
         inputStream = getClass().getResourceAsStream("/mod-template/TreasureTable.txt");
         String treasureTable = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         treasureTable += treasure;
         Files.writeString(statsDir.resolve("TreasureTable.txt"), treasureTable);
 
-        localizations = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+        String finalLocalizations = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
                 + "<contentList>\n"
-                + localizations
+                + localizations.toString()
                 + "</contentList>";
         Path locaXmlPath = localizationDir.resolve("english.xml");
-        Files.writeString(locaXmlPath, localizations);
+        Files.writeString(locaXmlPath, finalLocalizations);
 
         Converter.xmlToLoca(locaXmlPath, localizationDir.resolve("english.loca"));
 
@@ -316,7 +365,6 @@ public class ModPackager implements ChatFrame {
         writer.archive(modDir, outputPak);
 
         Log.info("Packaged mod to " + outputPak.toString());
-
         return outputPak.toFile();
     }
 

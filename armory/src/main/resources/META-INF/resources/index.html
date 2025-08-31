@@ -756,6 +756,8 @@
                     saveFile(blobUrl, filename);
                     URL.revokeObjectURL(blobUrl);
                     addMessage("Mod packaged and downloaded to " + filename, false);
+                    chatContext = null;
+                    updateSaveIndicator();
                 } catch (err) {
                     console.error("Error in fetching and downloading file:", err);
                 }
@@ -1230,7 +1232,7 @@
                     postData = JSON.stringify(request);
 
                     const response = await $.ajax({
-                        url: `/assistant/ask`,
+                        url: `/assistant/chat`,
                         type: 'POST',
                         data: postData,
                         processData: false,

@@ -131,6 +131,10 @@ public class StatsArchive {
         return byName.get(name);
     }
 
+    public Map<String, Stat> byName() {
+        return byName;
+    }
+
     public Map<String, Stat> getByType(String type) {
         return byType.get(type);
     }

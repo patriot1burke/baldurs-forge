@@ -279,22 +279,8 @@ public class LibraryService {
         return functions;
     }
 
-    public List<RootTemplate> findRootIconsFrom(String... data) {
-        Predicate<? super Stat> predicate = stat -> {
-            for (int i = 0; i < data.length; i += 2) {
-                String name = data[i];
-                String value = data[i + 1];
-                if (stat.getField(name) == null || !stat.getField(name).contains(value)) {
-                    return false;
-                }
-            }
-            return true;
-        };
-        return findRootIconsFrom(predicate);
-    }
-
     public List<RootTemplate> findRootIconsFrom(Predicate<? super Stat> predicate) {
-        return archive.stats.getArmor().values().stream()
+        return archive.stats.byName().values().stream()
                     .filter(predicate)
                     .map(stat -> stat.getField("RootTemplate"))
                     .filter(Objects::nonNull)

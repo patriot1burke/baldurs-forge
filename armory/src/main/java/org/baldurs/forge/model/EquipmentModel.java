@@ -18,13 +18,16 @@ public class EquipmentModel {
         public int armorClass;
         public String weaponType;
         public String armorType;
-        public Set<String> weaponProperties;
+        public List<String> weaponProperties;
         public String icon;
+        public String damage;
+        public String damageType;
+        public String versatileDamage;
 
         public EquipmentModel() {
         }
 
-        public EquipmentModel(String id, EquipmentType type, EquipmentSlot slot, Rarity rarity, String name, String description, String boostDescription, int armorClass, String weaponType, String armorType, Set<String> weaponProperties, String icon) {
+        public EquipmentModel(String id, EquipmentType type, EquipmentSlot slot, Rarity rarity, String name, String description, String boostDescription, int armorClass, String weaponType, String armorType, List<String> weaponProperties, String icon, String damage, String damageType, String versatileDamage) {
                 this.id = id;
                 this.type = type;
                 this.slot = slot;
@@ -37,6 +40,9 @@ public class EquipmentModel {
                 this.armorType = armorType;
                 this.weaponProperties = weaponProperties;
                 this.icon = icon;
+                this.damage = damage;
+                this.damageType = damageType;
+                this.versatileDamage = versatileDamage;
         }
 
         public static String toJson(List<EquipmentModel> models) {
@@ -50,7 +56,7 @@ public class EquipmentModel {
         }
 
         public static EquipmentModel from(Equipment equipment) {
-                return new EquipmentModel(equipment.id(), equipment.type(), equipment.slot(), equipment.rarity(), equipment.name(), equipment.description(), equipment.boostDescription(), equipment.armorClass(), equipment.weaponType(), equipment.armorType(), equipment.weaponProperties(), equipment.icon());
+                return new EquipmentModel(equipment.id(), equipment.type(), equipment.slot(), equipment.rarity(), equipment.name(), equipment.description(), equipment.boostDescription(), equipment.armorClass(), equipment.weaponType(), equipment.armorType(), equipment.weaponProperties(), equipment.icon(), equipment.damage(), equipment.damageType(), equipment.versatileDamage());
         }
 
 }

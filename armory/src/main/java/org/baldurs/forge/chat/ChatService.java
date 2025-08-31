@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.baldurs.forge.builder.BodyArmorBuilder;
 import org.baldurs.forge.builder.ModPackager;
+import org.baldurs.forge.builder.WeaponBuilder;
 import org.baldurs.forge.chat.actions.MessageAction;
 import org.baldurs.forge.context.ChatContext;
 import org.baldurs.forge.context.ClientMemoryStore;
@@ -27,6 +28,8 @@ public class ChatService {
     @Inject
     BodyArmorBuilder bodyArmorBuilder;
 
+    @Inject
+    WeaponBuilder weaponBuilder;
 
     @Inject
     ModPackager modPackager;
@@ -39,6 +42,7 @@ public class ChatService {
     @PostConstruct
     public void init() {
         chatFrames.put(BodyArmorBuilder.class.getName(), bodyArmorBuilder);
+        chatFrames.put(WeaponBuilder.class.getName(), weaponBuilder);
         chatFrames.put(ModPackager.class.getName(), modPackager);
     }
 

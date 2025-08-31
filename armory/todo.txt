@@ -1,3 +1,9 @@
+* expand boost macro support
+* Show spell/skill tooltips
+* add ring, amulet, glove, boot creation.
+* Clean up chat history where appropriate on server side.
+* Ability to override responses from chat.
+
 RAG Improvements:
 * Review created documents that are being fed into vector DB
 * Create a SQL DB of equipment items, generate a SQL query based on that

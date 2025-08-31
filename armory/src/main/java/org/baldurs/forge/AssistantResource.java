@@ -45,62 +45,13 @@ public class AssistantResource {
 	
 
 	@POST
-	@Path("/ask")
+	@Path("/chat")
 	@Produces(MediaType.TEXT_PLAIN)
-	public ChatContext naturalLanguage(ChatContext context) throws Exception {
+	public ChatContext chat(ChatContext context) throws Exception {
 
 		Log.info("CHAT: " + context.memoryId());
 		chat.chat(context);
 		return context;
-	}
-
-	
-
-	/**
-	 * Handles file upload for mod files.
-	 */
-	@POST
-	@Path("/upload")
-	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response uploadFile(InputStream fileInputStream, @QueryParam("filename") String filename) throws Exception {
-		LOG.info("Uploading file: " + filename);
-		try {
-			if (fileInputStream == null) {
-				return Response.status(Status.BAD_REQUEST)
-					.entity("{\"error\": \"No file provided\"}")
-					.build();
-			}
-
-			// Use provided filename or generate unique one if not provided
-			if (filename == null || filename.isEmpty()) {
-				filename = "upload_" + UUID.randomUUID().toString() + ".pak";
-			}
-
-			// Create uploads directory if it doesn't exist
-			java.nio.file.Path uploadsDir = library.modsPath();
-			if (!Files.exists(uploadsDir)) {
-				Files.createDirectories(uploadsDir);
-			}
-
-			// Save the file
-			java.nio.file.Path filePath = uploadsDir.resolve(filename);
-			Files.copy(fileInputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
-
-			LOG.info("File uploaded successfully: " + filePath.toString());
-			equipmentDB.uploadMod(filePath);
-
-			// Return success response
-			return Response.ok()
-				.entity("{\"message\": \"File uploaded successfully\", \"filename\": \"" + filename + "\"}")
-				.build();
-
-		} catch (IOException e) {
-			LOG.error("Error uploading file: " + e.getMessage(), e);
-			return Response.status(Status.INTERNAL_SERVER_ERROR)
-				.entity("{\"error\": \"Failed to upload file: " + e.getMessage() + "\"}")
-				.build();
-		}
 	}
 
 	@POST

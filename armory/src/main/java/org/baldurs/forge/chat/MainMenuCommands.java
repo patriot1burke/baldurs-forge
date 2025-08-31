@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.baldurs.forge.builder.BodyArmorBuilder;
 import org.baldurs.forge.builder.ModPackager;
+import org.baldurs.forge.builder.WeaponBuilder;
 import org.baldurs.forge.chat.actions.ImportModAction;
 import org.baldurs.forge.chat.actions.ListEquipmentAction;
 import org.baldurs.forge.chat.actions.MessageAction;
@@ -30,6 +31,9 @@ public class MainMenuCommands {
     BodyArmorBuilder bodyArmorBuilder;
 
     @Inject
+    WeaponBuilder weaponBuilder;
+
+    @Inject
     ChatService chatService;
 
     @Inject
@@ -40,7 +44,7 @@ public class MainMenuCommands {
 
    
 
-    @Tool("Search for armor or weapons in the equipment database based on a natural language query")
+    @Tool("Search for armor or weapons or rings or amulets or boots or gloves or helmets or shields in the equipment database based on a natural language query")
     public String searchEquipmentDatabase(String query) {
         Log.info("Searching equipment database for: " + query);
         List<EquipmentModel> models = equipmentDB.ragSearch(query);
@@ -52,7 +56,7 @@ public class MainMenuCommands {
         }
     }
 
-    @Tool("Find armor or weapons in the equipment database by name")
+    @Tool("Find armor or weapons or rings or amulets or boots or gloves or helmets or shields in the equipment database by name")
     public String findEquipmentByName(String name) {
         Log.info("Finding equipment by name: " + name);
         EquipmentModel model = equipmentDB.findByName(name);
@@ -67,6 +71,12 @@ public class MainMenuCommands {
     public String createNewBodyArmor(String userMessage) {
         Log.info("Creating new body armor");
         return bodyArmorBuilder.chat(context.memoryId(), context.userMessage());
+    }
+
+    @Tool("Create new weapon.")
+    public String createNewWeapon(String userMessage) {
+        Log.info("Creating new weapon");
+        return weaponBuilder.chat(context.memoryId(), context.userMessage());
     }
 
     @Tool("Find all values for data attribute by name.   This is a raw data untyped query.")

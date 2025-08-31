@@ -1,5 +1,6 @@
 package org.baldurs.forge.model;
 
+import java.util.List;
 import java.util.Set;
 
 import org.baldurs.forge.scanner.RootTemplate;
@@ -17,9 +18,12 @@ public record Equipment(
     String weaponType,
     String armorType,
     int armorClass,
-    Set<String> weaponProperties,
+    List<String> weaponProperties,
     RootTemplate rootTemplate,
-    StatsArchive.Stat stat
+    StatsArchive.Stat stat,
+    String damage,
+    String damageType,
+    String versatileDamage
 ) {
 
 

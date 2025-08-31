@@ -18,11 +18,20 @@ hey, a BG3 natural language search and mod creator chatbot might be good.
 * I wanted to relearn JQuery and CSS
 * I wanted to seriously test drive Cursor AI IDE
 
-# Architectural Lessons Learned
+# Lessons Learned
+
+The most frustrating thing about developing an AI chatbot was how wildly inconsistent it was.  Stuff that would work one day (or one week, or one month even!)
+would not work the next.  This caused me to constantly refine how I was working with it.  This was most of the work: getting consistent and deterministic results from the AI.  
+It could be the model I was using (OpenAI 4o).  I will eventually try other models.  My $5 bet?  That this application will not work with another model at all :)
+
+Here's more specific lessons learned:
 
 ## Keep prompts specific
 
 ## Provide examples with example input and output.  Or example input and what action you want the AI to take
+
+The MainMenuCommands toolbox did not work until I provided examples of input and actions to take based on that input.  Without
+those example, the AI was really inconsistent.  Sometimes it would call a tool, sometimes it wouldn't.
 
 ## You cannot trust the AI to provide consistently formatted output.
 
@@ -30,6 +39,14 @@ I honestly gave up on trying to get the AI to output HTML.  I even tried returni
 and the AI would just ignore it, interpret the response from the tool and output anything it wanted.  No matter what I put in the
 prompt, OpenAI would almost always return Markdown.  I was able to get it to output strict json schema, but sometimes it would return
 any json embedded within Markdown.  It was very frustrating
+
+## Need to communicate session state between tools and client
+
+For the, browser clients and server-side prompts and tool methods to even be able to work, I needed a way to pass session
+information between them.  Chat memory just wasn't enough.  In fact, chat memory often caused problems (see other issues).
+
+I called this a ChatContext and it could hold state that could be passed between the client and server and between tools spanning
+multiple calls.  I'll explain more about this in architecture section.
 
 ## Your client code should format complex visual responses itself
 
@@ -42,7 +59,8 @@ and the client would format thing based on rich data structure created by my cod
 
 I originally had my search return multiple items in a json array and I'd ask the AI to list and summarize the search.
 Sometimes it would provide a numbered list.  Sometimes bulleted.  Sometimes it would produce a paragraph with the names
-of things that it found.
+of things that it found. Thus, I couldn't create a consistent and nice looking UI.  I gave up trying to get the AI to produce
+nice output.
 
 ## void tool responses confuse the AI
 
@@ -54,12 +72,36 @@ when `listEquipment` was called.
 
 For example, I had a search tool method that took a string query parameter.  The AI would look at the user message and extract
 keywords before calling the search method.  This would screw up search results.  I had to manually make the raw user message
-available to the tool function.
+available to the tool function.  Context matters and keywords can lose context.
 
-## Need to communicate session state between tools and client
+Here's a better example:
 
-For the, browser clients and server-side prompts and tool methods to even be able to work, I needed a way to pass session
-information between them.  Chat memory just wasn't enough.
+This happened also with the BoostBuilderChat. I would call it with setBoost/addBoost tool methods.  I would have a prompt of
+
+"create new longsword with boost of +3"
+
+Only "+3" would be sent to the boost prompt and it would not know if it was armor or a weapon and didn't know whether to 
+output AC(3) or WeaponEnchantment(3).
+Again, I had to send get access to the original user message and send that to the BoostBuilderChat.
+
+## Chat memory can confuse the AI
+
+When I invoked the BoostBuilderChat, I would recycle the memory id of the conversation.  The 2nd time add boost was called
+the BoostBuilderChat would convert the user message, but *ALSO* would look in chat history and convert a previous add boost user message request.
+
+User:  add boost advantage on saving throws
+AI: Ai would return Advantage(SavingThrows) from BoostBuilderChat call
+User:  add boost +3 weapon enchantment
+AI:  Ai would return Advantage(SavingThrows);WeaponEnchantment(3)
+
+To solve this, I removed the @MemoryId parameter to the boost tool method.
+
+## You can't guarantee that the AI will call a tool
+
+I used to have BoostBuilderChat as part of the @ToolBox for WeaponBuilderChat.buildWeapon (and the other builders).  For a long long time
+it would consistently convert a boost description to a boost macro by calling BoostBuilderChat before invoking setBoost/addBoost tool methods.
+*Then it just stopped working consistently!!!*  For no reason at all OpenAI would or would not call the boost builder chat. It was different every time.
+
 
 # Architecture
 
