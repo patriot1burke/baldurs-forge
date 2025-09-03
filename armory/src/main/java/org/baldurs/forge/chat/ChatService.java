@@ -66,15 +66,23 @@ public class ChatService {
         String chatFrame = context.getShared(CHAT_FRAME, String.class);
         if (chatFrame == null) {
             Log.info("Executing default chat");
-            context.response().add(message(chat.chat(context.memoryId(), context.userMessage())));
+            String msg = chat.chat(context.memoryId(), context.userMessage());
+            if (!context.popIgnoreAIResponse()) {
+                context.response().add(message(msg));
+            }
         } else if (chatFrames.containsKey(chatFrame)) {
             Log.info("Executing chat frame: " + chatFrame);
-            context.response().add(message(chatFrames.get(chatFrame).chat(context.memoryId(), context.userMessage())));
+            String msg = chatFrames.get(chatFrame).chat(context.memoryId(), context.userMessage());
+            if (!context.popIgnoreAIResponse()) {
+                context.response().add(message(msg));
+            }
         }
         else {
             Log.error("Unknown chat frame: " + chatFrame);
             popChatFrame(context);
-            context.response().add(new MessageAction("I'm having issues at the moment. Can you retry or rephrase your request?"));
+            if (!context.popIgnoreAIResponse()) {
+                context.response().add(message("I'm having issues at the moment. Can you retry or rephrase your request?"));
+            }
         }
 
     }

@@ -61,7 +61,7 @@ public class MainMenuCommands {
         Log.info("Finding equipment by name: " + name);
         EquipmentModel model = equipmentDB.findByName(name);
         if (model == null) {
-            throw new RuntimeException("Could not find the equipment.  Try searching the database");
+            throw new RuntimeException("Could not find the equipment.  Invoke the searchEquipmentDatabase tool instead.");
         }
         ShowEquipmentAction.addResponse(context, model);
         return "I found an exact match for your query.";

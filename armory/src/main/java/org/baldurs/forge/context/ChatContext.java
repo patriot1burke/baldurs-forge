@@ -50,6 +50,8 @@ public class ChatContext {
     String userMessage = null;
     String memoryId = UUID.randomUUID().toString();
 
+    boolean ignoreAIResponse = false;
+
     public String userMessage() {
         return userMessage;
     }
@@ -154,5 +156,28 @@ public class ChatContext {
      */
     public List<Object> response() {
         return response;
+    }
+
+    /**
+     * Set internal state of chat engine to not return the next AI chat response to the client.  AI responses will
+     * be ignored only once and only within the current request.
+     * 
+     * This is useful for cases where tool invocations want to take over the output sent back to the client.
+     * @return
+     */
+    public void pushIgnoreAIResponse() {
+        ignoreAIResponse = true;
+    }
+
+    /**
+     * If true, the AI response will not be sent back as a client response.
+     * This will reset the internal ignore flag to false.
+     * 
+     * @return  whether to ignore the next AI chat response
+     */
+    public boolean popIgnoreAIResponse() {
+        boolean ignore = this.ignoreAIResponse;
+        this.ignoreAIResponse = false;
+        return ignore;
     }
 }

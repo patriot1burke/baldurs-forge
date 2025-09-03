@@ -86,6 +86,12 @@ Input: +5 Bow
 Output: WeaponEnchantment(5)
 Input: Add +2 enchantment to weapon
 Output: WeaponEnchantment(2)
+Input with +3 boost
+Output: WeaponEnchantment(3)
+Input add +3 boost
+Output: WeaponEnchantment(3)
+Input set a +3 boost
+Output: WeaponEnchantment(3)
 
 
 

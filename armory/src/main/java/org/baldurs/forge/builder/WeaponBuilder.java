@@ -81,9 +81,7 @@ public class WeaponBuilder implements ChatFrame {
             }
         }
         Log.info("Current JSON: " + currentJson);
-        String response = agent.buildWeapon(context.memoryId(), "weapon", WeaponModel.schema, currentJson, userMessage);
-        String html = renderer.markdownToHtml(response);
-        return html;
+        return agent.buildWeapon(context.memoryId(), "weapon", WeaponModel.schema, currentJson, userMessage);
     }
 
 
@@ -200,7 +198,9 @@ public class WeaponBuilder implements ChatFrame {
         }
         newEquipment.weapons.put(current.name, current);
         context.setShared(NewModModel.NEW_EQUIPMENT, newEquipment);
+        context.response().add(new MessageAction("Weapon finished!"));
         context.response().add(new UpdateNewEquipmentAction("To create and export a mod containing your newly built weapon, tell me to '" + ModPackager.PACKAGE_MODE_CHAT_COMMAND + "'"));
+        context.pushIgnoreAIResponse();
         Log.info("Finishing weapon");
         String weaponJson = logJson(current);
         return weaponJson;
@@ -271,7 +271,7 @@ public class WeaponBuilder implements ChatFrame {
             String properties = stat.getField("Proficiency Group");
             return properties != null && properties.contains(searchString);
         });
-        String html = "<ul>";
+        String html = "<ul class=\"icon-list\">";
         for (RootTemplate rootTemplate : rootTemplates) {
             html += "<li><img src=\"" + library.icons().get(rootTemplate.resolveIcon()) + "\" height=\"64\" width=\"64\"/> " + rootTemplate.MapKey + "</li>";
         }
@@ -280,8 +280,11 @@ public class WeaponBuilder implements ChatFrame {
         String message = "There are " + rootTemplates.size() + " visual models available. Choose one of the parent ids from the list above if you want a different look for your weapon.";
         context.response().add(new MessageAction(message));
 
-        // Had to return something because AI would specify that nothing was found.
-        // I really wanted to just return html via the context.response() and output nothing and let the client render the html however it wants.
+        // Ignore the next AI chat response because the AI often says it cannot find anything
+        // if a data list is not sent back as a tool result.
+        context.pushIgnoreAIResponse();
+
+        // Had to return something because AI would get confused sometimes.
         return message;
     }
 

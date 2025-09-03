@@ -79,9 +79,7 @@ public class BodyArmorBuilder implements ChatFrame {
             }
         }
         Log.info("Current JSON: " + currentJson);
-        String response = agent.buildBodyArmor(context.memoryId(), "body armor", BodyArmorModel.schema, currentJson, userMessage);
-        String html = renderer.markdownToHtml(response);
-        return html;
+        return agent.buildBodyArmor(context.memoryId(), "body armor", BodyArmorModel.schema, currentJson, userMessage);
     }
 
 
@@ -188,7 +186,9 @@ public class BodyArmorBuilder implements ChatFrame {
         }
         newEquipment.bodyArmors.put(current.name, current);
         context.setShared(NewModModel.NEW_EQUIPMENT, newEquipment);
+        context.response().add(new MessageAction("Body armor finished!"));
         context.response().add(new UpdateNewEquipmentAction("To create and export a mod containing your newly built body armor, tell me to '" + ModPackager.PACKAGE_MODE_CHAT_COMMAND + "'"));
+        context.pushIgnoreAIResponse();
         Log.info("Finishing body armor");
         String armorJson = logBodyArmorJson(current);
         return armorJson;
@@ -255,7 +255,7 @@ public class BodyArmorBuilder implements ChatFrame {
         }
         Log.info("Finding visual models for body armor type: " + armor.type.name());
         List<RootTemplate> rootTemplates = library.findRootIconsFrom(stat -> stat.getField("ArmorType") != null && stat.getField("ArmorType").equals(armor.type.name()) && stat.getField("Slot") != null && stat.getField("Slot").equals("Breast"));
-        String html = "<ul>";
+        String html = "<ul class=\"icon-list\">";
         for (RootTemplate rootTemplate : rootTemplates) {
             html += "<li><img src=\"" + library.icons().get(rootTemplate.resolveIcon()) + "\" height=\"64\" width=\"64\"/> " + rootTemplate.MapKey + "</li>";
         }
@@ -264,8 +264,11 @@ public class BodyArmorBuilder implements ChatFrame {
         String message = "There are " + rootTemplates.size() + " visual models available. Choose one of the parent ids from the list above if you want a different look for your body armor.";
         context.response().add(new MessageAction(message));
 
-        // Had to return something because AI would specify that nothing was found.
-        // I really wanted to just return html via the context.response() and output nothing and let the client render the html however it wants.
+        // Ignore the next AI chat response because the AI often says it cannot find anything
+        // if a data list is not sent back as a tool result.
+        context.pushIgnoreAIResponse();
+
+        // Had to return something because AI would get confused sometimes.
         return message;
     }
 
