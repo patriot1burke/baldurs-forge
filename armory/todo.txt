@@ -5,10 +5,10 @@
 * Move show visuals rendering to client.  Just pass back an action that contains json list of icons and ids.
 * add ring, amulet, glove, boot creation.
 * make ChatService more generic
-** Have the ChatFrame interface be String chat(); with no parameters.  Force user to write delegates to @RegisterAIService
-** returning null means no response message.
-** Force user to register delegates on startup.
-** Create a delegate abstract superclass to do things like registration. (if creating a quarkus extension, just scan for beans that implement the chat interface and do the registration)
+** ChatFrame returning null means no response message.
+** Force user to register chat frames on startup.  
+** Force user to register a default.
+** method to set a renderer
 ** rename it to ChatFrameService
 * expand boost macro support
 * Show spell/skill tooltips
