@@ -1,8 +1,17 @@
+* DONE Ability to override responses from chat.
+
+* Clean up chat history where appropriate on server side.
+* Create a builder superclass.  Try to abtract as much as possible.
+* Move show visuals rendering to client.  Just pass back an action that contains json list of icons and ids.
+* add ring, amulet, glove, boot creation.
+* make ChatService more generic
+** Have the ChatFrame interface be String chat(); with no parameters.  Force user to write delegates to @RegisterAIService
+** returning null means no response message.
+** Force user to register delegates on startup.
+** Create a delegate abstract superclass to do things like registration. (if creating a quarkus extension, just scan for beans that implement the chat interface and do the registration)
+** rename it to ChatFrameService
 * expand boost macro support
 * Show spell/skill tooltips
-* add ring, amulet, glove, boot creation.
-* Clean up chat history where appropriate on server side.
-* Ability to override responses from chat.
 
 RAG Improvements:
 * Review created documents that are being fed into vector DB
