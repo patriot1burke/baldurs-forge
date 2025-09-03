@@ -43,7 +43,6 @@ import jakarta.enterprise.context.RequestScoped;
 @RequestScoped
 public class ChatContext {
 
-    Map<String, Object> serverContext = new HashMap<>();
     Map<String, Object> sharedContext = new HashMap<>();
 
     List<Object> response = new ArrayList<>();
@@ -65,16 +64,6 @@ public class ChatContext {
 
     public void setUserMessage(String userMessage) {
         this.userMessage = userMessage;
-    }
-
-    /**
-     * Data used to serve current request. This is not shared or sent back to remote
-     * chat client.
-     * 
-     * @return
-     */
-    public Map<String, Object> serverContext() {
-        return serverContext;
     }
 
     /**
@@ -159,7 +148,7 @@ public class ChatContext {
     }
 
     /**
-     * Arbitrary list of response objects set back to client.
+     * Arbitrary list of response objects serialized to JSON and sent back to client.  
      * 
      * @return
      */
