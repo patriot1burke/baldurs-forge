@@ -10,7 +10,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.baldurs.forge.chat.ChatFrame;
-import org.baldurs.forge.chat.ChatService;
+import org.baldurs.forge.chat.ChatFrameService;
 import org.baldurs.forge.chat.actions.ListVisualModelsAction;
 import org.baldurs.forge.chat.actions.MessageAction;
 import org.baldurs.forge.chat.actions.UpdateNewEquipmentAction;
@@ -48,7 +48,7 @@ public abstract class EquipmentBuilder implements ChatFrame {
     ObjectMapper mapper;
 
     @Inject
-    ChatService chatService;
+    ChatFrameService chatService;
 
     @Inject
     RenderService renderer;

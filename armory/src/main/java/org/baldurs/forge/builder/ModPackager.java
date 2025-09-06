@@ -14,7 +14,7 @@ import org.baldurs.archivist.PackageWriter;
 import org.baldurs.archivist.LS.Converter;
 import org.baldurs.archivist.LS.PackedVersion;
 import org.baldurs.forge.chat.ChatFrame;
-import org.baldurs.forge.chat.ChatService;
+import org.baldurs.forge.chat.ChatFrameService;
 import org.baldurs.forge.chat.actions.ListEquipmentAction;
 import org.baldurs.forge.chat.actions.MessageAction;
 import org.baldurs.forge.chat.actions.PackageModAction;
@@ -45,7 +45,7 @@ public class ModPackager implements ChatFrame {
     ChatContext context;
 
     @Inject
-    ChatService chatService;
+    ChatFrameService chatService;
 
     @Inject
     EquipmentBuilderChat agent;

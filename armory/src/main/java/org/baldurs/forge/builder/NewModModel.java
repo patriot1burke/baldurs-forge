@@ -33,7 +33,7 @@ NewModModel {
 
     @JsonIgnore
     public boolean isEmpty() {
-        return bodyArmors == null || bodyArmors.isEmpty();
+        return count == 0;
     }
 
     public void addEquipment(BaseModel equipment) {

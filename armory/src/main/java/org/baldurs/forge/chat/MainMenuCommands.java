@@ -16,6 +16,7 @@ import org.baldurs.forge.services.LibraryService;
 
 import dev.langchain4j.agent.tool.Tool;
 import io.quarkus.logging.Log;
+import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -34,7 +35,7 @@ public class MainMenuCommands {
     WeaponBuilder weaponBuilder;
 
     @Inject
-    ChatService chatService;
+    ChatFrameService chatService;
 
     @Inject
     LibraryService library;
@@ -42,7 +43,16 @@ public class MainMenuCommands {
     @Inject
     ModPackager modPackager;
 
-   
+    @Inject
+    MainMenuChat chat;
+
+
+
+    @Startup
+    public void start() {
+        chatService.setDefaultChatFrame(chat);
+    }
+
 
     @Tool("Search for armor or weapons or rings or amulets or boots or gloves or helmets or shields in the equipment database based on a natural language query")
     public String searchEquipmentDatabase(String query) {
@@ -94,12 +104,18 @@ public class MainMenuCommands {
     @Tool("Show all new equipment the user has created.")
     public String showNewEquipment() {
         Log.info("showNewEquipment");
-        modPackager.showNewEquipment();
+        List<EquipmentModel> equipment = modPackager.listBuiltEquipment();
         context.suppressAIResponse();
-        // message for ai, it likes something returned sometimes 
+        if (equipment.isEmpty()) {
+            context.response().add(new MessageAction("You have not created any new equipment yet."));
+        } else {
+            context.response().add(new MessageAction("This is the equipment you have created so far:"));
+            ListEquipmentAction.addResponse(context, equipment);
+            context.response().add(new MessageAction("Ask me to <i>Package Mod</i> to package up your new equipment."));
+        }
         return "Here is all the equipment the user has created.";
     }
-
+    
     @Tool("Delete new equipment item by name.")
     public String deleteNewEquipmentByName(String name) {
         Log.info("deleteNewEquipment: " + name);

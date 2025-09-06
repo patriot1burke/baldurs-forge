@@ -10,7 +10,7 @@ import java.util.UUID;
 
 import org.baldurs.forge.builder.ModPackager;
 import org.baldurs.forge.builder.NewModModel;
-import org.baldurs.forge.chat.ChatService;
+import org.baldurs.forge.chat.ChatFrameService;
 import org.baldurs.forge.context.ChatContext;
 import org.baldurs.forge.services.EquipmentDB;
 import org.baldurs.forge.services.LibraryService;
@@ -41,7 +41,7 @@ public class AssistantResource {
 	EquipmentDB equipmentDB;
 
 	@Inject
-	ChatService chat;
+	ChatFrameService chat;
 	
 
 	@POST

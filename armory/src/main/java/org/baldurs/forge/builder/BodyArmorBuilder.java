@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.baldurs.forge.chat.ChatFrame;
-import org.baldurs.forge.chat.ChatService;
+import org.baldurs.forge.chat.ChatFrameService;
 import org.baldurs.forge.chat.actions.MessageAction;
 import org.baldurs.forge.chat.actions.UpdateNewEquipmentAction;
 import org.baldurs.forge.chat.RenderService;

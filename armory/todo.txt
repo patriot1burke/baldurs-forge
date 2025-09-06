@@ -1,15 +1,15 @@
-* DONE Ability to override responses from chat.
+DONE * Ability to override responses from chat.
+DONE * Create a builder superclass.  Try to abtract as much as possible.
+DONE * Move show visuals rendering to client.  Just pass back an action that contains json list of icons and ids.
+DONE * make ChatService more generic
+DONE ** rename it to ChatFrameService
+DONE ** ChatFrame returning null means no response message.
+DONE ** Force user to register chat frames on startup.  
+DONE ** Force user to register a default.
 
 * Clean up chat history where appropriate on server side.
-* Create a builder superclass.  Try to abtract as much as possible.
-* Move show visuals rendering to client.  Just pass back an action that contains json list of icons and ids.
 * add ring, amulet, glove, boot creation.
-* make ChatService more generic
-** ChatFrame returning null means no response message.
-** Force user to register chat frames on startup.  
-** Force user to register a default.
-** method to set a renderer
-** rename it to ChatFrameService
+* method to set a renderer on ChatFrameService
 * expand boost macro support
 * Show spell/skill tooltips
 

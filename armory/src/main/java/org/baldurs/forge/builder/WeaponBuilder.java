@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import org.baldurs.forge.chat.ChatFrame;
-import org.baldurs.forge.chat.ChatService;
+import org.baldurs.forge.chat.ChatFrameService;
 import org.baldurs.forge.chat.actions.MessageAction;
 import org.baldurs.forge.chat.actions.UpdateNewEquipmentAction;
 import org.baldurs.forge.chat.RenderService;
