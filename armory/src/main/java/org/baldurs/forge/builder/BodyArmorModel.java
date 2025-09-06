@@ -6,7 +6,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.baldurs.forge.model.EquipmentModel;
+import org.baldurs.forge.model.EquipmentSlot;
+import org.baldurs.forge.model.EquipmentType;
 import org.baldurs.forge.model.Rarity;
+import org.baldurs.forge.scanner.RootTemplate;
+import org.baldurs.forge.scanner.StatsArchive;
+import org.baldurs.forge.services.BoostService;
+import org.baldurs.forge.services.BoostService.BoostWriter;
+import org.baldurs.forge.services.LibraryService;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -43,22 +51,37 @@ public class BodyArmorModel extends BaseModel {
     public static final String schema;
 
     static {
-        // TODO:  can call JsonSchemas.jsonSchemaFrom(BodyArmorModel.class) directly after my langchain4j patch is merged and released
-        // right now langchain4j does not look at super classes for the schema
-        JsonObjectSchema baseModelSchema = BaseModel.schema();
-        JsonObjectSchema bodyArmorSchema = (JsonObjectSchema)JsonSchemas.jsonSchemaFrom(BodyArmorModel.class).get().rootElement();
-        Set<String> required = new HashSet<>(baseModelSchema.required());
-        required.addAll(bodyArmorSchema.required());
-        Map<String, JsonSchemaElement> properties = new HashMap<>(baseModelSchema.properties());
-        properties.putAll(bodyArmorSchema.properties());
-        JsonSchema.Builder builder = JsonSchema.builder();
-        JsonObjectSchema rootElement = JsonObjectSchema.builder()
-                                        .addProperties(properties)
-                                        .required(new ArrayList<>(required))
-                                        .build();
-        builder.name("bodyArmor")
-               .rootElement(rootElement);
-        schema = builder.build().toString();
+        schema = SchemaUtil.schema(BodyArmorModel.class, "bodyArmor");
+    }
+
+    @Override
+    public String schema() {
+        return schema;
+    }
+
+    @Override
+    public String type() {
+        return TYPE;
+    }
+
+    @Override
+    public String baseStat() {
+        return type == null ? null : type.baseStat;
+    }
+
+    public static final String TYPE = "bodyArmor";
+
+    public EquipmentModel toEquipmentModel(BoostService boostService, LibraryService library) {
+        EquipmentModel equipment = super.toEquipmentModel(boostService, library);
+        StatsArchive.Stat stat = library.archive().getStats().getByName(type.baseStat);
+        equipment.type = EquipmentType.Armor;
+        equipment.slot = EquipmentSlot.Breast;
+        if (armorClass == null) {
+            equipment.armorClass = Integer.parseInt(stat.getField("ArmorClass"));
+        } else {
+            equipment.armorClass = armorClass;
+        }
+        return equipment;
     }
 
 }

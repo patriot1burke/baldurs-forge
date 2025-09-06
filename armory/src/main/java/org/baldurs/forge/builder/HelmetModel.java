@@ -6,7 +6,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.baldurs.forge.model.EquipmentModel;
+import org.baldurs.forge.model.EquipmentSlot;
+import org.baldurs.forge.model.EquipmentType;
 import org.baldurs.forge.model.Rarity;
+import org.baldurs.forge.services.BoostService;
+import org.baldurs.forge.services.LibraryService;
 
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
@@ -28,26 +33,31 @@ public class HelmetModel extends AppendageModel {
     public static final String schema;
 
     static {
-        // TODO:  can call JsonSchemas.jsonSchemaFrom(BodyArmorModel.class) directly after my langchain4j patch is merged and released
-        // right now langchain4j does not look at super classes for the schema
-        JsonObjectSchema baseModelSchema = BaseModel.schema();
-        JsonObjectSchema appendageSchema = AppendageModel.schema();
-        JsonObjectSchema modelSchema = (JsonObjectSchema)JsonSchemas.jsonSchemaFrom(HelmetModel.class).get().rootElement();
-        Set<String> required = new HashSet<>(baseModelSchema.required());
-        required.addAll(baseModelSchema.required());
-        required.addAll(appendageSchema.required());
-        required.addAll(modelSchema.required());
-        Map<String, JsonSchemaElement> properties = new HashMap<>(baseModelSchema.properties());
-        properties.putAll(baseModelSchema.properties());
-        properties.putAll(appendageSchema.properties());
-        properties.putAll(modelSchema.properties());
-        JsonSchema.Builder builder = JsonSchema.builder();
-        JsonObjectSchema rootElement = JsonObjectSchema.builder()
-                                        .addProperties(properties)
-                                        .required(new ArrayList<>(required))
-                                        .build();
-        builder.name("helmet")
-               .rootElement(rootElement);
-        schema = builder.build().toString();
+        schema = SchemaUtil.schema(HelmetModel.class, "helmet");
     }
+
+    @Override
+    public String schema() {
+        return schema;
+    }
+
+    @Override
+    public String type() {
+        return TYPE;
+    }
+
+    @Override
+    public String baseStat() {
+        return "ARM_Circlet";
+    }
+
+    public static final String TYPE = "helmet";
+
+    public EquipmentModel toEquipmentModel(BoostService boostService, LibraryService library) {
+        EquipmentModel equipment = super.toEquipmentModel(boostService, library);
+        equipment.type = EquipmentType.Armor;
+        equipment.slot = EquipmentSlot.Helmet;
+        return equipment;
+    }
+
 }

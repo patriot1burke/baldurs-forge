@@ -11,8 +11,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 @RegisterAiService(chatMemoryProviderSupplier = MessageWindowClientMemoryProvider.class)
-public interface WeaponBuilderChat {
+public interface WeaponBuilderChat extends BuilderChat {
+    @Override
     @SystemMessage(fromResource = "prompts/equipmentBuilder.txt")
     @ToolBox({WeaponBuilder.class})
-    public String buildWeapon(@MemoryId String memoryId, String type, String schema, String currentJson, @UserMessage String userMessage);
+    public String build(@MemoryId String memoryId, String type, String schema, String currentJson, @UserMessage String userMessage);
 }

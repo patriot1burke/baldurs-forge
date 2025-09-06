@@ -23,6 +23,7 @@ import org.baldurs.forge.context.ChatContext;
 import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.scanner.RootTemplate;
 import org.baldurs.forge.scanner.StatsArchive;
+import org.baldurs.forge.services.BoostService;
 import org.baldurs.forge.services.LibraryService;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -30,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.langchain4j.agent.tool.Tool;
 import io.quarkus.logging.Log;
+import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -54,6 +56,9 @@ public class ModPackager implements ChatFrame {
     @Inject
     BodyArmorBuilder bodyArmorBuilder;
 
+    @Inject
+    BoostService boostService;
+
     ObjectMapper mapper;
 
     @PostConstruct
@@ -62,13 +67,19 @@ public class ModPackager implements ChatFrame {
         mapper.setSerializationInclusion(Include.NON_NULL);
     }
 
+    @Startup
+    public void start() {
+        chatService.register(ModPackager.class.getName(), this);
+    }
+
+
     @Override
     public String chat(String memoryId, String userMessage) {
         NewModModel newEquipment = context.getShared(NewModModel.NEW_EQUIPMENT, NewModModel.class);
         if (newEquipment == null) {
             return "You have not created any new equipment to package.";
         }
-        chatService.setChatFrame(context, ModPackager.class);
+        chatService.setChatFrame(context, ModPackager.class.getName());
         String currentJson = "{}";
         PackageModel current = null;
         if ((current = context.getShared(CURRENT_PACKAGE, PackageModel.class)) != null) {
@@ -124,13 +135,7 @@ public class ModPackager implements ChatFrame {
         if (newEquipment == null || newEquipment.isEmpty()) {
             return Collections.EMPTY_LIST;
         }
-        List<EquipmentModel> equipment = new ArrayList<>();
-        if (newEquipment.bodyArmors != null) {
-            for (BodyArmorModel bodyArmor : newEquipment.bodyArmors.values()) {
-                equipment.add(bodyArmorBuilder.bodyArmorModelToEquipmentModel(bodyArmor));
-            }
-        }
-        return equipment;
+        return newEquipment.toEquipmentModels(boostService, library);
     }
 
     public void showNewEquipment() {
@@ -152,21 +157,21 @@ public class ModPackager implements ChatFrame {
         if (newEquipment == null || newEquipment.isEmpty()) {
             return "No equipment to delete.";
         }
-        // todo handle when there are weapons and spells in newmodmodel.
-        boolean found = newEquipment.bodyArmors.containsKey(name);
-        if (!found) {
+
+        BaseModel equipment = newEquipment.findEquipmentByName(name);
+        if (equipment == null) {
             showNewEquipment();
             return "Equipment with name not found.";
         }
-        newEquipment.bodyArmors.remove(name);
-        newEquipment.count--;
-        if (!newEquipment.isEmpty()) {
+        newEquipment.removeEquipment(equipment);
+
+        if (newEquipment.count == 0) {
+            context.setShared(NewModModel.NEW_EQUIPMENT, null);
+        } else {
             context.setShared(NewModModel.NEW_EQUIPMENT, newEquipment);
             showNewEquipment();
-        } else {
-            context.setShared(NewModModel.NEW_EQUIPMENT, null);
         }
-
+        
         context.response().add(new UpdateNewEquipmentAction(null));
 
         return "Equipment deleted.";
@@ -177,14 +182,13 @@ public class ModPackager implements ChatFrame {
         if (newEquipment == null || newEquipment.isEmpty()) {
             return "No equipment to update.";
         }
-        // todo handle when there are weapons and spells in newmodmodel.
-        BodyArmorModel armor = newEquipment.bodyArmors.get(name);
-        if (armor == null) {
+        BaseModel equipment = newEquipment.findEquipmentByName(name);
+        if (equipment == null) {
             showNewEquipment();
             return "Equipment with name not found.";
         }
-        context.setShared(BodyArmorBuilder.CURRENT_BODY_ARMOR, armor);
-        return bodyArmorBuilder.chat(context.memoryId(), context.userMessage());
+        context.setShared(EquipmentBuilder.CURRENT_EQUIPMENT, equipment);
+        return chatService.getChatFrame(equipment.type()).chat(context.memoryId(), context.userMessage());
     }
 
     public void addGameObject(StringBuilder localizations, StringBuilder gameObjects, String name, String description,

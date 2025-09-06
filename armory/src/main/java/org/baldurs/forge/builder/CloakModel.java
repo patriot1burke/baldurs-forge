@@ -15,31 +15,28 @@ import org.baldurs.forge.scanner.StatsArchive;
 import org.baldurs.forge.services.BoostService;
 import org.baldurs.forge.services.BoostService.BoostWriter;
 import org.baldurs.forge.services.LibraryService;
+import org.baldurs.forge.model.Rarity;
 
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
 import dev.langchain4j.service.output.JsonSchemas;
 
-import org.baldurs.forge.model.Rarity;
+public class CloakModel extends BaseModel {
 
-public class BootsModel extends AppendageModel {
-
-    public BootsModel(
+    public CloakModel(
             Rarity rarity,
             String name,
             String description,
-            String boostMacro,
-            ArmorCategory category,
+            String boosts,
             String parentModel) {
-        super(category, rarity, name, description, boostMacro, parentModel);
+        super(rarity, name, description, boosts, parentModel);
     }
-
 
     public static final String schema;
 
     static {
-        schema = SchemaUtil.schema(BootsModel.class, "boots");
+        schema = SchemaUtil.schema(CloakModel.class, "cloak");
     }
 
     @Override
@@ -53,16 +50,15 @@ public class BootsModel extends AppendageModel {
     }
     @Override
     public String baseStat() {
-        return "ARM_Boots_Leather";
+        return "ARM_Cloak";
     }
 
-    public static final String TYPE = "boots";
+    public static final String TYPE = "cloak";
 
     public EquipmentModel toEquipmentModel(BoostService boostService, LibraryService library) {
         EquipmentModel equipment = super.toEquipmentModel(boostService, library);
-        StatsArchive.Stat stat = library.archive().getStats().getByName(baseStat());
         equipment.type = EquipmentType.Armor;
-        equipment.slot = EquipmentSlot.Boots;
+        equipment.slot = EquipmentSlot.Cloak;
         return equipment;
     }
 

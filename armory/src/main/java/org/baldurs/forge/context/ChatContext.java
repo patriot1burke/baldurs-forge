@@ -165,7 +165,7 @@ public class ChatContext {
      * This is useful for cases where tool invocations want to take over the output sent back to the client.
      * @return
      */
-    public void pushIgnoreAIResponse() {
+    public void suppressAIResponse() {
         ignoreAIResponse = true;
     }
 
@@ -175,7 +175,7 @@ public class ChatContext {
      * 
      * @return  whether to ignore the next AI chat response
      */
-    public boolean popIgnoreAIResponse() {
+    public boolean popSuppressAIResponse() {
         boolean ignore = this.ignoreAIResponse;
         this.ignoreAIResponse = false;
         return ignore;

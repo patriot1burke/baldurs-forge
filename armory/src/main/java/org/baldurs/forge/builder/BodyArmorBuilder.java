@@ -3,6 +3,7 @@ package org.baldurs.forge.builder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.baldurs.forge.chat.ChatFrame;
 import org.baldurs.forge.chat.ChatService;
@@ -24,252 +25,109 @@ import org.baldurs.forge.services.BoostService.BoostWriter;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Supplier;
 
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.service.MemoryId;
 import io.quarkus.logging.Log;
+import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 @ApplicationScoped
-public class BodyArmorBuilder implements ChatFrame {
-    public static final String CURRENT_BODY_ARMOR = "currentBodyArmor";
+public class BodyArmorBuilder extends EquipmentBuilder {
 
     @Inject
     BodyArmorBuilderChat agent;
 
-    @Inject
-    ChatContext context;
-
-    ObjectMapper mapper;
-
-    @Inject
-    ChatService chatService;
-
-    @Inject
-    RenderService renderer;
-    
-    @Inject
-    BoostService boostService;
-
-    @Inject
-    LibraryService library;
-
-    @Inject
-    BoostBuilderChat boostBuilder;
-
-
-    @PostConstruct
-    public void init() {
-        mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(Include.NON_NULL);
+    @Override
+    protected BuilderChat agent() {
+        return agent;
     }
 
-    public String chat(@MemoryId String memoryId, String userMessage) {
-        Log.info("BodyArmorBuilder.chat: " + memoryId + " " + userMessage);
-        chatService.setChatFrame(context, BodyArmorBuilder.class);
-        String currentJson = "{}";
-        BodyArmorModel current = null;
-        if ((current = context.getShared(CURRENT_BODY_ARMOR, BodyArmorModel.class)) != null) {
-            try {
-                currentJson = mapper.writeValueAsString(current);
-            } catch (Exception e) {
-                Log.warn("Error serializing body armor", e);
-            }
-        }
-        Log.info("Current JSON: " + currentJson);
-        return agent.buildBodyArmor(context.memoryId(), "body armor", BodyArmorModel.schema, currentJson, userMessage);
+    @Override
+    protected Class<? extends BaseModel> baseModelClass() {
+        return BodyArmorModel.class;
+    }
+    @Override
+    protected String schema() {
+        return BodyArmorModel.schema;
+    }
+    @Override
+    protected String type() {
+        return BodyArmorModel.TYPE;
+    }
+    @Override
+    protected Supplier<BaseModel> supplier() {
+        return () -> new BodyArmorModel();
+    }
+
+    @Startup
+    public void start() {
+        chatService.register(type(), this);
+    }
+
+ 
+    @Tool("Set the name for the current body armor.")
+    public void setName(String name) {
+        Log.info("Setting name: " + name);
+        set(current -> current.name = name);
     }
 
 
-    public void addShowEquipmentAction(BodyArmorModel armor) {
-        if (armor == null || armor.type == null) {
-            return;
-        }
-        EquipmentModel equipment = bodyArmorModelToEquipmentModel(armor);
-        ShowEquipmentAction.addResponse(context, equipment);
+    @Tool("Set the description for the current body armor.")
+    public void setDescription(String description) {
+        Log.info("Setting description: " + description);
+        set(current -> current.description = description);
     }
 
-    public EquipmentModel bodyArmorModelToEquipmentModel(BodyArmorModel armor) {
-        EquipmentModel equipment = new EquipmentModel();
-        equipment.type = EquipmentType.Armor;
-        equipment.slot = EquipmentSlot.Breast;
-        equipment.rarity = armor.rarity;
-        equipment.name = armor.name == null ? "New Body Armor" : armor.name;
-        equipment.description = armor.description;
-        if (armor.boosts != null) {
-            BoostWriter writer = boostService.html();
-            boostService.macros(armor.boosts, writer);
-            equipment.boostDescription = writer.toString();
-        } else {
-            equipment.boostDescription = "";
-        }
-        StatsArchive.Stat stat = library.archive().getStats().getByName(armor.type.baseStat);
-        if (armor.armorClass == null) {
-            equipment.armorClass = Integer.parseInt(stat.getField("ArmorClass"));
-        } else {
-            equipment.armorClass = armor.armorClass;
-        }
-        RootTemplate template = null;
-        if (armor.visualModel != null) {
-            template = library.archive().getRootTemplates().getRootTemplate(armor.visualModel);
-        } else {
-            template = library.archive().getRootTemplates().getRootTemplate(stat.getField("RootTemplate"));
-        }
-        equipment.icon = library.icons().get(template.resolveIcon());
-        return equipment;
+    @Tool("Set the rarity for the current body armor.")
+    public void setRarity(Rarity rarity) {
+        Log.info("Setting rarity: " + rarity);
+        set(current -> current.rarity = rarity);
     }
 
-    @Tool("Update the current body armor json document.")
-    public String updateBodyArmor(BodyArmorModel bodyArmor) {
-        Log.info("Updating body armor: ");
-        logBodyArmorJson(bodyArmor);
-        BodyArmorModel current = null;
-        if ((current = context.getShared(CURRENT_BODY_ARMOR, BodyArmorModel.class)) != null) {
-            if (bodyArmor.name != null) {
-                current.name = bodyArmor.name;
-            }
-            if (bodyArmor.description != null) {
-                current.description = bodyArmor.description;
-            }
-            if (bodyArmor.boosts != null) {
-                current.boosts = bodyArmor.boosts;
-            }
-            if (bodyArmor.armorClass != null) {
-                current.armorClass = bodyArmor.armorClass;
-            }
-            if (bodyArmor.type != null) {
-                current.type = bodyArmor.type;
-            }
-            if (bodyArmor.rarity != null) {
-                current.rarity = bodyArmor.rarity;
-            }
-            if (bodyArmor.visualModel != null) {
-                current.visualModel = bodyArmor.visualModel;
-            }
-        } else {
-            current = bodyArmor;
-            if (current.rarity == null) {
-                current.rarity = Rarity.Common;
-            }
-        }
-        String json =logBodyArmorJson(current);
-        context.setShared(CURRENT_BODY_ARMOR, current);
-        Log.info("End of updateBodyArmor");
-        addShowEquipmentAction(current);
-        return json;
+    @Tool("Set the visual model for the current body armor.")
+    public void setVisualModel(String visualModel) {
+        Log.info("Setting visual model: " + visualModel);
+        set(current -> current.visualModel = visualModel);
     }
 
-    @Tool("When finished building body armor, call this tool to finish the body armor.")
-    public String finishEquipment() throws Exception {
-        BodyArmorModel current = null;
-        if ((current = context.getShared(CURRENT_BODY_ARMOR, BodyArmorModel.class)) == null) {
-            return "No body armor to finish";
-        }
-        addShowEquipmentAction(current);
-        chatService.popChatFrame(context);
-        context.setShared(CURRENT_BODY_ARMOR, null);
-        if (current.rarity == null) {
-            current.rarity = Rarity.Common;
-        }
-        NewModModel newEquipment = context.getShared(NewModModel.NEW_EQUIPMENT, NewModModel.class);
-        if (newEquipment == null) {
-            newEquipment = new NewModModel();
-        }
-        if (newEquipment.bodyArmors == null) {
-            newEquipment.bodyArmors = new HashMap<>();
-        }
-        // for updates
-        if (!newEquipment.bodyArmors.containsKey(current.name)) {
-            newEquipment.count++;
-        }
-        newEquipment.bodyArmors.put(current.name, current);
-        context.setShared(NewModModel.NEW_EQUIPMENT, newEquipment);
-        context.response().add(new MessageAction("Body armor finished!"));
-        context.response().add(new UpdateNewEquipmentAction("To create and export a mod containing your newly built body armor, tell me to '" + ModPackager.PACKAGE_MODE_CHAT_COMMAND + "'"));
-        context.pushIgnoreAIResponse();
-        Log.info("Finishing body armor");
-        String armorJson = logBodyArmorJson(current);
-        return armorJson;
+    @Tool("Set the armor class for the current body armor.")
+    public void setArmorClass(Integer armorClass) {
+        Log.info("Setting armor class: " + armorClass);
+        set(current -> ((BodyArmorModel) current).armorClass = armorClass);
+    }
+    @Tool("Set the type for the current body armor.")
+    public void setType(BodyArmorType type) {
+        Log.info("Setting type: " + type);
+        set(current -> ((BodyArmorModel) current).type = type);
     }
 
-    private String logBodyArmorJson(BodyArmorModel armor)  {
-        try {
-        String armorJson = mapper.writeValueAsString(armor);
-        Log.info("Body Armor JSON: " + armorJson);
-        return armorJson;
-        } catch (Exception e) {
-            throw new RuntimeException("Error logging body armor json", e);
-        }
+    @Tool("Add boost to body armor.")
+    public void addBoost(String boost) throws Exception {
+        super.addBoost(boost);
     }
 
-
-    @Tool("Add boost macro to body armor.  May be called after the createBoostMacro tool.")
-    public void addBodyArmorBoost(String boostMacro) throws Exception {
-        // keep the boostMacro parameter as tool invocation is flaky otherwise
-        // AI gets confused
-        Log.info("addBodyArmorBoost: "  + boostMacro);
-        String enchantment = boostBuilder.createBoostMacro(context.userMessage());
-        Log.info("Enchantment: " + enchantment);
-        if (enchantment.indexOf('(') < 0) {
-            context.response().add(new MessageAction(enchantment));
-            context.response().add(new MessageAction("Could not create a boost macro from your description."));
-            return;
-        }
-        BodyArmorModel armor = context.getShared(CURRENT_BODY_ARMOR, BodyArmorModel.class);
-        if (armor.boosts == null || armor.boosts.isEmpty()) {
-            armor.boosts = enchantment;
-        } else {
-            armor.boosts += ";" + enchantment;
-        }
-        context.setShared(CURRENT_BODY_ARMOR, armor);
-        addShowEquipmentAction(armor);
-        logBodyArmorJson(armor);
-    }
-
-    @Tool("Set boost macro for body armor.  May be called after the createBoostMacro tool.")
-    public void setBodyArmorBoost(String boostMacro) throws Exception {
-        // keep the boostMacro parameter as tool invocation is flaky otherwise
-        // AI gets confused
-        Log.info("setBodyArmorBoost: "  + boostMacro);
-        String enchantment = boostBuilder.createBoostMacro(context.userMessage());
-        Log.info("Enchantment: " + enchantment);
-        if (enchantment.indexOf('(') < 0) {
-            context.response().add(new MessageAction(enchantment));
-            context.response().add(new MessageAction("Could not create a boost macro from your description."));
-            return;
-        }
-
-        BodyArmorModel armor = context.getShared(CURRENT_BODY_ARMOR, BodyArmorModel.class);
-        armor.boosts = enchantment;
-        context.setShared(CURRENT_BODY_ARMOR, armor);
-        addShowEquipmentAction(armor);
+    @Tool("Set boost for body armor.")
+    public void setBoost(String boost) throws Exception {
+        super.setBoost(boost);
     }
 
     @Tool("Summarizes available visual models for the current body armor type.")
     public String showVisualModels() {
-        BodyArmorModel armor = context.getShared(CURRENT_BODY_ARMOR, BodyArmorModel.class);
+        BodyArmorModel armor = context.getShared(CURRENT_EQUIPMENT, BodyArmorModel.class);
         if (armor == null || armor.type == null) {
-            throw new RuntimeException("Cannot determine vailable visual models because body armor type is not set");
+            throw new RuntimeException("Cannot determine vailable visual models because armor type is not set");
         }
-        Log.info("Finding visual models for body armor type: " + armor.type.name());
-        List<RootTemplate> rootTemplates = library.findRootIconsFrom(stat -> stat.getField("ArmorType") != null && stat.getField("ArmorType").equals(armor.type.name()) && stat.getField("Slot") != null && stat.getField("Slot").equals("Breast"));
-        String html = "<ul class=\"icon-list\">";
-        for (RootTemplate rootTemplate : rootTemplates) {
-            html += "<li><img src=\"" + library.icons().get(rootTemplate.resolveIcon()) + "\" height=\"64\" width=\"64\"/> " + rootTemplate.MapKey + "</li>";
-        }
-        html += "</ul>";
-        context.response().add(new MessageAction(html));
-        String message = "There are " + rootTemplates.size() + " visual models available. Choose one of the parent ids from the list above if you want a different look for your body armor.";
-        context.response().add(new MessageAction(message));
+        return showVisualModels(stat -> stat.getField("ArmorType") != null && stat.getField("ArmorType").equals(armor.type.name()) && stat.getField("Slot") != null && stat.getField("Slot").equals("Breast"));
+    }
 
-        // Ignore the next AI chat response because the AI often says it cannot find anything
-        // if a data list is not sent back as a tool result.
-        context.pushIgnoreAIResponse();
-
-        // Had to return something because AI would get confused sometimes.
-        return message;
+    @Tool("When finished building body armor, call this tool to finish the body armor.")
+    @Override
+    public String finishEquipment() throws Exception {
+        return super.finishEquipment();
     }
 
 }

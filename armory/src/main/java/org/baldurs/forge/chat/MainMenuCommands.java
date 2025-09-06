@@ -95,6 +95,8 @@ public class MainMenuCommands {
     public String showNewEquipment() {
         Log.info("showNewEquipment");
         modPackager.showNewEquipment();
+        context.suppressAIResponse();
+        // message for ai, it likes something returned sometimes 
         return "Here is all the equipment the user has created.";
     }
 

@@ -39,16 +39,17 @@ public class ChatService {
 
     Map<String, ChatFrame> chatFrames = new HashMap<>();
 
-    @PostConstruct
-    public void init() {
-        chatFrames.put(BodyArmorBuilder.class.getName(), bodyArmorBuilder);
-        chatFrames.put(WeaponBuilder.class.getName(), weaponBuilder);
-        chatFrames.put(ModPackager.class.getName(), modPackager);
+    public void register(String name, ChatFrame chatFrame) {
+        chatFrames.put(name, chatFrame);
     }
 
-    public void setChatFrame(ChatContext context, Class<? extends ChatFrame> chatFrame) {
-        Log.info("Setting chat frame: " + chatFrame.getName());
-        context.setShared(CHAT_FRAME, chatFrame.getName());
+    public ChatFrame getChatFrame(String name) {
+        return chatFrames.get(name);
+    }
+
+    public void setChatFrame(ChatContext context, String chatFrame) {
+        Log.info("Setting chat frame: " + chatFrame);
+        context.setShared(CHAT_FRAME, chatFrame);
     }
 
     public void popChatFrame(ChatContext context) {
@@ -67,20 +68,20 @@ public class ChatService {
         if (chatFrame == null) {
             Log.info("Executing default chat");
             String msg = chat.chat(context.memoryId(), context.userMessage());
-            if (!context.popIgnoreAIResponse()) {
+            if (!context.popSuppressAIResponse()) {
                 context.response().add(message(msg));
             }
         } else if (chatFrames.containsKey(chatFrame)) {
             Log.info("Executing chat frame: " + chatFrame);
             String msg = chatFrames.get(chatFrame).chat(context.memoryId(), context.userMessage());
-            if (!context.popIgnoreAIResponse()) {
+            if (!context.popSuppressAIResponse()) {
                 context.response().add(message(msg));
             }
         }
         else {
             Log.error("Unknown chat frame: " + chatFrame);
             popChatFrame(context);
-            if (!context.popIgnoreAIResponse()) {
+            if (!context.popSuppressAIResponse()) {
                 context.response().add(message("I'm having issues at the moment. Can you retry or rephrase your request?"));
             }
         }

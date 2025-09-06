@@ -1107,6 +1107,24 @@
                 $container.append($tableContainer);
             }
 
+            function listVisualModelsEvent(visualModels) {
+                const $resultDev = $('<div>', {
+                    class: `message data-message`
+                });
+                const $list = $('<ul class="icon-list">');
+                for (const visualModel of visualModels) {
+                    const $listItem = $('<li>');
+                    const $img = $('<img>', { src: visualModel.icon, width: '64', height: '64' });
+                    $listItem.append($img);
+                    $listItem.append($('<span>', { text: visualModel.id }));
+                    $list.append($listItem);
+                }
+                $resultDev.append($list);
+                $chatContainer.append($resultDev);
+                $chatContainer.scrollTop($chatContainer[0].scrollHeight);
+                updateClearButtonVisibility();
+     }
+
             function addJsonMessage(data) {
                 const $messageDiv = $('<div>', { class: 'message data-message' });
 
@@ -1280,6 +1298,9 @@
                             } else if (action.type === 'ImportMod') {
                                 console.log('ImportMod');
                                 importModEvent();
+                            } else if (action.type === 'ListVisualModels') {
+                                console.log('ListVisualModels');
+                                listVisualModelsEvent(action.visualModels);
                             }
                         }
                     }
