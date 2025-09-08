@@ -1,38 +1,12 @@
 package org.baldurs.forge.builder;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.function.Supplier;
 
-import org.baldurs.forge.chat.ChatFrame;
-import org.baldurs.forge.chat.ChatFrameService;
-import org.baldurs.forge.chat.actions.MessageAction;
-import org.baldurs.forge.chat.actions.UpdateNewEquipmentAction;
-import org.baldurs.forge.chat.RenderService;
-import org.baldurs.forge.chat.actions.ShowEquipmentAction;
-import org.baldurs.forge.context.ChatContext;
-import org.baldurs.forge.model.EquipmentModel;
-import org.baldurs.forge.model.EquipmentSlot;
-import org.baldurs.forge.model.EquipmentType;
 import org.baldurs.forge.model.Rarity;
-import org.baldurs.forge.scanner.RootTemplate;
-import org.baldurs.forge.scanner.StatsArchive;
-import org.baldurs.forge.services.BoostService;
-import org.baldurs.forge.services.LibraryService;
-import org.baldurs.forge.services.BoostService.BoostWriter;
-
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.langchain4j.agent.tool.Tool;
-import dev.langchain4j.service.MemoryId;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.Startup;
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 

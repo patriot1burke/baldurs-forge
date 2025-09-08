@@ -31,8 +31,7 @@ public class ChatFrameService {
     @Inject
     ModPackager modPackager;
 
-    @Inject
-    RenderService render;
+    Render render;
 
     ChatFrame defaultChatFrame;
 
@@ -46,15 +45,29 @@ public class ChatFrameService {
         defaultChatFrame = chatFrame;
     }
 
+    public void setRender(Render render) {
+        this.render = render;
+    }
+
     public ChatFrame getChatFrame(String name) {
         return chatFrames.get(name);
     }
 
+    /**
+     * Sets the chat frame for the given context. Also delete the messages for the ChatContext's memoryId.
+     * @param context
+     * @param chatFrame
+     */
     public void setChatFrame(ChatContext context, String chatFrame) {
         Log.info("Setting chat frame: " + chatFrame);
+        memoryStore.deleteMessages(context.memoryId());
         context.setShared(CHAT_FRAME, chatFrame);
     }
 
+    /**
+     * Clears the chat frame for the given context. Also delete the messages for the ChatContext's memoryId.
+     * @param context
+     */
     public void popChatFrame(ChatContext context) {
         Log.info("Popping chat frame");
         context.setShared(CHAT_FRAME, null);
@@ -63,7 +76,7 @@ public class ChatFrameService {
     }
 
     private MessageAction message(String message) {
-        return new MessageAction(render.markdownToHtml(message));
+        return new MessageAction(render.render(message));
     }
 
     public void chat(ChatContext context) {

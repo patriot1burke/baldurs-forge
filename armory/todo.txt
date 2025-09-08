@@ -6,12 +6,16 @@ DONE ** rename it to ChatFrameService
 DONE ** ChatFrame returning null means no response message.
 DONE ** Force user to register chat frames on startup.  
 DONE ** Force user to register a default.
+DONE * Clean up chat history where appropriate on server side.
+DONE * method to set a renderer on ChatFrameService
 
-* Clean up chat history where appropriate on server side.
+* Get set/addBoost to be called reliably.
 * add ring, amulet, glove, boot creation.
-* method to set a renderer on ChatFrameService
 * expand boost macro support
 * Show spell/skill tooltips
+
+* Try Olama
+* Create docker image with olama if olama works
 
 RAG Improvements:
 * Review created documents that are being fed into vector DB

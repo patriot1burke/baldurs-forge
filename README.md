@@ -102,6 +102,10 @@ I used to have BoostBuilderChat as part of the @ToolBox for WeaponBuilderChat.bu
 it would consistently convert a boost description to a boost macro by calling BoostBuilderChat before invoking setBoost/addBoost tool methods.
 *Then it just stopped working consistently!!!*  For no reason at all OpenAI would or would not call the boost builder chat. It was different every time.
 
+An even simpler example is that I have a 'setBoost' tool and a 'addBoost' tool which is called to set the boost attribute of a json document the prompt is building.
+Simple right?  So, it sometimes works, and sometimes doesn't.  For instance, I type `add boost +3 to weapon` it sometimes calls the `addBoost` tool other times it calls
+the `setBoost` tool.  Frustrating!
+
 
 # Architecture
 
