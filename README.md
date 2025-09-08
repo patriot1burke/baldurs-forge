@@ -104,7 +104,8 @@ it would consistently convert a boost description to a boost macro by calling Bo
 
 An even simpler example is that I have a 'setBoost' tool and a 'addBoost' tool which is called to set the boost attribute of a json document the prompt is building.
 Simple right?  So, it sometimes works, and sometimes doesn't.  For instance, I type `add boost +3 to weapon` it sometimes calls the `addBoost` tool other times it calls
-the `setBoost` tool.  Frustrating!
+the `setBoost` tool.  Frustrating!  The workaround was to explicitly state in the prompt when to call the add or set boost tool.  At least, I hope that's the workaround!!!
+I wouldn't be surprised if this just stopped working randomly someday.
 
 
 # Architecture

@@ -84,12 +84,12 @@ public class WeaponBuilder extends EquipmentBuilder {
     }
 
     @Tool("Add boost to the current weapon.")
-    public void addWeaponBoost(String boostDescription) throws Exception {
+    public void addBoost(String boostDescription) throws Exception {
         super.addBoost(boostDescription);
     }
 
     @Tool("Set boost macro for the current weapon.")
-    public void setWeaponBoost(String boostDescription) throws Exception {
+    public void setBoost(String boostDescription) throws Exception {
         super.setBoost(boostDescription);
     }
 
