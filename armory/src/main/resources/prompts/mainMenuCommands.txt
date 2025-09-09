@@ -34,6 +34,90 @@ Action: invoke the 'createNewBodyArmor' tool with the argument 'Create new leath
 Input: I want to create new chainmail armor
 Action: invoke the 'createNewBodyArmor' tool with the argument 'I want to create new chainmail armor'
 
+Input: Create new longsword
+Action: invoke the 'createNewWeapon' tool with the argument 'Create new longsword'
+
+Input: I want to create a new longsword
+Action: invoke the 'createNewWeapon' tool with the argument 'I want to create a new longsword'
+
+Input: Create new boots
+Action: invoke the 'createNewBoots' tool with the argument 'Create new boots'
+
+Input: I want to create some new boots
+Action: invoke the 'createNewBoots' tool with the argument 'I want to create some new boots'
+
+Input: Create new shoes
+Action: invoke the 'createNewBoots' tool with the argument 'Create new shoes'
+
+Input: I want to create some new shoes
+Action: invoke the 'createNewBoots' tool with the argument 'I want to create some new shoes'
+
+Input: Create new gloves
+Action: invoke the 'createNewGloves' tool with the argument 'Create new gloves'
+
+Input: I want to create some new gloves
+Action: invoke the 'createNewGloves' tool with the argument 'I want to create some new gloves'
+
+Input: Create new gauntlets
+Action: invoke the 'createNewGloves' tool with the argument 'Create new gauntlets'
+
+Input: I want to create some new gauntlets
+Action: invoke the 'createNewGloves' tool with the argument 'I want to create some new gauntlets'
+
+Input: Create new helmet
+Action: invoke the 'createNewHelmet' tool with the argument 'Create new helmet'
+
+Input: I want to create a new helmet
+Action: invoke the 'createNewHelmet' tool with the argument 'I want to create a new helmet'
+
+Input: Create new hat
+Action: invoke the 'createNewHelmet' tool with the argument 'Create new hat'
+
+Input: I want to create a new hat
+Action: invoke the 'createNewHelmet' tool with the argument 'I want to create a new hat'
+
+Input: Create new hood
+Action: invoke the 'createNewHelmet' tool with the argument 'Create new hat'
+
+Input: I want to create a new hood
+Action: invoke the 'createNewHelmet' tool with the argument 'I want to create a new hood'
+
+Input: Create new helm
+Action: invoke the 'createNewHelmet' tool with the argument 'Create new helm'
+
+Input: I want to create a new helm
+Action: invoke the 'createNewHelmet' tool with the argument 'I want to create a new helm'
+
+Input: Create new cloak
+Action: invoke the 'createNewCloak' tool with the argument 'Create new cloak'
+
+Input: I want to create a new cloak
+Action: invoke the 'createNewCloak' tool with the argument 'I want to create a new cloak'
+
+Input: Create new cape
+Action: invoke the 'createNewCloak' tool with the argument 'Create new cape'
+
+Input: I want to create a new cape
+Action: invoke the 'createNewCloak' tool with the argument 'I want to create a new cape'
+
+Input: Create new ring
+Action: invoke the 'createNewRing' tool with the argument 'Create new ring'
+
+Input: I want to create a new ring
+Action: invoke the 'createNewRing' tool with the argument 'I want to create a new ring'
+
+Input: Create new amulet
+Action: invoke the 'createNewAmulet' tool with the argument 'Create new amulet'
+
+Input: I want to create a new amulet
+Action: invoke the 'createNewAmulet' tool with the argument 'I want to create a new amulet'
+
+Input: Create new necklace
+Action: invoke the 'createNewAmulet' tool with the argument 'Create new necklace'
+
+Input: I want to create a new necklace
+Action: invoke the 'createNewAmulet' tool with the argument 'I want to create a new necklace'
+
 Input: Find attribute values for ArmorType
 Action: invoke the 'findDataAttributeValues' tool with the argument 'ArmorType'
 

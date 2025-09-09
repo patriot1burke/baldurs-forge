@@ -16,6 +16,7 @@ import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.model.Rarity;
 import org.baldurs.forge.scanner.RootTemplate;
 import org.baldurs.forge.scanner.StatsArchive;
+import org.baldurs.forge.scanner.StatsArchive.Stat;
 import org.baldurs.forge.services.BoostService;
 import org.baldurs.forge.services.LibraryService;
 
@@ -111,6 +112,7 @@ public abstract class EquipmentBuilder implements ChatFrame {
         }
         newEquipment.addEquipment(current);
         context.setShared(NewModModel.NEW_EQUIPMENT, newEquipment);
+        context.response().add(new MessageAction("Finished building item!"));
         context.response().add(new UpdateNewEquipmentAction("To create a mod containing your newly built equipment, tell me to '" + ModPackager.PACKAGE_MODE_CHAT_COMMAND + "'"));
         context.suppressAIResponse();
         Log.info("Finishing equipment");
@@ -137,6 +139,25 @@ public abstract class EquipmentBuilder implements ChatFrame {
         context.setShared(CURRENT_EQUIPMENT, current);
         logJson(current);
         addShowEquipmentAction(current);
+    }
+
+    public void setVisualModel(String visualModel) {
+        Predicate<? super Stat> visualModelPredicate = visualModelPredicate();
+        if (visualModelPredicate == null) {
+            throw new RuntimeException("Item is not finished.  Cannot set visual model yet." + visualModel);
+        }
+        List<RootTemplate> rootTemplates = library.findRootIconsFrom(visualModelPredicate);
+        boolean found = false;
+        for (RootTemplate rootTemplate : rootTemplates) {
+            if (rootTemplate.MapKey.equals(visualModel)) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            throw new RuntimeException("Could not find visual model." );
+        }
+        set(current -> current.visualModel = visualModel);
     }
 
     public void addBoost(String boostDescription) throws Exception {
@@ -178,11 +199,25 @@ public abstract class EquipmentBuilder implements ChatFrame {
         set(current -> current.boosts = enchantment);
     }
 
-    public String showVisualModels(Predicate<? super StatsArchive.Stat> predicate) {
-        List<RootTemplate> rootTemplates = library.findRootIconsFrom(predicate);
+    protected abstract Predicate<? super StatsArchive.Stat> visualModelPredicate();
+
+    public String showVisualModels() {
+        Predicate<? super Stat> visualModelPredicate = visualModelPredicate();
+        if (visualModelPredicate == null) {
+            throw new RuntimeException("Item not finished yet.  Cannot search for visual models.");
+        }
+       List<RootTemplate> rootTemplates = library.findRootIconsFrom(visualModelPredicate);
         ListVisualModelsAction action = new ListVisualModelsAction();
         for (RootTemplate rootTemplate : rootTemplates) {
-            action.add(library.icons().get(rootTemplate.resolveIcon()), rootTemplate.MapKey);
+            String icon = rootTemplate.resolveIcon();
+            if (icon == null) {
+                continue;
+            }
+            String iconPath = library.icons().get(icon);
+            if (iconPath == null) {
+                continue;
+            }
+            action.add(iconPath, rootTemplate.MapKey);
         }
         context.response().add(action);
         String message = "There are " + rootTemplates.size() + " visual models available. Choose one of the parent ids from the list above if you want a different look for your weapon.";

@@ -33,6 +33,9 @@ public class AmuletModel extends BaseModel {
         super(rarity, name, description, boosts, parentModel);
     }
 
+    public AmuletModel() {
+    }
+
     public static final String schema;
 
     static {

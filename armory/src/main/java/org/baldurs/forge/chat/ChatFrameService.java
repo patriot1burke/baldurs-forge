@@ -60,7 +60,6 @@ public class ChatFrameService {
      */
     public void setChatFrame(ChatContext context, String chatFrame) {
         Log.info("Setting chat frame: " + chatFrame);
-        memoryStore.deleteMessages(context.memoryId());
         context.setShared(CHAT_FRAME, chatFrame);
     }
 

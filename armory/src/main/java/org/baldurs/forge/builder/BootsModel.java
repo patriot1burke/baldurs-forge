@@ -34,6 +34,8 @@ public class BootsModel extends AppendageModel {
             String parentModel) {
         super(category, rarity, name, description, boostMacro, parentModel);
     }
+    public BootsModel() {
+    }
 
 
     public static final String schema;
@@ -60,7 +62,6 @@ public class BootsModel extends AppendageModel {
 
     public EquipmentModel toEquipmentModel(BoostService boostService, LibraryService library) {
         EquipmentModel equipment = super.toEquipmentModel(boostService, library);
-        StatsArchive.Stat stat = library.archive().getStats().getByName(baseStat());
         equipment.type = EquipmentType.Armor;
         equipment.slot = EquipmentSlot.Boots;
         return equipment;

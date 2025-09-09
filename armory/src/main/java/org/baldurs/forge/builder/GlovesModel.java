@@ -30,6 +30,9 @@ public class GlovesModel extends AppendageModel {
         super(category, rarity, name, description, boostMacro, parentModel);
     }
 
+    public GlovesModel() {
+    }
+
     public static final String schema;
 
     static {

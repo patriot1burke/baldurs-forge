@@ -1,6 +1,9 @@
 package org.baldurs.forge.builder;
 
+import java.util.function.Predicate;
+
 import org.baldurs.forge.model.Rarity;
+import org.baldurs.forge.scanner.StatsArchive;
 
 import com.google.common.base.Supplier;
 
@@ -25,14 +28,17 @@ public class BodyArmorBuilder extends EquipmentBuilder {
     protected Class<? extends BaseModel> baseModelClass() {
         return BodyArmorModel.class;
     }
+
     @Override
     protected String schema() {
         return BodyArmorModel.schema;
     }
+
     @Override
     protected String type() {
         return BodyArmorModel.TYPE;
     }
+
     @Override
     protected Supplier<BaseModel> supplier() {
         return () -> new BodyArmorModel();
@@ -43,13 +49,11 @@ public class BodyArmorBuilder extends EquipmentBuilder {
         chatService.register(type(), this);
     }
 
- 
     @Tool("Set the name for the current body armor.")
     public void setName(String name) {
         Log.info("Setting name: " + name);
         set(current -> current.name = name);
     }
-
 
     @Tool("Set the description for the current body armor.")
     public void setDescription(String description) {
@@ -66,7 +70,7 @@ public class BodyArmorBuilder extends EquipmentBuilder {
     @Tool("Set the visual model for the current body armor.")
     public void setVisualModel(String visualModel) {
         Log.info("Setting visual model: " + visualModel);
-        set(current -> current.visualModel = visualModel);
+        super.setVisualModel(visualModel);
     }
 
     @Tool("Set the armor class for the current body armor.")
@@ -74,6 +78,7 @@ public class BodyArmorBuilder extends EquipmentBuilder {
         Log.info("Setting armor class: " + armorClass);
         set(current -> ((BodyArmorModel) current).armorClass = armorClass);
     }
+
     @Tool("Set the type for the current body armor.")
     public void setType(BodyArmorType type) {
         Log.info("Setting type: " + type);
@@ -90,13 +95,26 @@ public class BodyArmorBuilder extends EquipmentBuilder {
         super.setBoost(boost);
     }
 
+    @Override
+    protected Predicate<? super StatsArchive.Stat> visualModelPredicate() {
+        BodyArmorModel armor = context.getShared(CURRENT_EQUIPMENT, BodyArmorModel.class);
+        if (armor == null || armor.type == null) {
+            return null;
+        }
+        return stat -> {
+            String armorType = stat.getField("ArmorType");
+            String slot = stat.getField("Slot");
+            return armor != null && armorType != null && armor.type != null && armorType.equals(armor.type.name()) && slot != null && slot.equals("Breast");
+        };
+    }
+
     @Tool("Summarizes available visual models for the current body armor type.")
     public String showVisualModels() {
         BodyArmorModel armor = context.getShared(CURRENT_EQUIPMENT, BodyArmorModel.class);
         if (armor == null || armor.type == null) {
             throw new RuntimeException("Cannot determine vailable visual models because armor type is not set");
         }
-        return showVisualModels(stat -> stat.getField("ArmorType") != null && stat.getField("ArmorType").equals(armor.type.name()) && stat.getField("Slot") != null && stat.getField("Slot").equals("Breast"));
+        return super.showVisualModels();
     }
 
     @Tool("When finished building body armor, call this tool to finish the body armor.")

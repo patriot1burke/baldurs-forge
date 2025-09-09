@@ -30,6 +30,10 @@ public class HelmetModel extends AppendageModel {
         super(category, rarity, name, description, boostMacro, parentModel);
     }
 
+    public HelmetModel() {
+
+    }
+    
     public static final String schema;
 
     static {
@@ -48,6 +52,15 @@ public class HelmetModel extends AppendageModel {
 
     @Override
     public String baseStat() {
+        if (armorCategory == null || armorCategory == ArmorCategory.None) {
+            return "ARM_Circlet";
+        } else if (armorCategory == ArmorCategory.Light) {
+            return "ARM_Helmet_Leather";
+        } else if (armorCategory == ArmorCategory.Medium) {
+            return "ARM_Helmet_Metal";
+        } else if (armorCategory == ArmorCategory.Heavy) {
+            return "ARM_Helmet_Metal";
+        }
         return "ARM_Circlet";
     }
 

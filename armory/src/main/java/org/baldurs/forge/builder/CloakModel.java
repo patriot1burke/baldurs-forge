@@ -33,6 +33,9 @@ public class CloakModel extends BaseModel {
         super(rarity, name, description, boosts, parentModel);
     }
 
+    public CloakModel() {
+    }
+
     public static final String schema;
 
     static {

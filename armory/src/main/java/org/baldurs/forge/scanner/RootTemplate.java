@@ -42,6 +42,8 @@ public class RootTemplate {
     public RootTemplate resolveTemplateThatDefinesIcon() {
         if (icon != null) return this;
         if (ParentTemplateId == null) return null;
-        return archive.templates.get(ParentTemplateId).resolveTemplateThatDefinesIcon();
+        RootTemplate parent = archive.templates.get(ParentTemplateId);
+        if (parent == null) return null;
+        return parent.resolveTemplateThatDefinesIcon();
     }
 }

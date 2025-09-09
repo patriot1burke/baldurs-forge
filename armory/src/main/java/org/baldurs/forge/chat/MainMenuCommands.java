@@ -2,8 +2,14 @@ package org.baldurs.forge.chat;
 
 import java.util.List;
 
+import org.baldurs.forge.builder.AmuletBuilder;
 import org.baldurs.forge.builder.BodyArmorBuilder;
+import org.baldurs.forge.builder.BootsBuilder;
+import org.baldurs.forge.builder.CloakBuilder;
+import org.baldurs.forge.builder.GlovesBuilder;
+import org.baldurs.forge.builder.HelmetBuilder;
 import org.baldurs.forge.builder.ModPackager;
+import org.baldurs.forge.builder.RingBuilder;
 import org.baldurs.forge.builder.WeaponBuilder;
 import org.baldurs.forge.chat.actions.ImportModAction;
 import org.baldurs.forge.chat.actions.ListEquipmentAction;
@@ -33,6 +39,23 @@ public class MainMenuCommands {
 
     @Inject
     WeaponBuilder weaponBuilder;
+
+    @Inject
+    BootsBuilder bootsBuilder;
+
+    @Inject
+    GlovesBuilder glovesBuilder;
+
+    @Inject
+    HelmetBuilder helmetBuilder;
+
+    @Inject
+    RingBuilder ringBuilder;
+    
+    @Inject
+    AmuletBuilder amuletBuilder;
+    @Inject
+    CloakBuilder cloakBuilder;
 
     @Inject
     ChatFrameService chatService;
@@ -87,6 +110,42 @@ public class MainMenuCommands {
     public String createNewWeapon(String userMessage) {
         Log.info("Creating new weapon");
         return weaponBuilder.chat(context.memoryId(), context.userMessage());
+    }
+
+    @Tool("Create new boots.")
+    public String createNewBoots(String userMessage) {
+        Log.info("Creating new boots");
+        return bootsBuilder.chat(context.memoryId(), context.userMessage());
+    }
+
+    @Tool("Create new gloves.")
+    public String createNewGloves(String userMessage) {
+        Log.info("Creating new gloves");
+        return glovesBuilder.chat(context.memoryId(), context.userMessage());
+    }
+
+    @Tool("Create new helmet.")
+    public String createNewHelmet(String userMessage) {
+        Log.info("Creating new helmet");
+        return helmetBuilder.chat(context.memoryId(), context.userMessage());
+    }
+
+    @Tool("Create new ring.")
+    public String createNewRing(String userMessage) {
+        Log.info("Creating new ring");
+        return ringBuilder.chat(context.memoryId(), context.userMessage());
+    }
+
+    @Tool("Create new amulet.")
+    public String createNewAmulet(String userMessage) {
+        Log.info("Creating new amulet");
+        return amuletBuilder.chat(context.memoryId(), context.userMessage());
+    }
+
+    @Tool("Create new cloak.")
+    public String createNewCloak(String userMessage) {
+        Log.info("Creating new cloak");
+        return cloakBuilder.chat(context.memoryId(), context.userMessage());
     }
 
     @Tool("Find all values for data attribute by name.   This is a raw data untyped query.")

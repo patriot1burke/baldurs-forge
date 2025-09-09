@@ -8,14 +8,22 @@ DONE ** Force user to register chat frames on startup.
 DONE ** Force user to register a default.
 DONE * Clean up chat history where appropriate on server side.
 DONE * method to set a renderer on ChatFrameService
-
-* Get set/addBoost to be called reliably.
-* add ring, amulet, glove, boot creation.
-* expand boost macro support
-* Show spell/skill tooltips
+DONE * Get set/addBoost to be called reliably.
+DONE * Add message that you are finished
+DONE * add ring, amulet, glove, boot creation.
+DONE * check valid values:
+DONE - visual model
 
 * Try Olama
 * Create docker image with olama if olama works
+
+* Add shields
+* Add weapon type icon to tooltip bottom left corner
+* Add armor category to tooltip
+* expand boost macro support
+* Show spell/skill tooltips
+* Add ability to import mod and edit it.
+
 
 RAG Improvements:
 * Review created documents that are being fed into vector DB

@@ -29,6 +29,9 @@ public class RingModel extends BaseModel {
         super(rarity, name, description, boosts, parentModel);
     }
 
+    public RingModel() {
+    }
+
     public static final String schema;
 
     static {

@@ -226,6 +226,33 @@ public class ModPackager implements ChatFrame {
         gameObjects.append("        </node>\n");
     }
 
+    public void addArmor(BaseModel armor, String statPrefix, StringBuilder localizations, StringBuilder gameObjects, StringBuilder treasure, StringBuilder armorData) {
+        String name = armor.name;
+        String description = armor.description;
+        String visualModel = armor.visualModel;
+        String baseStat = armor.baseStat();
+        String statName = statPrefix + "_" + toAlphaNumericUnderscore(name);
+        String MapKey = IdMaker.uuid();
+
+        addGameObject(localizations, gameObjects, name, description, visualModel, baseStat, statName, MapKey);
+
+        treasure.append("new subtable \"1,1\"\n");
+        treasure.append("object category \"I_" + statName + "\",1,0,0,0,0,0,0,0\n");
+
+        armorData.append("new entry \"" + statName + "\"\n");
+        armorData.append("type \"Armor\"\n");
+        armorData.append("using \"" + armor.baseStat() + "\"\n");
+        armorData.append("data \"RootTemplate\" \"" + MapKey + "\"\n");
+        if (armor.rarity != null) {
+            armorData.append("data \"Rarity\" \"" + armor.rarity.name() + "\"\n");
+        }
+        if (armor.boosts != null) {
+            armorData.append("data \"Boosts\" \"" + armor.boosts + "\"\n");
+        }
+        armorData.append("data \"MinLevel\" \"1\"\n");
+
+    }
+
     public File packageMod(NewModModel newEquipment) throws Exception {
         Path tempDir = Files.createTempDirectory("mod");
         Log.info("Packaging mod in temp directory: " + tempDir.toString());
@@ -264,47 +291,60 @@ public class ModPackager implements ChatFrame {
 
         StringBuilder gameObjects = new StringBuilder();
 
-        String armorData = "";
+        StringBuilder armorData = new StringBuilder();
 
-        String treasure = "";
+        StringBuilder treasure = new StringBuilder();
 
         StringBuilder localizations = new StringBuilder();
 
         if (newEquipment.bodyArmors != null) {
 
             for (BodyArmorModel bodyArmor : newEquipment.bodyArmors.values()) {
-                String name = bodyArmor.name;
-                String description = bodyArmor.description;
-                String visualModel = bodyArmor.visualModel;
-                String baseStat = bodyArmor.type.getBaseStat();
-                String statName = statPrefix + "_" + toAlphaNumericUnderscore(name);
-                String MapKey = IdMaker.uuid();
-
-                addGameObject(localizations, gameObjects, name, description, visualModel, baseStat, statName, MapKey);
-
-                armorData += "new entry \"" + statName + "\"\n";
-                armorData += "type \"Armor\"\n";
-                armorData += "using \"" + bodyArmor.type.getBaseStat() + "\"\n";
-                armorData += "data \"RootTemplate\" \"" + MapKey + "\"\n";
-                if (bodyArmor.rarity != null) {
-                    armorData += "data \"Rarity\" \"" + bodyArmor.rarity.name() + "\"\n";
-                }
+                addArmor(bodyArmor, statPrefix, localizations, gameObjects, treasure, armorData);
                 if (bodyArmor.armorClass != null) {
-                    armorData += "data \"ArmorClass\" \"" + bodyArmor.armorClass + "\"\n";
+                    armorData.append("data \"ArmorClass\" \"" + bodyArmor.armorClass + "\"\n");
                 }
-                if (bodyArmor.boosts != null) {
-                    armorData += "data \"Boosts\" \"" + bodyArmor.boosts + "\"\n";
-                }
-                armorData += "data \"MinLevel\" \"1\"\n";
-                armorData += "\n";
-
-                treasure += "new subtable \"1,1\"\n";
-                treasure += "object category \"I_" + statName + "\",1,0,0,0,0,0,0,0\n";
-
+                armorData.append("\n");
+            }
+        }
+        if (newEquipment.helmets != null) {
+            for (HelmetModel helmet : newEquipment.helmets.values()) {
+                addArmor(helmet, statPrefix, localizations, gameObjects, treasure, armorData);
+                armorData.append("\n");
+            }
+        }
+        if (newEquipment.gloves != null) {
+            for (GlovesModel glove : newEquipment.gloves.values()) {
+                addArmor(glove, statPrefix, localizations, gameObjects, treasure, armorData);
+                armorData.append("\n");
+            }
+        }
+        if (newEquipment.boots != null) {
+            for (BootsModel boot : newEquipment.boots.values()) {
+                addArmor(boot, statPrefix, localizations, gameObjects, treasure, armorData);
+                armorData.append("\n");
+            }
+        }
+        if (newEquipment.rings != null) {
+            for (RingModel ring : newEquipment.rings.values()) {
+                addArmor(ring, statPrefix, localizations, gameObjects, treasure, armorData);
+                armorData.append("\n");
+            }
+        }
+        if (newEquipment.amulets != null) {
+            for (AmuletModel amulet : newEquipment.amulets.values()) {
+                addArmor(amulet, statPrefix, localizations, gameObjects, treasure, armorData);
+                armorData.append("\n");
+            }
+        }
+        if (newEquipment.cloaks != null) {
+            for (CloakModel cloak : newEquipment.cloaks.values()) {
+                addArmor(cloak, statPrefix, localizations, gameObjects, treasure, armorData);
+                armorData.append("\n");
             }
         }
         String weaponData = "";
-
+        
         if (newEquipment.weapons != null) {
             for (WeaponModel weapon : newEquipment.weapons.values()) {
                 String statName = statPrefix + "_" + toAlphaNumericUnderscore(weapon.name);
@@ -336,8 +376,8 @@ public class ModPackager implements ChatFrame {
                 weaponData += "data \"MinLevel\" \"1\"\n";
                 weaponData += "\n";
 
-                treasure += "new subtable \"1,1\"\n";
-                treasure += "object category \"I_" + statName + "\",1,0,0,0,0,0,0,0\n";
+                treasure.append("new subtable \"1,1\"\n");
+                treasure.append("object category \"I_" + statName + "\",1,0,0,0,0,0,0,0\n");
             }
         }
 
@@ -347,12 +387,12 @@ public class ModPackager implements ChatFrame {
         Path lsxBoilerplateFile = Files.writeString(rootTemplatesDir.resolve("Merged.lsx"), lsxBoilerplate);
         Converter.lsxToLsf(lsxBoilerplateFile, rootTemplatesDir.resolve("Merged.lsf"));
 
-        Files.writeString(statsDataDir.resolve("Armor.txt"), armorData);
+        Files.writeString(statsDataDir.resolve("Armor.txt"), armorData.toString());
         Files.writeString(statsDataDir.resolve("Weapon.txt"), weaponData);
 
         inputStream = getClass().getResourceAsStream("/mod-template/TreasureTable.txt");
         String treasureTable = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-        treasureTable += treasure;
+        treasureTable += treasure.toString();
         Files.writeString(statsDir.resolve("TreasureTable.txt"), treasureTable);
 
         String finalLocalizations = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
