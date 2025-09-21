@@ -38,7 +38,7 @@ The app is functional, but not fully featured.  Would need a lot more work to ge
 # High level architecture:
 
 ## Software Stack
-* Java and Quarkus for the Server
+* Java and [Quarkus](https://quarkus.io) for the Server
 * quarkus-rest-jackson
 * quarkus-langchain4j
 * Open AI, with 4o language model
@@ -172,7 +172,7 @@ Only "+3" would be sent to the boost prompt and it would not know if it was armo
 output AC(3) or WeaponEnchantment(3).
 Again, I had to send get access to the original user message and send that to the BoostBuilderChat.
 
-# Tools will need access to the original user message
+## Tools will need access to the original user message
 
 This builds off of the __You can't guarantee what the LLM will pass to tool parameters__.  All tool invocations have access
 to the *Chat Context* which provides the current user message.  Multiple tool invocations in my code needed to get access to the
