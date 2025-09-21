@@ -40,21 +40,22 @@ The app is functional, but not fully featured.  Would need a lot more work to ge
 ## Software Stack
 * Java and [Quarkus](https://quarkus.io) for the Server
 * quarkus-rest-jackson
-* quarkus-langchain4j
+* [quarkus-langchain4j](https://docs.quarkiverse.io/quarkus-langchain4j/dev/index.html) AI library I used.
 * Open AI, with 4o language model
-* PGVectorDB
+* [PGVectorDB](https://github.com/pgvector/pgvector)
 * JQuery for browser client
 
 ## 6 Different prompts
 
-* Main Menu Prompt.  List of high level commands that can delegate to other prompts and tools.
-* 2 Metadata prompts for RAG.  Item type and Slot.
-* Semi-generic prompt for building magical equipment.  This was basically asking the LLM to build up a JSON document
-* Natural language to enchantment macro prompt.  BG3 has a rich macro language for application enchantments to magical items.  This prompt converts natural language to this macro language
+* [Main Menu Prompt](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/resources/prompts/mainMenuCommands.txt).  List of high level commands that can delegate to other prompts and tools.
+* 2 Metadata prompts for RAG.  Item [type](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/resources/prompts/equipmentType.txt) and [Slot](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/resources/prompts/equipmentSlot.txt)
+* Natural language to [enchantment](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/resources/prompts/nl2boost.txt) macro prompt.  BG3 has a rich macro language for application enchantments to magical items.  This prompt converts natural language to this macro language
+* General prompt for [equipment building](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/resources/prompts/equipmentBuilder.txt)
+* Prompt for gathering metadata to [package the BG3 mod](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/resources/prompts/equipmentModPackager.txt)
 
 ## Main Menu Tool Box
 
-The Main Menu Prompt is hooked up to a list of tools.  Each of these tools can perform a capability of the application.  Creating new items, finding an item, searching for an item,
+The [Main Menu Prompt](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/resources/prompts/mainMenuCommands.txt) is hooked up to a list of [tool methods](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/java/org/baldurs/forge/chat/MainMenuCommands.java).  Each of these tools can perform a capability of the application.  Creating new items, finding an item, searching for an item,
 editing or deleting an item, or packaging up a mod.  There is a tool for each of these actions and these tools use other prompts and services to complete the actions.
 
 ## Basic RAG with Metadata Prompts
@@ -63,7 +64,7 @@ I imported every BG3 item into a custom in-memory DB.  From that in-memory DB I 
 is semi-structured english descriptions.  Each document is sent to Open AI to create embeddings for searches.  These embeddings are stored in a vector DB.  Each
 item stored in the vector DB has metadata associated with it:  ID, Type (Weapon or Armor), Slot (Head, Body, Glove, Boot, Necklace etc...)
 
-When a user asks to find something, the user message is filtered through a specific prompt to identify the type (Weapon or Armor).  The same user message is sent through a another prompt to 
+For search queries, the user message is filtered through a specific prompt to identify the type (Weapon or Armor).  The same user message is sent through a another prompt to 
 extract the Slot.  This metadata is used as a filter to the vector DB.  This is Basic RAG.  Look at my code or do a search on RAG to understand this basic well-known pattern.
 
 ## Find vs. Search
@@ -73,7 +74,7 @@ The LLM understands this and immediately calls search which does a RAG query.  I
 
 ## Chat Context
 
-I found that tools need to store structered information in between chat messages.  I call this the *Chat Context*.  For example, when building a piece of armor, the current representation of the new armor
+I found that tools need to store structered information in between chat messages.  I call this the [Chat Context](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/java/org/baldurs/forge/context/ChatContext.java).  For example, when building a piece of armor, the current representation of the new armor
 is stored in the chat context so that it can be accessed between chat messages.
 
 The client sends the *Chat Context* as a json document to the server.  It contains the user message and a map of context data returned from the server.
@@ -90,17 +91,32 @@ is used to set the current prompt between chat messages.
 
 When a chat frame is pushed or poped, the current chat memory is cleared.
 
-## Client-side Chat Memory
+## [Client-side Chat Memory](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/java/org/baldurs/forge/context/ClientMemoryStore.java)
 
 I needed per-user chat memory.  I didn't like the idea of storing chat memory on the server as I prefer my services to be stateless.  Obviously, being stateless solves
 a lot of architectural issues as there's no need to have sticky sessions or distributed cache to hold session state.  So, I developed client side chat memory which simply
 serializes chat memory into json and stores it in the *Chat Context*.  Client memory is piggy-backed with the client user message when chatting with the server.
+
+I had to do a few hacks to make this work with Quarkus correctly.  All that is documented in the code.  Take a look!
 
 ## Tool/UI Messages
 
 As you'll see in the *Lessons Learned* section, it was quite difficult to get the LLM to return formatted output.  So, what I implemented was that tools can piggyback
 additional response messages to the client.  These messages tell the client to perform specific actions and could provide data to perform those actions.  For example, search
 provides a list of equipment.  This is sent back to the client as a ListEquipment message.  From that message, the client renders something nice a specific.
+
+## LLM Json Document Builder
+
+For general data gathering (equipment building and mod packaging) I used prompt/tool pattern of building a JSON document.  The prompt would provide
+a JSON schema and the current JSON built document and ask the user to fill out the fields that haven't been set yet.  I used 2 different tool patterns.
+
+If you look at [ModPackager](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/java/org/baldurs/forge/builder/ModPackager.java) you'll see that the LLM will call the [updatePackage](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/java/org/baldurs/forge/builder/ModPackager.java#L98) tool method passing in json of the package representation.
+The way Open AI 4o works(sometimes!) is that it will pass in the PackageModel with only the fields set in the user message.  The `updatePackage`tool method figures out what fields were set
+and updates the current json object and stores it within the *Chat Context*.  When the user says they are finished, the [finishPackage](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/java/org/baldurs/forge/builder/ModPackager.java#L117) tool method is invoked by the LLM and sends back a message to the client through the *Chat Context* to
+package up the mod.
+
+Building items (magic rings, armor, weapons, etc..) is a little different.  Instead of having an `update` method, I have a tool method that sets each and every property of the json document.  An example is the [setName](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/java/org/baldurs/forge/builder/WeaponBuilder.java#L52).  Why do I do it this way?  Well...I used to use
+the `update` tool method pattern I used for `ModPackager`, but one day, after like 2 months, Open AI 4o decided not to call the `update` method consistently.
 
 # Lessons Learned
 
@@ -156,47 +172,51 @@ For instance, I had a tool method `void listEquipment()`  It would invoke the to
 that it could not find anything to list even though I would tell the prompt and tell description not to output anything
 when `listEquipment` was called.
 
+## Tools will need access to the original user message
+
+Multiple tool implementations in my code needed to get access to the
+current user message to get more accurate results from the LLM.  "Why, you ask?"  Read on dear reader!
+
 ## You can't guarantee what the LLM will send to tool parameters
 
 For example, I had a search tool method that took a string query parameter.  The AI would look at the user message and extract
 keywords before calling the search method.  This would screw up search results.  I had to manually make the raw user message
 available to the tool function.  Context matters and keywords can lose context.
 
-Here's a better example:
+Take a look at the [addBoost](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/java/org/baldurs/forge/builder/EquipmentBuilder.java#L163) tool method.
+The LLM would look at the following user message and invoke the `addBoost` method.
 
-This happened also with the BoostBuilderChat. I would call it with setBoost/addBoost tool methods.  I would have a prompt of
+*create new longsword with boost of +3*
 
-"create new longsword with boost of +3"
-
-Only "+3" would be sent to the boost prompt and it would not know if it was armor or a weapon and didn't know whether to 
+Only *+3* would be sent as a parameter and it would not know if it was armor or a weapon and didn't know whether to 
 output AC(3) or WeaponEnchantment(3).
-Again, I had to send get access to the original user message and send that to the BoostBuilderChat.
-
-## Tools will need access to the original user message
-
-This builds off of the __You can't guarantee what the LLM will pass to tool parameters__.  All tool invocations have access
-to the *Chat Context* which provides the current user message.  Multiple tool invocations in my code needed to get access to the
-current user message to output more consistent reseults.
+Again, I had to send get access to the original user message and send that to the boost prompt.
 
 ## Chat memory can confuse the AI
 
-When I invoked the BoostBuilderChat, I would recycle the memory id of the conversation.  The 2nd time add boost was called
-the BoostBuilderChat would convert the user message, but *ALSO* would look in chat history and convert a previous add boost user message request.
+When invoking the [enchantment](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/resources/prompts/nl2boost.txt) macro prompt, 
+I originally hooked up this call to chat memory.  The 2nd time `addBoost` tool was called within a chat session
+the call to the `enchantment` prompt would convert the user message , but *ALSO* would look in chat history and convert a previous add boost user message request.
 
+For example:
+
+```
 User:  add boost advantage on saving throws
-AI: Ai would return Advantage(SavingThrows) from BoostBuilderChat call
+AI: Ai would return Advantage(SavingThrows) from enchantment prompt
 User:  add boost +3 weapon enchantment
 AI:  Ai would return Advantage(SavingThrows);WeaponEnchantment(3)
+```
 
-To solve this, I removed the @MemoryId parameter to the boost tool method.
+To solve this, I turned off chat memory for enchantment prompt invocations (aka I removed the @MemoryId parameter to the chat method call)
 
 ## You can't guarantee that the AI will call a tool
 
-I used to have BoostBuilderChat as part of the @ToolBox for WeaponBuilderChat.buildWeapon (and the other builders).  For a long long time
-it would consistently convert a boost description to a boost macro by calling BoostBuilderChat before invoking setBoost/addBoost tool methods.
-*Then it just stopped working consistently!!!*  For no reason at all OpenAI would or would not call the boost builder chat. It was different every time.
+I used to have the enchantment prompt as part of the @ToolBox for `WeaponBuilderChat.buildWeapon` (and the other builders).  For a long long time
+it would consistently convert a boost description to a boost macro by calling the enchantment prompt before invoking `setBoost/addBoost` tool methods.
+*Then it just stopped working consistently!!!*  For no reason at all OpenAI would or would not call the enchantment prompt tool. It was different every time.
 
-An even simpler example is that I have a 'setBoost' tool and a 'addBoost' tool which is called to set the boost attribute of a json document the prompt is building.
+An even simpler example is that I have a `setBoost` tool and a `addBoost` tool which is called to set the enchantment macro.  `setBoost` clears the existing value
+of the boost and resets it with the new.  `addBoost` tool adds an additional macro to the existing enchantment.
 Simple right?  So, it sometimes works, and sometimes doesn't.  For instance, I type `add boost +3 to weapon` it sometimes calls the `addBoost` tool other times it calls
 the `setBoost` tool.  Frustrating!  The workaround was to explicitly state in the prompt when to call the add or set boost tool.  At least, I hope that's the workaround!!!
 I wouldn't be surprised if this just stopped working randomly someday.
