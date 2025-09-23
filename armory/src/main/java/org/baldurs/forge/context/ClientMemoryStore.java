@@ -102,6 +102,8 @@ public class ClientMemoryStore {
      * Wraps the ClientMemoryStore in a ChatMemoryStore.
      * ChatMemoryStore.deleteMessages can be called by Quarkus out of scope of a request.  Since ClientMemoryStore is request scoped,
      * this wrapper catches any CDI exceptions and eats them to avoid logging so many errors.
+     * 
+     * QuarkusAiServiceContext.close() will call deleteMessages() and the ClientMemoryStorebean will be out of scope.
      * @return
      */
     public static ChatMemoryStore beanDelegate() {

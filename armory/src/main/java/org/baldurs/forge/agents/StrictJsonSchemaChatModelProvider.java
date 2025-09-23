@@ -14,8 +14,8 @@ public class StrictJsonSchemaChatModelProvider implements Supplier<ChatModel> {
                 .modelName("gpt-4o-2024-08-06")
                 .supportedCapabilities(Capability.RESPONSE_FORMAT_JSON_SCHEMA)
                 .strictJsonSchema(true) 
-                .logRequests(true)
-                .logResponses(true)
+                .logRequests(false)
+                .logResponses(false)
                 .build();
     }
 
