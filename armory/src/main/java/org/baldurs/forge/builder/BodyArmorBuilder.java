@@ -97,7 +97,7 @@ public class BodyArmorBuilder extends EquipmentBuilder {
 
     @Override
     protected Predicate<? super StatsArchive.Stat> visualModelPredicate() {
-        BodyArmorModel armor = context.getShared(CURRENT_EQUIPMENT, BodyArmorModel.class);
+        BodyArmorModel armor = context.getData(CURRENT_EQUIPMENT, BodyArmorModel.class);
         if (armor == null || armor.type == null) {
             return null;
         }
@@ -110,7 +110,7 @@ public class BodyArmorBuilder extends EquipmentBuilder {
 
     @Tool("Summarizes available visual models for the current body armor type.")
     public String showVisualModels() {
-        BodyArmorModel armor = context.getShared(CURRENT_EQUIPMENT, BodyArmorModel.class);
+        BodyArmorModel armor = context.getData(CURRENT_EQUIPMENT, BodyArmorModel.class);
         if (armor == null || armor.type == null) {
             throw new RuntimeException("Cannot determine vailable visual models because armor type is not set");
         }

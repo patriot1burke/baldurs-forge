@@ -20,7 +20,7 @@ import jakarta.enterprise.context.RequestScoped;
  *    "userMessage": "...",
  *    "memoryId": "...",
  *    "context": {
- *       "shared": {
+ *       "data": {
  *           "...": "..."
  *       },
  *       "memory": "[...]" // List of Langchain4j chat messages in JSON format
@@ -33,7 +33,7 @@ import jakarta.enterprise.context.RequestScoped;
  *    "response": "[...]",
  *    "memoryId": "...",
  *    "context": {
- *       "shared": {
+ *       "data": {
  *           "...": "..."
  *       },
  *       "memory": "[...]" // List of Langchain4j chat messages in JSON format
@@ -43,7 +43,7 @@ import jakarta.enterprise.context.RequestScoped;
 @RequestScoped
 public class ChatContext {
 
-    Map<String, Object> sharedContext = new HashMap<>();
+    Map<String, Object> data = new HashMap<>();
 
     List<Object> response = new ArrayList<>();
 
@@ -72,13 +72,13 @@ public class ChatContext {
      * Data serialized and shared with client.
      * 
      * This is raw data and could contain JsonNode objects.
-     * Preferably use the {@link #getShared(String, Class)} method to get the data
+     * Preferably use the {@link #getData(String, Class)} method to get the data
      * as a specific type.
      * 
      * @return
      */
-    public Map<String, Object> sharedContext() {
-        return sharedContext;
+    public Map<String, Object> data() {
+        return data;
     }
 
     /**
@@ -92,8 +92,8 @@ public class ChatContext {
      * 
      * @return
      */
-    public <T> T getShared(String key, Class<T> type) {
-        Object value = sharedContext.get(key);
+    public <T> T getData(String key, Class<T> type) {
+        Object value = data.get(key);
         if (value == null) {
             return null;
         }
@@ -119,8 +119,8 @@ public class ChatContext {
      * 
      * @return
      */
-    public <T> T getShared(String key, TypeReference<T> type) {
-        Object value = sharedContext.get(key);
+    public <T> T getData(String key, TypeReference<T> type) {
+        Object value = data.get(key);
         if (value == null) {
             return null;
         }
@@ -145,8 +145,8 @@ public class ChatContext {
      * 
      * @return
      */
-    public void setShared(String key, Object value) {
-        sharedContext.put(key, value);
+    public void setData(String key, Object value) {
+        data.put(key, value);
     }
 
     /**

@@ -96,7 +96,7 @@ public class WeaponBuilder extends EquipmentBuilder {
     }
     @Override
     protected Predicate<? super StatsArchive.Stat> visualModelPredicate() {
-        WeaponModel weapon = context.getShared(CURRENT_EQUIPMENT, WeaponModel.class);
+        WeaponModel weapon = context.getData(CURRENT_EQUIPMENT, WeaponModel.class);
         if (weapon == null || weapon.type == null) {
             return null;
         }
@@ -109,7 +109,7 @@ public class WeaponBuilder extends EquipmentBuilder {
 
     @Tool("Summarizes available visual models for the current weapon type.")
     public String showVisualModels() {
-        WeaponModel weapon = context.getShared(CURRENT_EQUIPMENT, WeaponModel.class);
+        WeaponModel weapon = context.getData(CURRENT_EQUIPMENT, WeaponModel.class);
         if (weapon == null || weapon.type == null) {
             throw new RuntimeException("Cannot determine vailable visual models because weapon type is not set");
         }

@@ -91,7 +91,7 @@ public class GlovesBuilder extends EquipmentBuilder {
 
     @Override
     protected Predicate<? super StatsArchive.Stat> visualModelPredicate() {
-        GlovesModel gloves = context.getShared(CURRENT_EQUIPMENT, GlovesModel.class);
+        GlovesModel gloves = context.getData(CURRENT_EQUIPMENT, GlovesModel.class);
         return stat -> {
             String slot = stat.getField("Slot");
             if (slot == null || (slot != null && !slot.equals("Gloves"))) {

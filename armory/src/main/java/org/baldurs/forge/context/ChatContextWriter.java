@@ -69,8 +69,8 @@ public class ChatContextWriter implements MessageBodyWriter<ChatContext> {
         writer.write("\"memoryId\":");
         writer.write("\"" + t.memoryId() + "\"");
         writer.write(",");
-        writer.write("\"shared\":");
-        mapper.writeValue(writer, t.sharedContext());
+        writer.write("\"data\":");
+        mapper.writeValue(writer, t.data());
         writer.write(",");
         writer.write("\"memory\":");
         memory.writeJson(writer);

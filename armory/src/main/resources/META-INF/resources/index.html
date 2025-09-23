@@ -764,7 +764,7 @@
                             "Accept": "application/octet-stream",
                             "Content-Type": "application/json"
                         },
-                        body: JSON.stringify(chatContext.shared.newEquipment)
+                        body: JSON.stringify(chatContext.data.newEquipment)
                     });
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
@@ -796,8 +796,8 @@
             // Function to update save indicator visibility
             function updateSaveIndicator() {
                 let saveCount = 0;
-                if (chatContext && chatContext.shared && chatContext.shared.newEquipment) {
-                    saveCount = chatContext.shared.newEquipment.count;
+                if (chatContext && chatContext.data && chatContext.data.newEquipment) {
+                    saveCount = chatContext.data.newEquipment.count;
                 }
                 let canSaveFile = saveCount > 0;
                 const $saveIndicator = $('#save-indicator');

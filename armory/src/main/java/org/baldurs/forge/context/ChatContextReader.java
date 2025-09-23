@@ -67,12 +67,12 @@ public class ChatContextReader implements MessageBodyReader<ChatContext> {
             memory.readJson(memoryNode);
         }
 
-        JsonNode sharedNode = contextNode.get("shared");
+        JsonNode sharedNode = contextNode.get("data");
         if (sharedNode != null && !sharedNode.isNull()) {
             sharedNode.fields().forEachRemaining(field -> {
                 JsonNode value = field.getValue();
                 if (value != null && !value.isNull()) {
-                    context.sharedContext().put(field.getKey(), value);
+                    context.data().put(field.getKey(), value);
                 }
             });
         }

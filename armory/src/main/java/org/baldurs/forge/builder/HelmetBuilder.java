@@ -89,7 +89,7 @@ public class HelmetBuilder extends EquipmentBuilder {
     }
     @Override
     protected Predicate<? super StatsArchive.Stat> visualModelPredicate() {
-        HelmetModel helmet = context.getShared(CURRENT_EQUIPMENT, HelmetModel.class);
+        HelmetModel helmet = context.getData(CURRENT_EQUIPMENT, HelmetModel.class);
         return stat -> {
             String slot = stat.getField("Slot");
             if (slot == null || (slot != null && !slot.equals("Helmet"))) {

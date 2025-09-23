@@ -72,7 +72,7 @@ public abstract class EquipmentBuilder implements ChatFrame {
         chatService.setChatFrame(context, type());
         String currentJson = "{}";
         BaseModel current = null;
-        if ((current = context.getShared(CURRENT_EQUIPMENT, baseModelClass())) != null) {
+        if ((current = context.getData(CURRENT_EQUIPMENT, baseModelClass())) != null) {
             try {
                 currentJson = mapper.writeValueAsString(current);
             } catch (Exception e) {
@@ -80,7 +80,7 @@ public abstract class EquipmentBuilder implements ChatFrame {
             }
         } else {
             current = create();
-            context.setShared(CURRENT_EQUIPMENT, current);
+            context.setData(CURRENT_EQUIPMENT, current);
         }
         Log.info("Current JSON: " + currentJson);
         return agent().build(context.memoryId(), type(), schema(), currentJson, userMessage);
@@ -97,21 +97,21 @@ public abstract class EquipmentBuilder implements ChatFrame {
 
     public String finishEquipment() throws Exception {
         BaseModel current = null;
-        if ((current = context.getShared(CURRENT_EQUIPMENT, baseModelClass())) == null) {
+        if ((current = context.getData(CURRENT_EQUIPMENT, baseModelClass())) == null) {
             return "No equipment to finish";
         }
         addShowEquipmentAction(current);
         chatService.popChatFrame(context);
-        context.setShared(CURRENT_EQUIPMENT, null);
+        context.setData(CURRENT_EQUIPMENT, null);
         if (current.rarity == null) {
             current.rarity = Rarity.Common;
         }
-        NewModModel newEquipment = context.getShared(NewModModel.NEW_EQUIPMENT, NewModModel.class);
+        NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
         if (newEquipment == null) {
             newEquipment = new NewModModel();
         }
         newEquipment.addEquipment(current);
-        context.setShared(NewModModel.NEW_EQUIPMENT, newEquipment);
+        context.setData(NewModModel.NEW_EQUIPMENT, newEquipment);
         context.response().add(new MessageAction("Finished building item!"));
         context.response().add(new UpdateNewEquipmentAction("To create a mod containing your newly built equipment, tell me to '" + ModPackager.PACKAGE_MODE_CHAT_COMMAND + "'"));
         context.suppressAIResponse();
@@ -131,12 +131,12 @@ public abstract class EquipmentBuilder implements ChatFrame {
     }
     
     protected void set(Consumer<BaseModel> consumer) {
-        BaseModel current = context.getShared(CURRENT_EQUIPMENT, baseModelClass());
+        BaseModel current = context.getData(CURRENT_EQUIPMENT, baseModelClass());
         if (current == null) {
             current = create();
         }
         consumer.accept(current);
-        context.setShared(CURRENT_EQUIPMENT, current);
+        context.setData(CURRENT_EQUIPMENT, current);
         logJson(current);
         addShowEquipmentAction(current);
     }
@@ -171,7 +171,7 @@ public abstract class EquipmentBuilder implements ChatFrame {
             context.response().add(new MessageAction("Could not create a boost macro from your description."));
             return;
         }
-        BaseModel current = context.getShared(CURRENT_EQUIPMENT, baseModelClass());
+        BaseModel current = context.getData(CURRENT_EQUIPMENT, baseModelClass());
         if (current == null) {
             current = create();
         }
@@ -180,7 +180,7 @@ public abstract class EquipmentBuilder implements ChatFrame {
         } else {
             current.boosts += ";" + enchantment;
         }
-        context.setShared(CURRENT_EQUIPMENT, current);
+        context.setData(CURRENT_EQUIPMENT, current);
         addShowEquipmentAction(current);
         logJson(current);
     }

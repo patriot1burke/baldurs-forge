@@ -60,7 +60,7 @@ public class ChatFrameService {
      */
     public void setChatFrame(ChatContext context, String chatFrame) {
         Log.info("Setting chat frame: " + chatFrame);
-        context.setShared(CHAT_FRAME, chatFrame);
+        context.setData(CHAT_FRAME, chatFrame);
     }
 
     /**
@@ -69,7 +69,7 @@ public class ChatFrameService {
      */
     public void popChatFrame(ChatContext context) {
         Log.info("Popping chat frame");
-        context.setShared(CHAT_FRAME, null);
+        context.setData(CHAT_FRAME, null);
         Log.info("Deleting messages for memoryId: " + context.memoryId());
         memoryStore.deleteMessages(context.memoryId());
     }
@@ -79,7 +79,7 @@ public class ChatFrameService {
     }
 
     public void chat(ChatContext context) {
-        String chatFrame = context.getShared(CHAT_FRAME, String.class);
+        String chatFrame = context.getData(CHAT_FRAME, String.class);
         if (chatFrame == null) {
             Log.info("Executing default chat");
             String msg = defaultChatFrame.chat(context.memoryId(), context.userMessage());

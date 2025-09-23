@@ -91,7 +91,7 @@ public class BootsBuilder extends EquipmentBuilder {
     }
     @Override
     protected Predicate<? super StatsArchive.Stat> visualModelPredicate() {
-        BootsModel boots = context.getShared(CURRENT_EQUIPMENT, BootsModel.class);
+        BootsModel boots = context.getData(CURRENT_EQUIPMENT, BootsModel.class);
         return stat -> {
             String slot = stat.getField("Slot");
             if (slot == null || (slot != null && !slot.equals("Boots"))) {

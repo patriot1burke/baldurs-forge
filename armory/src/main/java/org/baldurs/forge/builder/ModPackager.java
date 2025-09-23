@@ -75,14 +75,14 @@ public class ModPackager implements ChatFrame {
 
     @Override
     public String chat(String memoryId, String userMessage) {
-        NewModModel newEquipment = context.getShared(NewModModel.NEW_EQUIPMENT, NewModModel.class);
+        NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
         if (newEquipment == null) {
             return "You have not created any new equipment to package.";
         }
         chatService.setChatFrame(context, ModPackager.class.getName());
         String currentJson = "{}";
         PackageModel current = null;
-        if ((current = context.getShared(CURRENT_PACKAGE, PackageModel.class)) != null) {
+        if ((current = context.getData(CURRENT_PACKAGE, PackageModel.class)) != null) {
             try {
                 currentJson = mapper.writeValueAsString(current);
             } catch (Exception e) {
@@ -96,7 +96,7 @@ public class ModPackager implements ChatFrame {
 
     @Tool("Update the current package json document.")
     public String updatePackage(PackageModel packageModel) throws Exception {
-        PackageModel current = context.getShared(CURRENT_PACKAGE, PackageModel.class);
+        PackageModel current = context.getData(CURRENT_PACKAGE, PackageModel.class);
         if (current == null) {
             current = packageModel;
         }
@@ -109,20 +109,20 @@ public class ModPackager implements ChatFrame {
         if (packageModel.description != null) {
             current.description = packageModel.description;
         }
-        context.setShared(CURRENT_PACKAGE, current);
+        context.setData(CURRENT_PACKAGE, current);
         return mapper.writeValueAsString(current);
     }
 
     @Tool("Package the mod.")
     public String finishPackage(PackageModel packageModel) {
-        NewModModel newEquipment = context.getShared(NewModModel.NEW_EQUIPMENT, NewModModel.class);
+        NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
         if (newEquipment == null) {
             return "No equipment to package.";
         }
         newEquipment.name = packageModel.name;
         newEquipment.author = packageModel.author;
         newEquipment.description = packageModel.description;
-        context.setShared(NewModModel.NEW_EQUIPMENT, newEquipment);
+        context.setData(NewModModel.NEW_EQUIPMENT, newEquipment);
         chatService.popChatFrame(context);
         String baseFileName = toAlphaNumericUnderscore(newEquipment.name);
 
@@ -131,7 +131,7 @@ public class ModPackager implements ChatFrame {
     }
 
     public List<EquipmentModel> listBuiltEquipment() {
-        NewModModel newEquipment = context.getShared(NewModModel.NEW_EQUIPMENT, NewModModel.class);
+        NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
         if (newEquipment == null || newEquipment.isEmpty()) {
             return Collections.EMPTY_LIST;
         }
@@ -148,12 +148,12 @@ public class ModPackager implements ChatFrame {
     }
 
     public void deleteAllNewEquipment() {
-        context.setShared(NewModModel.NEW_EQUIPMENT, null);
+        context.setData(NewModModel.NEW_EQUIPMENT, null);
         context.response().add(new UpdateNewEquipmentAction(null));
     }
 
     public String deleteNewEquipment(String name) {
-        NewModModel newEquipment = context.getShared(NewModModel.NEW_EQUIPMENT, NewModModel.class);
+        NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
         if (newEquipment == null || newEquipment.isEmpty()) {
             return "No equipment to delete.";
         }
@@ -166,9 +166,9 @@ public class ModPackager implements ChatFrame {
         newEquipment.removeEquipment(equipment);
 
         if (newEquipment.count == 0) {
-            context.setShared(NewModModel.NEW_EQUIPMENT, null);
+            context.setData(NewModModel.NEW_EQUIPMENT, null);
         } else {
-            context.setShared(NewModModel.NEW_EQUIPMENT, newEquipment);
+            context.setData(NewModModel.NEW_EQUIPMENT, newEquipment);
             showNewEquipment();
         }
         
@@ -178,7 +178,7 @@ public class ModPackager implements ChatFrame {
     }
 
     public String updateNewEquipment(String name) {
-        NewModModel newEquipment = context.getShared(NewModModel.NEW_EQUIPMENT, NewModModel.class);
+        NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
         if (newEquipment == null || newEquipment.isEmpty()) {
             return "No equipment to update.";
         }
@@ -187,7 +187,7 @@ public class ModPackager implements ChatFrame {
             showNewEquipment();
             return "Equipment with name not found.";
         }
-        context.setShared(EquipmentBuilder.CURRENT_EQUIPMENT, equipment);
+        context.setData(EquipmentBuilder.CURRENT_EQUIPMENT, equipment);
         return chatService.getChatFrame(equipment.type()).chat(context.memoryId(), context.userMessage());
     }
 
