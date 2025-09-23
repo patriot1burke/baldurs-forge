@@ -51,7 +51,7 @@ public class MainMenuCommands {
 
     @Inject
     RingBuilder ringBuilder;
-    
+
     @Inject
     AmuletBuilder amuletBuilder;
     @Inject
@@ -69,23 +69,25 @@ public class MainMenuCommands {
     @Inject
     MainMenuChat chat;
 
-
-
     @Startup
     public void start() {
         chatService.setDefaultChatFrame(chat);
     }
 
-
     @Tool("Search for armor or weapons or rings or amulets or boots or gloves or helmets or shields in the equipment database based on a natural language query")
     public String searchEquipmentDatabase(String query) {
         Log.info("Searching equipment database for: " + query);
         List<EquipmentModel> models = equipmentDB.ragSearch(query);
+        context.suppressAIResponse();
         if (models.isEmpty()) {
-            return "Could not find equipment";
+            context.response().add(new MessageAction("Could not find any equipment that matched your query."));
+            // supressing AI response, but send something meaningful back to LLM
+            return "Could not find equipment that matched your query.";
         } else {
             ListEquipmentAction.addResponse(context, models);
-            return "I found some possible matches for your query.";
+            context.response().add(new MessageAction("I found some possible matches for your query."));
+            // supressing AI response, but send something meaningful back to LLM
+            return "I found some matches for your query.";
         }
     }
 
@@ -93,11 +95,23 @@ public class MainMenuCommands {
     public String findEquipmentByName(String name) {
         Log.info("Finding equipment by name: " + name);
         EquipmentModel model = equipmentDB.findByName(name);
+        context.suppressAIResponse();
         if (model == null) {
-            throw new RuntimeException("Could not find the equipment.  Invoke the searchEquipmentDatabase tool instead.");
+            List<EquipmentModel> models = equipmentDB.ragSearch(context.userMessage());
+            if (models.isEmpty()) {
+                context.response()
+                        .add(new MessageAction("I could not find any equipment with that name or any similar names."));
+            } else {
+                context.response().add(new MessageAction(
+                        "I could not find an exact match for your query, but I found some possible matches."));
+                ListEquipmentAction.addResponse(context, models);
+            }
+        } else {
+            ShowEquipmentAction.addResponse(context, model);
         }
-        ShowEquipmentAction.addResponse(context, model);
+        // supressing AI response, but no matter what tell the LLM we found an exact match so it doesn't try a search tool call, even on an error.
         return "I found an exact match for your query.";
+
     }
 
     @Tool("Create new body armor.")
@@ -174,7 +188,7 @@ public class MainMenuCommands {
         }
         return "Here is all the equipment the user has created.";
     }
-    
+
     @Tool("Delete new equipment item by name.")
     public String deleteNewEquipmentByName(String name) {
         Log.info("deleteNewEquipment: " + name);

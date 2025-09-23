@@ -85,16 +85,22 @@ public class ChatFrameService {
             String msg = defaultChatFrame.chat(context.memoryId(), context.userMessage());
             if (!context.popSuppressAIResponse()) {
                 if (msg != null) {
+                    Log.info("Adding message: " + msg);
                     context.response().add(message(msg));
                 }
+            } else {
+                Log.info("Suppressing AI response");
             }
         } else if (chatFrames.containsKey(chatFrame)) {
             Log.info("Executing chat frame: " + chatFrame);
             String msg = chatFrames.get(chatFrame).chat(context.memoryId(), context.userMessage());
             if (!context.popSuppressAIResponse()) {
                 if (msg != null) {
+                    Log.info("Adding message: " + msg);
                     context.response().add(message(msg));
                 }
+            } else {
+                Log.info("Suppressing AI response");
             }
         }
         else {
