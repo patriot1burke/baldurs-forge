@@ -76,8 +76,10 @@ public class MainMenuCommands {
 
     @Tool("Search for armor or weapons or rings or amulets or boots or gloves or helmets or shields in the equipment database based on a natural language query")
     public String searchEquipmentDatabase(String query) {
-        Log.info("Searching equipment database for: " + query);
-        List<EquipmentModel> models = equipmentDB.ragSearch(query);
+        // query parameter is ignored, but tool invocations are fickle so keeping it as a parameter.
+        Log.debug("Searching equipment database with query: " + query);
+        Log.info("Searching equipment database with user message: " + context.userMessage());
+        List<EquipmentModel> models = equipmentDB.ragSearch(context.userMessage());
         context.suppressAIResponse();
         if (models.isEmpty()) {
             context.response().add(new MessageAction("Could not find any equipment that matched your query."));
