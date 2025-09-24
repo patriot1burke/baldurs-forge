@@ -22,15 +22,6 @@ public class ChatFrameService {
     @Inject
     ClientMemoryStore memoryStore;
 
-    @Inject
-    BodyArmorBuilder bodyArmorBuilder;
-
-    @Inject
-    WeaponBuilder weaponBuilder;
-
-    @Inject
-    ModPackager modPackager;
-
     Render render;
 
     ChatFrame defaultChatFrame;
