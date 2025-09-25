@@ -66,7 +66,7 @@ public class MainMenuCommands {
     ModPackager modPackager;
 
     @Inject
-    MainMenuChat chat;
+    MainMenuPrompt chat;
 
     @Startup
     public void start() {

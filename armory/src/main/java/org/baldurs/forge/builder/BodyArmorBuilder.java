@@ -17,10 +17,10 @@ import jakarta.inject.Inject;
 public class BodyArmorBuilder extends EquipmentBuilder {
 
     @Inject
-    BodyArmorBuilderChat agent;
+    BodyArmorBuilderPrompt agent;
 
     @Override
-    protected BuilderChat agent() {
+    protected BuilderPrompt agent() {
         return agent;
     }
 

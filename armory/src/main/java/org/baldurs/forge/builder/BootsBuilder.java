@@ -18,9 +18,9 @@ import jakarta.inject.Inject;
 public class BootsBuilder extends EquipmentBuilder {
 
     @Inject
-    BootsBuilderChat agent;
+    BootsBuilderPrompt agent;
     @Override
-    protected BuilderChat agent() {
+    protected BuilderPrompt agent() {
         return agent;
     }
 

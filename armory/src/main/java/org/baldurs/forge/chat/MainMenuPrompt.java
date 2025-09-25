@@ -11,7 +11,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 @RegisterAiService(chatMemoryProviderSupplier = MessageWindowClientMemoryProvider.class)
-public interface MainMenuChat extends ChatFrame {
+public interface MainMenuPrompt extends ChatFrame {
 
     @SystemMessage(fromResource = "prompts/mainMenuCommands.txt")
     @ToolBox({MainMenuCommands.class})

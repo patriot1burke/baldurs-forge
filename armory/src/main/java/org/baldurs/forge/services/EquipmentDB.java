@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.baldurs.forge.agents.MetadataAgent;
+import org.baldurs.forge.chat.MetadataPrompts;
 import org.baldurs.forge.model.Equipment;
 import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.model.EquipmentSlot;
@@ -52,7 +52,7 @@ public class EquipmentDB {
     EmbeddingModel embeddingModel;
 
     @Inject
-    MetadataAgent metadataAgent;
+    MetadataPrompts metadataAgent;
 
     Map<String, Equipment> equipmentDB = new HashMap<>();
 

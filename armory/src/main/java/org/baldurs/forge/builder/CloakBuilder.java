@@ -16,10 +16,10 @@ import jakarta.inject.Inject;
 public class CloakBuilder extends EquipmentBuilder {
 
     @Inject
-    CloakBuilderChat agent;
+    CloakBuilderPrompt agent;
 
     @Override
-    protected BuilderChat agent() {
+    protected BuilderPrompt agent() {
         return agent;
     }
 

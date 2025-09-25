@@ -16,10 +16,10 @@ import jakarta.inject.Inject;
 public class AmuletBuilder extends EquipmentBuilder {
 
     @Inject
-    AmuletBuilderChat agent;
+    AmuletBuilderPrompt agent;
 
     @Override
-    protected BuilderChat agent() {
+    protected BuilderPrompt agent() {
         return agent;
     }
 

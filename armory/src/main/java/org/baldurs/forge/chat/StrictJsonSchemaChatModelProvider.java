@@ -1,4 +1,4 @@
-package org.baldurs.forge.agents;
+package org.baldurs.forge.chat;
 
 import java.util.function.Supplier;
 

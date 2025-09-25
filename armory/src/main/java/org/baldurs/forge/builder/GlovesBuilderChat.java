@@ -11,7 +11,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 @RegisterAiService(chatMemoryProviderSupplier = MessageWindowClientMemoryProvider.class)
-public interface GlovesBuilderChat extends BuilderChat {
+public interface GlovesBuilderChat extends BuilderPrompt {
     @Override
     @SystemMessage(fromResource = "prompts/equipmentBuilder.txt")
     @ToolBox({GlovesBuilder.class})

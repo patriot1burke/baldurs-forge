@@ -46,7 +46,7 @@ public abstract class EquipmentBuilder implements ChatFrame {
     LibraryService library;
 
     @Inject
-    BoostBuilderChat boostBuilder;
+    BoostBuilderPrompt boostBuilder;
 
     @PostConstruct
     public void init() {
@@ -54,7 +54,7 @@ public abstract class EquipmentBuilder implements ChatFrame {
         mapper.setSerializationInclusion(Include.NON_NULL);
     }
 
-    protected abstract BuilderChat agent();
+    protected abstract BuilderPrompt agent();
     protected abstract Class<? extends BaseModel> baseModelClass();
     protected abstract String schema();
     protected abstract String type();

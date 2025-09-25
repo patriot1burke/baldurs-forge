@@ -19,7 +19,7 @@ public class GlovesBuilder extends EquipmentBuilder {
     GlovesBuilderChat agent;
 
     @Override
-    protected BuilderChat agent() {
+    protected BuilderPrompt agent() {
         return agent;
     }
 

@@ -16,10 +16,10 @@ import jakarta.inject.Inject;
 public class RingBuilder extends EquipmentBuilder {
 
     @Inject
-    RingBuilderChat agent;
+    RingBuilderPrompt agent;
 
     @Override
-    protected BuilderChat agent() {
+    protected BuilderPrompt agent() {
         return agent;
     }
 

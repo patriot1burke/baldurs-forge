@@ -47,7 +47,7 @@ public class ModPackager implements ChatFrame {
     ChatFrameService chatService;
 
     @Inject
-    EquipmentBuilderChat agent;
+    ModPackagePrompt agent;
 
     @Inject
     LibraryService library;
