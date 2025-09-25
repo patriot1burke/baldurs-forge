@@ -1,11 +1,7 @@
 package org.baldurs.forge.builder;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.model.EquipmentSlot;
@@ -17,11 +13,7 @@ import org.baldurs.forge.services.LibraryService;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
-import dev.langchain4j.model.chat.request.json.JsonSchema;
-import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
 import dev.langchain4j.model.output.structured.Description;
-import dev.langchain4j.service.output.JsonSchemas;
 
 public class WeaponModel extends BaseModel {
     @Description("The type of weapon")

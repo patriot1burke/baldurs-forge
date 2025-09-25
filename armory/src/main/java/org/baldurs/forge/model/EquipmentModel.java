@@ -1,7 +1,6 @@
 package org.baldurs.forge.model;
 
 import java.util.List;
-import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -1,10 +1,8 @@
 package org.baldurs.forge.builder;
 
-import org.baldurs.forge.chat.ChatFrame;
 import org.baldurs.forge.context.MessageWindowClientMemoryProvider;
 
 import dev.langchain4j.agent.tool.Tool;
-import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.RegisterAiService;

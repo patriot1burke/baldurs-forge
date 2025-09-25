@@ -1,22 +1,11 @@
 package org.baldurs.forge.builder;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.model.EquipmentSlot;
 import org.baldurs.forge.model.EquipmentType;
 import org.baldurs.forge.model.Rarity;
 import org.baldurs.forge.services.BoostService;
 import org.baldurs.forge.services.LibraryService;
-
-import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
-import dev.langchain4j.model.chat.request.json.JsonSchema;
-import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
-import dev.langchain4j.service.output.JsonSchemas;
 
 public class GlovesModel extends AppendageModel {
 

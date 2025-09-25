@@ -3,14 +3,10 @@ package org.baldurs.forge.chat;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.baldurs.forge.builder.BodyArmorBuilder;
-import org.baldurs.forge.builder.ModPackager;
-import org.baldurs.forge.builder.WeaponBuilder;
 import org.baldurs.forge.context.ChatContext;
 import org.baldurs.forge.context.ClientMemoryStore;
 
 import io.quarkus.logging.Log;
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 

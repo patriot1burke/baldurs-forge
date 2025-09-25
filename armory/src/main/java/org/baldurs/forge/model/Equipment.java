@@ -1,7 +1,6 @@
 package org.baldurs.forge.model;
 
 import java.util.List;
-import java.util.Set;
 
 import org.baldurs.forge.scanner.RootTemplate;
 import org.baldurs.forge.scanner.StatsArchive;

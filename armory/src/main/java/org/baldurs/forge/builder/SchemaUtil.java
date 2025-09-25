@@ -6,14 +6,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.baldurs.forge.model.Rarity;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
-import dev.langchain4j.model.output.structured.Description;
 import dev.langchain4j.service.output.JsonSchemas;
 
 public class SchemaUtil {
