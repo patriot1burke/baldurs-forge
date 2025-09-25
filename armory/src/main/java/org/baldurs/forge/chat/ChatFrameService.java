@@ -6,7 +6,6 @@ import java.util.Map;
 import org.baldurs.forge.builder.BodyArmorBuilder;
 import org.baldurs.forge.builder.ModPackager;
 import org.baldurs.forge.builder.WeaponBuilder;
-import org.baldurs.forge.chat.actions.MessageAction;
 import org.baldurs.forge.context.ChatContext;
 import org.baldurs.forge.context.ClientMemoryStore;
 
@@ -65,8 +64,8 @@ public class ChatFrameService {
         memoryStore.deleteMessages(context.memoryId());
     }
 
-    private MessageAction message(String message) {
-        return new MessageAction(render.render(message));
+    private ObjectMessage message(String message) {
+        return new ObjectMessage(render.render(message));
     }
 
     public void chat(ChatContext context) {

@@ -11,11 +11,10 @@ import org.baldurs.forge.builder.HelmetBuilder;
 import org.baldurs.forge.builder.ModPackager;
 import org.baldurs.forge.builder.RingBuilder;
 import org.baldurs.forge.builder.WeaponBuilder;
-import org.baldurs.forge.chat.actions.ImportModAction;
-import org.baldurs.forge.chat.actions.ListEquipmentAction;
-import org.baldurs.forge.chat.actions.MessageAction;
-import org.baldurs.forge.chat.actions.ShowEquipmentAction;
 import org.baldurs.forge.context.ChatContext;
+import org.baldurs.forge.messages.ImportModMessage;
+import org.baldurs.forge.messages.ListEquipmentMessage;
+import org.baldurs.forge.messages.ShowEquipmentMessage;
 import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.services.EquipmentDB;
 import org.baldurs.forge.services.LibraryService;
@@ -82,12 +81,12 @@ public class MainMenuCommands {
         List<EquipmentModel> models = equipmentDB.ragSearch(context.userMessage());
         context.suppressAIResponse();
         if (models.isEmpty()) {
-            context.response().add(new MessageAction("Could not find any equipment that matched your query."));
+            context.response().add(new ObjectMessage("Could not find any equipment that matched your query."));
             // supressing AI response, but send something meaningful back to LLM
             return "Could not find equipment that matched your query.";
         } else {
-            ListEquipmentAction.addResponse(context, models);
-            context.response().add(new MessageAction("I found some possible matches for your query."));
+            ListEquipmentMessage.addResponse(context, models);
+            context.response().add(new ObjectMessage("I found some possible matches for your query."));
             // supressing AI response, but send something meaningful back to LLM
             return "I found some matches for your query.";
         }
@@ -102,14 +101,14 @@ public class MainMenuCommands {
             List<EquipmentModel> models = equipmentDB.ragSearch(context.userMessage());
             if (models.isEmpty()) {
                 context.response()
-                        .add(new MessageAction("I could not find any equipment with that name or any similar names."));
+                        .add(new ObjectMessage("I could not find any equipment with that name or any similar names."));
             } else {
-                context.response().add(new MessageAction(
+                context.response().add(new ObjectMessage(
                         "I could not find an exact match for your query, but I found some possible matches."));
-                ListEquipmentAction.addResponse(context, models);
+                ListEquipmentMessage.addResponse(context, models);
             }
         } else {
-            ShowEquipmentAction.addResponse(context, model);
+            ShowEquipmentMessage.addResponse(context, model);
         }
         // supressing AI response, but no matter what tell the LLM we found an exact match so it doesn't try a search tool call, even on an error.
         return "I found an exact match for your query.";
@@ -171,7 +170,7 @@ public class MainMenuCommands {
         if (values.isEmpty()) {
             return "I could not find any values for attribute: " + attributeName;
         } else {
-            context.response().add(new MessageAction(values));
+            context.response().add(new ObjectMessage(values));
             return "Query was successful";
         }
     }
@@ -182,11 +181,11 @@ public class MainMenuCommands {
         List<EquipmentModel> equipment = modPackager.listBuiltEquipment();
         context.suppressAIResponse();
         if (equipment.isEmpty()) {
-            context.response().add(new MessageAction("You have not created any new equipment yet."));
+            context.response().add(new ObjectMessage("You have not created any new equipment yet."));
         } else {
-            context.response().add(new MessageAction("This is the equipment you have created so far:"));
-            ListEquipmentAction.addResponse(context, equipment);
-            context.response().add(new MessageAction("Ask me to <i>Package Mod</i> to package up your new equipment."));
+            context.response().add(new ObjectMessage("This is the equipment you have created so far:"));
+            ListEquipmentMessage.addResponse(context, equipment);
+            context.response().add(new ObjectMessage("Ask me to <i>Package Mod</i> to package up your new equipment."));
         }
         return "Here is all the equipment the user has created.";
     }
@@ -218,7 +217,7 @@ public class MainMenuCommands {
     @Tool("Import a mod from a file.")
     public String importMod() {
         Log.info("importMod");
-        ImportModAction.addResponse(context);
+        ImportModMessage.addResponse(context);
         return "Please select a file to import.";
     }
 }

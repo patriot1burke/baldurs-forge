@@ -15,11 +15,11 @@ import org.baldurs.archivist.LS.Converter;
 import org.baldurs.archivist.LS.PackedVersion;
 import org.baldurs.forge.chat.ChatFrame;
 import org.baldurs.forge.chat.ChatFrameService;
-import org.baldurs.forge.chat.actions.ListEquipmentAction;
-import org.baldurs.forge.chat.actions.MessageAction;
-import org.baldurs.forge.chat.actions.PackageModAction;
-import org.baldurs.forge.chat.actions.UpdateNewEquipmentAction;
+import org.baldurs.forge.chat.ObjectMessage;
 import org.baldurs.forge.context.ChatContext;
+import org.baldurs.forge.messages.ListEquipmentMessage;
+import org.baldurs.forge.messages.PackageModMessage;
+import org.baldurs.forge.messages.UpdateNewEquipmentMessage;
 import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.scanner.RootTemplate;
 import org.baldurs.forge.scanner.StatsArchive;
@@ -126,7 +126,7 @@ public class ModPackager implements ChatFrame {
         chatService.popChatFrame(context);
         String baseFileName = toAlphaNumericUnderscore(newEquipment.name);
 
-        PackageModAction.addResponse(context, baseFileName + ".pak");
+        PackageModMessage.addResponse(context, baseFileName + ".pak");
         return "The mod is finished.";
     }
 
@@ -141,15 +141,15 @@ public class ModPackager implements ChatFrame {
     public void showNewEquipment() {
         List<EquipmentModel> equipment = listBuiltEquipment();
         if (!equipment.isEmpty()) {
-            ListEquipmentAction.addResponse(context, equipment);
+            ListEquipmentMessage.addResponse(context, equipment);
         } else {
-            context.response().add(new MessageAction("No new equipment."));
+            context.response().add(new ObjectMessage("No new equipment."));
         }
     }
 
     public void deleteAllNewEquipment() {
         context.setData(NewModModel.NEW_EQUIPMENT, null);
-        context.response().add(new UpdateNewEquipmentAction(null));
+        context.response().add(new UpdateNewEquipmentMessage(null));
     }
 
     public String deleteNewEquipment(String name) {
@@ -172,7 +172,7 @@ public class ModPackager implements ChatFrame {
             showNewEquipment();
         }
         
-        context.response().add(new UpdateNewEquipmentAction(null));
+        context.response().add(new UpdateNewEquipmentMessage(null));
 
         return "Equipment deleted.";
     }

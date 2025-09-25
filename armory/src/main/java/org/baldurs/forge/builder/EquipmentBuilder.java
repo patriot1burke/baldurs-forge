@@ -7,11 +7,11 @@ import java.util.function.Supplier;
 
 import org.baldurs.forge.chat.ChatFrame;
 import org.baldurs.forge.chat.ChatFrameService;
-import org.baldurs.forge.chat.actions.ListVisualModelsAction;
-import org.baldurs.forge.chat.actions.MessageAction;
-import org.baldurs.forge.chat.actions.ShowEquipmentAction;
-import org.baldurs.forge.chat.actions.UpdateNewEquipmentAction;
+import org.baldurs.forge.chat.ObjectMessage;
 import org.baldurs.forge.context.ChatContext;
+import org.baldurs.forge.messages.ListVisualModelsMessage;
+import org.baldurs.forge.messages.ShowEquipmentMessage;
+import org.baldurs.forge.messages.UpdateNewEquipmentMessage;
 import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.model.Rarity;
 import org.baldurs.forge.scanner.RootTemplate;
@@ -92,7 +92,7 @@ public abstract class EquipmentBuilder implements ChatFrame {
             return;
         }
         EquipmentModel equipment = baseModel.toEquipmentModel(boostService, library);
-        ShowEquipmentAction.addResponse(context, equipment);
+        ShowEquipmentMessage.addResponse(context, equipment);
     }
 
     public String finishEquipment() throws Exception {
@@ -112,8 +112,8 @@ public abstract class EquipmentBuilder implements ChatFrame {
         }
         newEquipment.addEquipment(current);
         context.setData(NewModModel.NEW_EQUIPMENT, newEquipment);
-        context.response().add(new MessageAction("Finished building item!"));
-        context.response().add(new UpdateNewEquipmentAction("To create a mod containing your newly built equipment, tell me to '" + ModPackager.PACKAGE_MODE_CHAT_COMMAND + "'"));
+        context.response().add(new ObjectMessage("Finished building item!"));
+        context.response().add(new UpdateNewEquipmentMessage("To create a mod containing your newly built equipment, tell me to '" + ModPackager.PACKAGE_MODE_CHAT_COMMAND + "'"));
         context.suppressAIResponse();
         Log.info("Finishing equipment");
         String json = logJson(current);
@@ -167,8 +167,8 @@ public abstract class EquipmentBuilder implements ChatFrame {
         String enchantment = boostBuilder.createBoostMacro(context.userMessage());
         Log.info("Enchantment: " + enchantment);
         if (enchantment.indexOf('(') < 0) {
-            context.response().add(new MessageAction(enchantment));
-            context.response().add(new MessageAction("Could not create a boost macro from your description."));
+            context.response().add(new ObjectMessage(enchantment));
+            context.response().add(new ObjectMessage("Could not create a boost macro from your description."));
             return;
         }
         BaseModel current = context.getData(CURRENT_EQUIPMENT, baseModelClass());
@@ -192,8 +192,8 @@ public abstract class EquipmentBuilder implements ChatFrame {
         String enchantment = boostBuilder.createBoostMacro(context.userMessage());
         Log.info("Enchantment: " + enchantment);
         if (enchantment.indexOf('(') < 0) {
-            context.response().add(new MessageAction(enchantment));
-            context.response().add(new MessageAction("Could not create a boost macro from your description."));
+            context.response().add(new ObjectMessage(enchantment));
+            context.response().add(new ObjectMessage("Could not create a boost macro from your description."));
             return;
         }
         set(current -> current.boosts = enchantment);
@@ -207,7 +207,7 @@ public abstract class EquipmentBuilder implements ChatFrame {
             throw new RuntimeException("Item not finished yet.  Cannot search for visual models.");
         }
        List<RootTemplate> rootTemplates = library.findRootIconsFrom(visualModelPredicate);
-        ListVisualModelsAction action = new ListVisualModelsAction();
+        ListVisualModelsMessage action = new ListVisualModelsMessage();
         for (RootTemplate rootTemplate : rootTemplates) {
             String icon = rootTemplate.resolveIcon();
             if (icon == null) {
@@ -221,7 +221,7 @@ public abstract class EquipmentBuilder implements ChatFrame {
         }
         context.response().add(action);
         String message = "There are " + rootTemplates.size() + " visual models available. Choose one of the parent ids from the list above if you want a different look for your weapon.";
-        context.response().add(new MessageAction(message));
+        context.response().add(new ObjectMessage(message));
 
         // Ignore the next AI chat response because the AI often says it cannot find anything
         // if a data list is not sent back as a tool result.

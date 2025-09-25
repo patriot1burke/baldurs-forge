@@ -3,7 +3,7 @@ package org.bg3.forge;
 import java.io.StringWriter;
 import java.util.List;
 
-import org.baldurs.forge.chat.actions.MessageAction;
+import org.baldurs.forge.chat.ObjectMessage;
 import org.baldurs.forge.context.ChatContext;
 import org.baldurs.forge.context.ChatContextWriter;
 import org.baldurs.forge.context.ClientMemoryStore;
@@ -18,7 +18,7 @@ public class ChatContextSerializationTest {
     public void testSerialization() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         ChatContext context = new ChatContext();
-        context.response().add(new MessageAction("Hello"));
+        context.response().add(new ObjectMessage("Hello"));
         ClientMemoryStore memory = ClientMemoryStore.pojo(mapper);
         memory.updateMessages("test", List.of(new UserMessage("Hello")));
         
