@@ -13,17 +13,19 @@ import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.ChatMessageDeserializer;
 import dev.langchain4j.data.message.ChatMessageSerializer;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 
 /**
  * 
- * Quarkus does not provide a way to hook in the chat memory store directly. It
- * also
- * will automatically use any ChatMemoryStore that is provided as a bean.
+ * QuarkusAiServiceContext.close() will call deleteMessages() and this
+ * bean is @RequestScoped so it would be out of scope.
  * 
- * So, this class cannot implement ChatMemoryStore directly.
+ * So, we do not implement ChatMemoryStore directly and instead 
+ * wrap it in a ClientMemoryStoreBean.
+ * 
  */
 @RequestScoped
 public class ClientMemoryStore {
@@ -33,14 +35,17 @@ public class ClientMemoryStore {
     Map<String, List<ChatMessage>> messages = new ConcurrentHashMap<>();
 
     public void deleteMessages(Object memoryId) {
+        Log.info("Deleting messages for memoryId: " + memoryId);
         messages.remove(memoryId);
     }
 
     public List<ChatMessage> getMessages(Object memoryId) {
+        Log.info("Getting messages for memoryId: " + memoryId);
         return messages.computeIfAbsent(memoryId.toString(), ignored -> new ArrayList<>());
     }
 
     public void updateMessages(Object memoryId, List<ChatMessage> messages) {
+        Log.info("Updating messages for memoryId: " + memoryId);
         this.messages.put(memoryId.toString(), messages);
     }
 
@@ -96,44 +101,6 @@ public class ClientMemoryStore {
         ClientMemoryStore memory = new ClientMemoryStore();
         memory.mapper = mapper;
         return memory;
-    }
-
-    /**
-     * Wraps the ClientMemoryStore in a ChatMemoryStore.
-     * ChatMemoryStore.deleteMessages can be called by Quarkus out of scope of a request.  Since ClientMemoryStore is request scoped,
-     * this wrapper catches any CDI exceptions and eats them to avoid logging so many errors.
-     * 
-     * QuarkusAiServiceContext.close() will call deleteMessages() and the ClientMemoryStorebean will be out of scope.
-     * @return
-     */
-    public static ChatMemoryStore beanDelegate() {
-        return new ChatMemoryStore() {
-
-            @Override
-            public void deleteMessages(Object memoryId) {
-                ClientMemoryStore clientMemoryStore = null;
-                clientMemoryStore = CDI.current().select(ClientMemoryStore.class).get();
-                try {
-                    clientMemoryStore.ping(); // ping forces CDI to reference the instance
-                } catch (Exception e) {
-                    return;
-                }
-                clientMemoryStore.deleteMessages(memoryId);
-            }
-
-            @Override
-            public List<ChatMessage> getMessages(Object memoryId) {
-                ClientMemoryStore clientMemoryStore = CDI.current().select(ClientMemoryStore.class).get();
-                return clientMemoryStore.getMessages(memoryId);
-            }
-
-            @Override
-            public void updateMessages(Object memoryId, List<ChatMessage> messages) {
-                ClientMemoryStore clientMemoryStore = CDI.current().select(ClientMemoryStore.class).get();
-                clientMemoryStore.updateMessages(memoryId, messages);
-            }
-
-        };
     }
 }
 

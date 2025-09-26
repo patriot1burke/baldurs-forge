@@ -12,7 +12,7 @@ import io.quarkus.logging.Log;
 import io.quarkus.runtime.Startup;
 
 @ApplicationScoped
-public class MarkdownToHtmlRenderService {
+public class MarkdownToHtmlService {
     Parser parser;
     HtmlRenderer renderer;
 

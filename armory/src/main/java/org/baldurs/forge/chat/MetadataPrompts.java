@@ -8,7 +8,6 @@ import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.RegisterAiService;
 import jakarta.enterprise.context.ApplicationScoped;
 
-@ApplicationScoped
 @RegisterAiService(chatLanguageModelSupplier = StrictJsonSchemaChatModelProvider.class)
 public interface MetadataPrompts {
 

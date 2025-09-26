@@ -1,6 +1,5 @@
 package org.baldurs.forge.builder;
 
-import org.baldurs.forge.context.MessageWindowClientMemoryProvider;
 
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
@@ -9,8 +8,7 @@ import io.quarkiverse.langchain4j.RegisterAiService;
 import io.quarkiverse.langchain4j.ToolBox;
 import jakarta.enterprise.context.ApplicationScoped;
 
-@ApplicationScoped
-@RegisterAiService(chatMemoryProviderSupplier = MessageWindowClientMemoryProvider.class)
+@RegisterAiService
 public interface BootsBuilderPrompt extends BuilderPrompt {
     @Override
     @SystemMessage(fromResource = "prompts/equipmentBuilder.txt")
