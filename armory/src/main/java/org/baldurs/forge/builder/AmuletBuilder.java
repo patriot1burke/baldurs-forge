@@ -6,6 +6,7 @@ import org.baldurs.forge.scanner.StatsArchive;
 
 import org.baldurs.forge.model.Rarity;
 
+import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.Startup;
@@ -97,12 +98,12 @@ public class AmuletBuilder extends EquipmentBuilder {
         };
     }
 
-    @Tool("Summarizes available visual models for the current amulet type.")
+    @Tool(value = "Summarizes available visual models for the current amulet type.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String showVisualModels() {
         return super.showVisualModels();
     }
 
-    @Tool("When finished building amulet, call this tool to finish the amulet.")
+    @Tool(value = "When finished building amulet, call this tool to finish the amulet.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String finishEquipment() throws Exception {
         return super.finishEquipment();
     }

@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import org.baldurs.forge.model.Rarity;
 import org.baldurs.forge.scanner.StatsArchive;
 
+import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.Startup;
@@ -97,12 +98,12 @@ public class CloakBuilder extends EquipmentBuilder {
         };
     }
 
-    @Tool("Summarizes available visual models for the current cloak type.")
+    @Tool(value = "Summarizes available visual models for the current cloak type.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String showVisualModels() {
        return super.showVisualModels();
     }
 
-    @Tool("When finished building cloak, call this tool to finish the cloak.")
+    @Tool(value = "When finished building cloak, call this tool to finish the cloak.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String finishEquipment() throws Exception {
         return super.finishEquipment();
     }

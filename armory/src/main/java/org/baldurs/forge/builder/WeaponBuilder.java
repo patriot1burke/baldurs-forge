@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import org.baldurs.forge.model.Rarity;
 import org.baldurs.forge.scanner.StatsArchive;
 
+import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.Startup;
@@ -107,7 +108,7 @@ public class WeaponBuilder extends EquipmentBuilder {
         };
     }
 
-    @Tool("Summarizes available visual models for the current weapon type.")
+    @Tool(value = "Summarizes available visual models for the current weapon type.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String showVisualModels() {
         WeaponModel weapon = context.getData(CURRENT_EQUIPMENT, WeaponModel.class);
         if (weapon == null || weapon.type == null) {
@@ -115,7 +116,7 @@ public class WeaponBuilder extends EquipmentBuilder {
         }
         return super.showVisualModels();
     }
-    @Tool("When finished building weapon, call this tool to finish the weapon.")
+    @Tool(value = "When finished building weapon, call this tool to finish the weapon.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String finishEquipment() throws Exception {
         return super.finishEquipment();
     }

@@ -104,7 +104,9 @@ public class MainMenuChatFrame implements ChatFrame {
         } else {
             Log.info("MainMenu with multiple tool executions");
             for (ToolExecution execution : result.toolExecutions()) {
-                if (execution.result() == null) continue;
+                if (execution.result() == null || execution.result().equals("\"null\"")) {
+                    continue;
+                }
                 if (execution.result().contains(CLEAR_MEMORY_ON_EXIT)) {
                     clearMemory = true;
                 } else {

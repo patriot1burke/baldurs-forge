@@ -24,6 +24,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.langchain4j.service.MemoryId;
+import dev.langchain4j.service.Result;
+import dev.langchain4j.service.tool.ToolExecution;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import io.quarkus.logging.Log;
 import jakarta.annotation.PostConstruct;
@@ -93,7 +95,30 @@ public abstract class EquipmentBuilder {
             context.setData(CURRENT_EQUIPMENT, current);
         }
         Log.info("Current JSON: " + currentJson);
-        return agent().build(context.memoryId(), type(), schema(), currentJson, context.userMessage());
+        Result<String> result = agent().build(context.memoryId(), type(), schema(), currentJson, context.userMessage());
+        if (result.content() != null) {
+            Log.info("EquipmentBuilder with content: " + result.content());
+            return result.content();
+        }
+        String msg = null;
+        if (result.toolExecutions().isEmpty()) {
+            Log.info("EquipmentBuilder with no tool executions");
+            return null;
+        } else {
+            Log.info("EquipmentBuilder with multiple tool executions");
+            for (ToolExecution execution : result.toolExecutions()) {
+                if (execution.result() == null || execution.result().equals("\"null\"")) {
+                    continue;
+                } else {
+                    if (msg == null || msg.isEmpty()) {
+                        msg = execution.result();
+                    } else {
+                        msg += execution.result() + "\n";
+                    }
+                }
+            }
+        }
+        return msg;
     }
 
 
@@ -211,10 +236,12 @@ public abstract class EquipmentBuilder {
 
     protected abstract Predicate<? super StatsArchive.Stat> visualModelPredicate();
 
+    // todo, may be able to have a void return type.  Nervous that AI gets confused if it does not get a return value for this tool.
     public String showVisualModels() {
         Predicate<? super Stat> visualModelPredicate = visualModelPredicate();
         if (visualModelPredicate == null) {
-            throw new RuntimeException("Item not finished yet.  Cannot search for visual models.");
+            context.response().add(new ObjectMessage("Item not finished yet.  Cannot search for visual models."));
+            return null;
         }
        List<RootTemplate> rootTemplates = library.findRootIconsFrom(visualModelPredicate);
         ListVisualModelsMessage action = new ListVisualModelsMessage();
@@ -233,11 +260,6 @@ public abstract class EquipmentBuilder {
         String message = "There are " + rootTemplates.size() + " visual models available. Choose one of the parent ids from the list above if you want a different look for your weapon.";
         context.response().add(new ObjectMessage(message));
 
-        // Ignore the next AI chat response because the AI often says it cannot find anything
-        // if a data list is not sent back as a tool result.
-        context.suppressAIResponse();
-        // Had to return something because AI would get confused sometimes.
-        return "Found some visual models";
-
+        return null;
     }
 }

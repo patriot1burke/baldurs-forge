@@ -7,6 +7,7 @@ import org.baldurs.forge.scanner.StatsArchive;
 
 import com.google.common.base.Supplier;
 
+import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.Startup;
@@ -108,7 +109,7 @@ public class BodyArmorBuilder extends EquipmentBuilder {
         };
     }
 
-    @Tool("Summarizes available visual models for the current body armor type.")
+    @Tool(value = "Summarizes available visual models for the current body armor type.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String showVisualModels() {
         BodyArmorModel armor = context.getData(CURRENT_EQUIPMENT, BodyArmorModel.class);
         if (armor == null || armor.type == null) {
@@ -117,7 +118,7 @@ public class BodyArmorBuilder extends EquipmentBuilder {
         return super.showVisualModels();
     }
 
-    @Tool("When finished building body armor, call this tool to finish the body armor.")
+    @Tool(value = "When finished building body armor, call this tool to finish the body armor.", returnBehavior = ReturnBehavior.IMMEDIATE)
     @Override
     public String finishEquipment() throws Exception {
         return super.finishEquipment();
