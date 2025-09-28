@@ -149,10 +149,8 @@ public abstract class EquipmentBuilder {
         context.setData(NewModModel.NEW_EQUIPMENT, newEquipment);
         context.response().add(new ObjectMessage("Finished building item!"));
         context.response().add(new UpdateNewEquipmentMessage("To create a mod containing your newly built equipment, tell me to '" + ModPackager.PACKAGE_MODE_CHAT_COMMAND + "'"));
-        context.suppressAIResponse();
-        Log.info("Finishing equipment");
-        String json = logJson(current);
-        return json;
+        Log.info("Finished equipment");
+        return null;
     }
 
     protected String logJson(BaseModel equipment)  {
