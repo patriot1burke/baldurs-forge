@@ -46,7 +46,7 @@ public class BodyArmorBuilder extends EquipmentBuilder {
 
     @Startup
     public void start() {
-        chatService.register(type(), this);
+        chatService.register(type(), this::continueBuilding);
     }
 
     @Tool("Set the name for the current body armor.")

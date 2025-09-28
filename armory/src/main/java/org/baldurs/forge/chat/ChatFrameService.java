@@ -68,7 +68,7 @@ public class ChatFrameService {
         String chatFrame = context.getData(CHAT_FRAME, String.class);
         if (chatFrame == null) {
             Log.info("Executing default chat");
-            String msg = defaultChatFrame.chat(context.memoryId(), context.userMessage());
+            String msg = defaultChatFrame.chat();
             if (!context.popSuppressAIResponse()) {
                 if (msg != null) {
                     Log.info("Adding message: " + msg);
@@ -79,7 +79,7 @@ public class ChatFrameService {
             }
         } else if (chatFrames.containsKey(chatFrame)) {
             Log.info("Executing chat frame: " + chatFrame);
-            String msg = chatFrames.get(chatFrame).chat(context.memoryId(), context.userMessage());
+            String msg = chatFrames.get(chatFrame).chat();
             if (!context.popSuppressAIResponse()) {
                 if (msg != null) {
                     Log.info("Adding message: " + msg);

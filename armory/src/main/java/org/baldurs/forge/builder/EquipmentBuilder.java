@@ -24,11 +24,12 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.langchain4j.service.MemoryId;
+import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import io.quarkus.logging.Log;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
-public abstract class EquipmentBuilder implements ChatFrame {
+public abstract class EquipmentBuilder {
     public static final String CURRENT_EQUIPMENT = "currentEquipment";
 
     @Inject
@@ -47,6 +48,9 @@ public abstract class EquipmentBuilder implements ChatFrame {
 
     @Inject
     BoostBuilderPrompt boostBuilder;
+
+    @Inject
+    ChatMemoryStore chatMemoryStore;
 
     @PostConstruct
     public void init() {
@@ -67,8 +71,14 @@ public abstract class EquipmentBuilder implements ChatFrame {
         return current;
     }
 
-    public String chat(@MemoryId String memoryId, String userMessage) {
-        Log.info("chat: " + memoryId + " " + userMessage);
+    public String startBuilding() {
+        // clean clear history.  Also less to serialize back to and from client.
+        chatMemoryStore.deleteMessages(context.memoryId());
+        return continueBuilding();
+    }
+
+    public String continueBuilding() {
+        Log.info("chat: " + context.memoryId() + " " + context.userMessage());
         chatService.setChatFrame(context, type());
         String currentJson = "{}";
         BaseModel current = null;
@@ -83,7 +93,7 @@ public abstract class EquipmentBuilder implements ChatFrame {
             context.setData(CURRENT_EQUIPMENT, current);
         }
         Log.info("Current JSON: " + currentJson);
-        return agent().build(context.memoryId(), type(), schema(), currentJson, userMessage);
+        return agent().build(context.memoryId(), type(), schema(), currentJson, context.userMessage());
     }
 
 

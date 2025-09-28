@@ -1,13 +1,16 @@
 package org.baldurs.forge.builder;
 
 
+import org.baldurs.forge.context.TemporaryChatMemoryProvider;
+
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.RegisterAiService;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
 
-@RegisterAiService
+@RequestScoped
+@RegisterAiService(chatMemoryProviderSupplier = TemporaryChatMemoryProvider.class)
 public interface BoostBuilderPrompt {
 
     @SystemMessage(fromResource = "prompts/nl2boost.txt")

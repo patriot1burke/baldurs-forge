@@ -1,14 +1,16 @@
 package org.baldurs.forge.chat;
 
+import org.baldurs.forge.context.TemporaryChatMemoryProvider;
 import org.baldurs.forge.model.EquipmentSlot;
 import org.baldurs.forge.model.EquipmentType;
 
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.RegisterAiService;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
 
-@RegisterAiService(chatLanguageModelSupplier = StrictJsonSchemaChatModelProvider.class)
+@RequestScoped
+@RegisterAiService(chatLanguageModelSupplier = StrictJsonSchemaChatModelProvider.class, chatMemoryProviderSupplier = TemporaryChatMemoryProvider.class)
 public interface MetadataPrompts {
 
     @SystemMessage(fromResource = "prompts/equipmentType.txt")

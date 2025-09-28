@@ -19,14 +19,23 @@ import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.services.EquipmentDB;
 import org.baldurs.forge.services.LibraryService;
 
+import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
+import dev.langchain4j.memory.ChatMemory;
+import dev.langchain4j.memory.chat.MessageWindowChatMemory;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.service.AiServiceContext;
+import dev.langchain4j.service.AiServices;
+import dev.langchain4j.service.Result;
+import dev.langchain4j.service.tool.ToolExecution;
+import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 @ApplicationScoped
-public class MainMenuCommands {
+public class MainMenuChatFrame implements ChatFrame {
     @Inject
     ChatContext context;
 
@@ -68,35 +77,72 @@ public class MainMenuCommands {
     @Inject
     MainMenuPrompt chat;
 
+    @Inject
+    ChatMemoryStore chatMemoryStore;
+
     @Startup
     public void start() {
-        chatService.setDefaultChatFrame(chat);
+        chatService.setDefaultChatFrame(this);
     }
 
-    @Tool("Search for armor or weapons or rings or amulets or boots or gloves or helmets or shields in the equipment database based on a natural language query")
+    public static final String CLEAR_MEMORY_ON_EXIT = "clearMemoryOnExit";
+
+    @Override
+    public String chat() {
+        Log.info("MainMenu with user message: " + context.userMessage());
+        Result<String> result = chat.chat(context.memoryId(), context.userMessage());
+        if (result.content() != null) {
+            Log.info("MainMenu with content: " + result.content());
+            return result.content();
+        }
+        String msg = null;
+        boolean clearMemory = false;
+        if (result.toolExecutions().isEmpty()) {
+            Log.info("MainMenu with no tool executions");
+            chatMemoryStore.deleteMessages(context.memoryId());
+            return null;
+        } else {
+            Log.info("MainMenu with multiple tool executions");
+            for (ToolExecution execution : result.toolExecutions()) {
+                if (execution.result() == null) continue;
+                if (execution.result().contains(CLEAR_MEMORY_ON_EXIT)) {
+                    clearMemory = true;
+                } else {
+                    if (msg == null) {
+                        msg = execution.result();
+                    } else {
+                        msg += execution.result() + "\n";
+                    }
+                }
+            }
+        }
+        // If there is a message, assume that a tool is continuing the conversation and has set up chat memory how it wants it.
+        if (clearMemory && msg == null) {
+            chatMemoryStore.deleteMessages(context.memoryId());
+        }
+        return msg;
+    }
+
+    @Tool(value = "Search for armor or weapons or rings or amulets or boots or gloves or helmets or shields in the equipment database based on a natural language query", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String searchEquipmentDatabase(String query) {
-        // query parameter is ignored, but tool invocations are fickle so keeping it as a parameter.
+        // query parameter is ignored, but tool invocations are fickle so keeping it as
+        // a parameter.
         Log.debug("Searching equipment database with query: " + query);
         Log.info("Searching equipment database with user message: " + context.userMessage());
         List<EquipmentModel> models = equipmentDB.ragSearch(context.userMessage());
-        context.suppressAIResponse();
         if (models.isEmpty()) {
             context.response().add(new ObjectMessage("Could not find any equipment that matched your query."));
-            // supressing AI response, but send something meaningful back to LLM
-            return "Could not find equipment that matched your query.";
         } else {
-            ListEquipmentMessage.addResponse(context, models);
             context.response().add(new ObjectMessage("I found some possible matches for your query."));
-            // supressing AI response, but send something meaningful back to LLM
-            return "I found some matches for your query.";
+            ListEquipmentMessage.addResponse(context, models);
         }
+        return CLEAR_MEMORY_ON_EXIT;
     }
 
-    @Tool("Find armor or weapons or rings or amulets or boots or gloves or helmets or shields in the equipment database by name")
+    @Tool(value = "Find armor or weapons or rings or amulets or boots or gloves or helmets or shields in the equipment database by name", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String findEquipmentByName(String name) {
         Log.info("Finding equipment by name: " + name);
         EquipmentModel model = equipmentDB.findByName(name);
-        context.suppressAIResponse();
         if (model == null) {
             List<EquipmentModel> models = equipmentDB.ragSearch(context.userMessage());
             if (models.isEmpty()) {
@@ -108,78 +154,78 @@ public class MainMenuCommands {
                 ListEquipmentMessage.addResponse(context, models);
             }
         } else {
+            context.response().add(new ObjectMessage(
+                "I found what you were looking for."));
             ShowEquipmentMessage.addResponse(context, model);
         }
-        // supressing AI response, but no matter what tell the LLM we found an exact match so it doesn't try a search tool call, even on an error.
-        return "I found an exact match for your query.";
+        return CLEAR_MEMORY_ON_EXIT;
 
     }
 
-    @Tool("Create new body armor.")
+    @Tool(value = "Create new body armor.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String createNewBodyArmor(String userMessage) {
         Log.info("Creating new body armor");
-        return bodyArmorBuilder.chat(context.memoryId(), context.userMessage());
+        return bodyArmorBuilder.startBuilding();
     }
 
-    @Tool("Create new weapon.")
+    @Tool(value = "Create new weapon.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String createNewWeapon(String userMessage) {
         Log.info("Creating new weapon");
-        return weaponBuilder.chat(context.memoryId(), context.userMessage());
+        return weaponBuilder.startBuilding();
     }
 
-    @Tool("Create new boots.")
+    @Tool(value = "Create new boots.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String createNewBoots(String userMessage) {
         Log.info("Creating new boots");
-        return bootsBuilder.chat(context.memoryId(), context.userMessage());
+        return bootsBuilder.startBuilding();
     }
 
-    @Tool("Create new gloves.")
+    @Tool(value = "Create new gloves.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String createNewGloves(String userMessage) {
         Log.info("Creating new gloves");
-        return glovesBuilder.chat(context.memoryId(), context.userMessage());
+        return glovesBuilder.startBuilding();
     }
 
-    @Tool("Create new helmet.")
+    @Tool(value = "Create new helmet.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String createNewHelmet(String userMessage) {
         Log.info("Creating new helmet");
-        return helmetBuilder.chat(context.memoryId(), context.userMessage());
+        return helmetBuilder.startBuilding();
     }
 
-    @Tool("Create new ring.")
+    @Tool(value = "Create new ring.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String createNewRing(String userMessage) {
         Log.info("Creating new ring");
-        return ringBuilder.chat(context.memoryId(), context.userMessage());
+        return ringBuilder.startBuilding();
     }
 
-    @Tool("Create new amulet.")
+    @Tool(value = "Create new amulet.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String createNewAmulet(String userMessage) {
         Log.info("Creating new amulet");
-        return amuletBuilder.chat(context.memoryId(), context.userMessage());
+        return amuletBuilder.startBuilding();
     }
 
-    @Tool("Create new cloak.")
+    @Tool(value = "Create new cloak.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String createNewCloak(String userMessage) {
         Log.info("Creating new cloak");
-        return cloakBuilder.chat(context.memoryId(), context.userMessage());
+        return cloakBuilder.startBuilding();
     }
 
-    @Tool("Find all values for data attribute by name.   This is a raw data untyped query.")
+    @Tool(value = "Find all values for data attribute by name.   This is a raw data untyped query.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String findDataAttributeValues(String attributeName) {
         Log.info("Finding data attribute values for: " + attributeName);
         List<String> values = library.getStatAttributeValues(attributeName);
         if (values.isEmpty()) {
-            return "I could not find any values for attribute: " + attributeName;
+            context.response().add(new ObjectMessage("I could not find any values for attribute: " + attributeName));
         } else {
             context.response().add(new ObjectMessage(values));
-            return "Query was successful";
         }
+        return CLEAR_MEMORY_ON_EXIT;
     }
 
-    @Tool("Show all new equipment the user has created.")
+    @Tool(value = "Show all new equipment the user has created.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String showNewEquipment() {
         Log.info("showNewEquipment");
         List<EquipmentModel> equipment = modPackager.listBuiltEquipment();
-        context.suppressAIResponse();
         if (equipment.isEmpty()) {
             context.response().add(new ObjectMessage("You have not created any new equipment yet."));
         } else {
@@ -187,37 +233,38 @@ public class MainMenuCommands {
             ListEquipmentMessage.addResponse(context, equipment);
             context.response().add(new ObjectMessage("Ask me to <i>Package Mod</i> to package up your new equipment."));
         }
-        return "Here is all the equipment the user has created.";
+        return CLEAR_MEMORY_ON_EXIT;
     }
 
-    @Tool("Delete new equipment item by name.")
+    @Tool(value = "Delete new equipment item by name.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String deleteNewEquipmentByName(String name) {
         Log.info("deleteNewEquipment: " + name);
         return modPackager.deleteNewEquipment(name);
     }
 
-    @Tool("Update new equipment item by name.")
+    @Tool(value = "Update new equipment item by name.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String updateNewEquipmentByName(String name) {
         Log.info("updateNewEquipment: " + name);
         return modPackager.updateNewEquipment(name);
     }
 
-    @Tool("Delete all new equipment the user has created.")
+    @Tool(value = "Delete all new equipment the user has created.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void deleteAllNewEquipment() {
         Log.info("deleteAllNewEquipment");
         modPackager.deleteAllNewEquipment();
     }
 
-    @Tool("Package mod with any new equipment the user has created.")
+    @Tool(value = "Package mod with any new equipment the user has created.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String packageMod() {
         Log.info("packageMod");
-        return modPackager.chat(context.memoryId(), context.userMessage());
+        return modPackager.startPackaging();
     }
 
-    @Tool("Import a mod from a file.")
+    @Tool(value = "Import a mod from a file.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String importMod() {
         Log.info("importMod");
         ImportModMessage.addResponse(context);
-        return "Please select a file to import.";
+        context.response().add(new ObjectMessage("Please select a file to import."));
+        return CLEAR_MEMORY_ON_EXIT;
     }
 }

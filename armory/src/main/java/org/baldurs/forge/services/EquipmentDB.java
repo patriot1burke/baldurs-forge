@@ -31,6 +31,7 @@ import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
 import dev.langchain4j.store.embedding.filter.Filter;
 import dev.langchain4j.store.embedding.filter.MetadataFilterBuilder;
+import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -53,6 +54,9 @@ public class EquipmentDB {
 
     @Inject
     MetadataPrompts metadataAgent;
+
+    @Inject
+    ChatMemoryStore chatMemoryStore;
 
     Map<String, Equipment> equipmentDB = new HashMap<>();
 

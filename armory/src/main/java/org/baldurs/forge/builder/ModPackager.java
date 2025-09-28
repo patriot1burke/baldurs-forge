@@ -18,6 +18,7 @@ import org.baldurs.forge.chat.ObjectMessage;
 import org.baldurs.forge.context.ChatContext;
 import org.baldurs.forge.messages.ListEquipmentMessage;
 import org.baldurs.forge.messages.PackageModMessage;
+import org.baldurs.forge.messages.ShowEquipmentMessage;
 import org.baldurs.forge.messages.UpdateNewEquipmentMessage;
 import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.scanner.RootTemplate;
@@ -29,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.langchain4j.agent.tool.Tool;
+import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
@@ -58,6 +60,9 @@ public class ModPackager implements ChatFrame {
     @Inject
     BoostService boostService;
 
+    @Inject
+    ChatMemoryStore chatMemoryStore;
+
     ObjectMapper mapper;
 
     @PostConstruct
@@ -71,9 +76,15 @@ public class ModPackager implements ChatFrame {
         chatService.register(ModPackager.class.getName(), this);
     }
 
+    public String startPackaging() {
+        // clean clear history.  Also less to serialize back to and from client.
+        chatMemoryStore.deleteMessages(context.memoryId());
+        return chat();
+    }
+
 
     @Override
-    public String chat(String memoryId, String userMessage) {
+    public String chat() {
         NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
         if (newEquipment == null) {
             return "You have not created any new equipment to package.";
@@ -88,7 +99,7 @@ public class ModPackager implements ChatFrame {
                 Log.warn("Error serializing package", e);
             }
         }
-        return agent.packageMod(memoryId, userMessage, PackageModel.schema, currentJson);
+        return agent.packageMod(context.memoryId(), context.userMessage(), PackageModel.schema, currentJson);
     }
 
     private static final String CURRENT_PACKAGE = "currentPackage";
@@ -149,6 +160,7 @@ public class ModPackager implements ChatFrame {
     public void deleteAllNewEquipment() {
         context.setData(NewModModel.NEW_EQUIPMENT, null);
         context.response().add(new UpdateNewEquipmentMessage(null));
+        chatMemoryStore.deleteMessages(context.memoryId());
     }
 
     public String deleteNewEquipment(String name) {
@@ -170,7 +182,7 @@ public class ModPackager implements ChatFrame {
             context.setData(NewModModel.NEW_EQUIPMENT, newEquipment);
             showNewEquipment();
         }
-        
+        chatMemoryStore.deleteMessages(context.memoryId());
         context.response().add(new UpdateNewEquipmentMessage(null));
 
         return "Equipment deleted.";
@@ -187,7 +199,9 @@ public class ModPackager implements ChatFrame {
             return "Equipment with name not found.";
         }
         context.setData(EquipmentBuilder.CURRENT_EQUIPMENT, equipment);
-        return chatService.getChatFrame(equipment.type()).chat(context.memoryId(), context.userMessage());
+        chatMemoryStore.deleteMessages(context.memoryId());
+        ShowEquipmentMessage.addResponse(context, equipment.toEquipmentModel(boostService, library));
+        return chatService.getChatFrame(equipment.type()).chat();
     }
 
     public void addGameObject(StringBuilder localizations, StringBuilder gameObjects, String name, String description,
