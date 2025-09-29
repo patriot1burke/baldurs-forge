@@ -89,9 +89,6 @@ public class ChatContext {
      * Tools should only add data to the shared context if they need to pass data
      * back to the client.
      * 
-     * This is an expensive operation as each call to this method will deserialize
-     * the value from JSON.
-     * 
      * @return
      */
     public <T> T getData(String key, Class<T> type) {
@@ -102,7 +99,8 @@ public class ChatContext {
         if (value instanceof JsonNode) {
             ObjectMapper mapper = new ObjectMapper();
             try {
-                return mapper.treeToValue((JsonNode) value, type);
+                value = mapper.treeToValue((JsonNode) value, type);
+                data.put(key, value);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -116,9 +114,6 @@ public class ChatContext {
      * Tools should only add data to the shared context if they need to pass data
      * back to the client.
      * 
-     * This is an expensive operation as each call to this method will deserialize
-     * the value from JSON.
-     * 
      * @return
      */
     public <T> T getData(String key, TypeReference<T> type) {
@@ -129,7 +124,8 @@ public class ChatContext {
         if (value instanceof JsonNode) {
             ObjectMapper mapper = new ObjectMapper();
             try {
-                return mapper.treeToValue((JsonNode) value, type);
+                value = mapper.treeToValue((JsonNode) value, type);
+                data.put(key, value);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

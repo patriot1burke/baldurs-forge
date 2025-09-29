@@ -33,7 +33,7 @@ public class AmuletBuilder extends EquipmentBuilder {
         return AmuletModel.schema;
     }
     @Override
-    protected String type() {
+    public String type() {
         return AmuletModel.TYPE;
     }
     @Override

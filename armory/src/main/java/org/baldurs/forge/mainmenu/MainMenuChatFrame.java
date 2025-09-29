@@ -22,6 +22,7 @@ import org.baldurs.forge.messages.ShowEquipmentMessage;
 import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.services.EquipmentDB;
 import org.baldurs.forge.services.LibraryService;
+import org.baldurs.forge.services.MarkdownToHtmlService;
 
 import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
@@ -86,6 +87,9 @@ public class MainMenuChatFrame implements ChatFrame {
     @Inject
     ChatMemoryStore chatMemoryStore;
 
+    @Inject
+    MarkdownToHtmlService renderer;
+
     @Startup
     public void start() {
         chatService.setDefaultFrame(this);
@@ -98,7 +102,7 @@ public class MainMenuChatFrame implements ChatFrame {
         Log.info("MainMenu with user message: " + context.userMessage());
         Result<String> result = chat.chat(context.memoryId(), context.userMessage());
         if (result.content() != null) {
-            throw new RuntimeException("This should be unreachable.");
+            context.response().add(new ObjectMessage(renderer.markdownToHtml(result.content())));
         }
         String msg = null;
         boolean clearMemory = false;
@@ -111,11 +115,15 @@ public class MainMenuChatFrame implements ChatFrame {
                 Log.info("MainMenu with tool " + execution.request().name() + " execution: " + execution.result());
                 // exeuctionIds.add(execution.request().id());
                 if (execution.result() == null || execution.result().equals("\"null\"")) {
+                    Log.info("MainMenu with null tool execution result");
                     continue;
-                }
-                if (execution.result().contains(CLEAR_MEMORY_ON_EXIT)) {
+                } else if (execution.result().contains(CLEAR_MEMORY_ON_EXIT)) {
+                    Log.info("MainMenu with CLEAR_MEMORY_ON_EXIT tool execution result");
                     clearMemory = true;
-                } else {
+                } else if (execution.result().equals("Success")) {
+                    Log.info("MainMenu with Success tool execution result");
+                    continue;
+                }else {
                     if (msg == null) {
                         msg = execution.result();
                     } else {
@@ -172,57 +180,49 @@ public class MainMenuChatFrame implements ChatFrame {
     @Tool(value = "Create new body armor.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void createNewBodyArmor(String userMessage) {
         Log.info("Creating new body armor");
-        chatMemoryStore.deleteMessages(context.memoryId());
-        bodyArmorBuilder.build();
+        bodyArmorBuilder.startBuild();
     }
 
     @Tool(value = "Create new weapon.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void createNewWeapon(String userMessage) {
         Log.info("Creating new weapon");
-        chatMemoryStore.deleteMessages(context.memoryId());
-        weaponBuilder.build();
+        weaponBuilder.startBuild();
     }
 
     @Tool(value = "Create new boots.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void createNewBoots(String userMessage) {
         Log.info("Creating new boots");
-        chatMemoryStore.deleteMessages(context.memoryId());
-        bootsBuilder.build();
+        bootsBuilder.startBuild();
     }
 
     @Tool(value = "Create new gloves.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void createNewGloves(String userMessage) {
         Log.info("Creating new gloves");
-        chatMemoryStore.deleteMessages(context.memoryId());
-        glovesBuilder.build();
+        glovesBuilder.startBuild();
     }
 
     @Tool(value = "Create new helmet.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void createNewHelmet(String userMessage) {
         Log.info("Creating new helmet");
-        chatMemoryStore.deleteMessages(context.memoryId());
-        helmetBuilder.build();
+        helmetBuilder.startBuild();
     }
 
     @Tool(value = "Create new ring.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void createNewRing(String userMessage) {
         Log.info("Creating new ring");
-        chatMemoryStore.deleteMessages(context.memoryId());
-        ringBuilder.build();
+        ringBuilder.startBuild();
     }
 
     @Tool(value = "Create new amulet.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void createNewAmulet(String userMessage) {
         Log.info("Creating new amulet");
-        chatMemoryStore.deleteMessages(context.memoryId());
-        amuletBuilder.build();
+        amuletBuilder.startBuild();
     }
 
     @Tool(value = "Create new cloak.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void createNewCloak(String userMessage) {
         Log.info("Creating new cloak");
-        chatMemoryStore.deleteMessages(context.memoryId());
-        cloakBuilder.build();
+        cloakBuilder.startBuild();
     }
 
     @Tool(value = "Find all values for data attribute by name.   This is a raw data untyped query.", returnBehavior = ReturnBehavior.IMMEDIATE)

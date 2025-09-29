@@ -1,10 +1,14 @@
 package org.baldurs.forge.chat;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.baldurs.forge.context.ChatContext;
 import org.baldurs.forge.context.ClientMemoryStore;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -32,12 +36,20 @@ public class ChatFrameService {
         defaultChatFrame = chatFrame;
     }
 
-    public String currrentFrameId() {
-        return context.getData(CHAT_FRAME, String.class);
+    public String currentFrameId() {
+        List<String> frameStack = getFrameStack();
+        if (frameStack == null || frameStack.isEmpty()) {
+            return null;
+        }
+        return frameStack.get(frameStack.size() - 1);
+    }
+
+    protected List<String> getFrameStack() {
+        return context.getData(CHAT_FRAME, new TypeReference<List<String>>() {});
     }
 
     public ChatFrame currentFrame() {
-        String frameId = currrentFrameId();
+        String frameId = currentFrameId();
         if (frameId == null) {
             return defaultChatFrame;
         }
@@ -49,26 +61,50 @@ public class ChatFrameService {
     }
 
     /**
-     * Sets the chat frame for the given context.
+     * Clears the stack and sets the chat frame for the given context.
      * @param chatFrame
      */
     public void setFrame(String chatFrame) {
         Log.info("Setting chat frame: " + chatFrame);
-        context.setData(CHAT_FRAME, chatFrame);
+        List<String> frameStack = new ArrayList<>();
+        frameStack.add(chatFrame);
+        context.setData(CHAT_FRAME, frameStack);
     }
 
     /**
-     * Clears the chat frame for the given context. Also delete the messages for the ChatContext's memoryId.
+     * Pushes the given chat frame onto the frame stack.
+     * 
+     * @param chatFrame
+     */
+    public void pushFrame(String chatFrame) {
+        List<String> frameStack = getFrameStack();
+        if (frameStack == null) {
+            frameStack = new ArrayList<>();
+        }
+        frameStack.add(chatFrame);
+        context.setData(CHAT_FRAME, frameStack);
+    }
+
+    /**
+     * Pops current frame off of the frame stack and also deletes the messages for the ChatContext's memoryId.
      */
     public void popFrame() {
         Log.info("Popping chat frame");
-        context.setData(CHAT_FRAME, null);
+        List<String> frameStack = getFrameStack();
+        if (frameStack != null && !frameStack.isEmpty()) {
+            frameStack.remove(frameStack.size() - 1);
+            if (frameStack.isEmpty()) {
+                context.setData(CHAT_FRAME, null);
+            } else {
+                context.setData(CHAT_FRAME, frameStack);
+            }
+        }
         Log.info("Deleting messages for memoryId: " + context.memoryId());
         memoryStore.deleteMessages(context.memoryId());
     }
 
     public void chat(ChatContext context) {
-        String chatFrame = context.getData(CHAT_FRAME, String.class);
+        String chatFrame = currentFrameId();
         if (chatFrame == null) {
             Log.info("Executing default chat");
             defaultChatFrame.chat();

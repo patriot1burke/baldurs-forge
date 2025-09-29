@@ -33,7 +33,7 @@ public class GlovesBuilder extends EquipmentBuilder {
         return GlovesModel.schema;
     }
     @Override
-    protected String type() {
+    public String type() {
         return GlovesModel.TYPE;
     }
     @Override

@@ -32,7 +32,7 @@ public class HelmetBuilder extends EquipmentBuilder {
         return HelmetModel.schema;
     }
     @Override
-    protected String type() {
+    public String type() {
         return HelmetModel.TYPE;
     }
     @Override

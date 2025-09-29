@@ -67,7 +67,7 @@ public abstract class EquipmentBuilder {
     protected abstract BuilderPrompt agent();
     protected abstract Class<? extends BaseModel> baseModelClass();
     protected abstract String schema();
-    protected abstract String type();
+    public abstract String type();
     protected abstract Supplier<BaseModel> supplier();
 
     protected BaseModel create() {
@@ -77,9 +77,15 @@ public abstract class EquipmentBuilder {
         return current;
     }
 
+    public void startBuild() {
+        // clear chat history and start conversation with this builder
+        chatMemoryStore.deleteMessages(context.memoryId());
+        chatService.pushFrame(type());
+        build();
+    }
+
     public void build() {
         Log.info("chat: " + context.memoryId() + " " + context.userMessage());
-        chatService.setFrame(type());
         String currentJson = "{}";
         BaseModel current = null;
         if ((current = context.getData(CURRENT_EQUIPMENT, baseModelClass())) != null) {
@@ -110,9 +116,11 @@ public abstract class EquipmentBuilder {
                 if (execution.result() == null) {
                     Log.info("EquipmentBuilder with null tool execution result");
                     continue;
-                }
-                if (execution.result().equals("\"null\"")) {
+                } else if (execution.result().equals("\"null\"")) {
                     Log.info("EquipmentBuilder with \"null\" tool execution result");
+                    continue;
+                } else if (execution.result().equals("Success")) {
+                    Log.info("EquipmentBuilder with Success tool execution result");
                     continue;
                 } else {
                     if (msg == null || msg.isEmpty()) {

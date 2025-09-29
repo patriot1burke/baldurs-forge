@@ -34,7 +34,7 @@ public class BootsBuilder extends EquipmentBuilder {
         return BootsModel.schema;
     }
     @Override
-    protected String type() {
+    public String type() {
         return BootsModel.TYPE;
     }
     @Override

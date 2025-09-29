@@ -36,7 +36,7 @@ public class BodyArmorBuilder extends EquipmentBuilder {
     }
 
     @Override
-    protected String type() {
+    public String type() {
         return BodyArmorModel.TYPE;
     }
 

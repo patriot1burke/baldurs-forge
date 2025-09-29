@@ -93,6 +93,7 @@ public class ModPackager {
             context.response().add(new ObjectMessage("Nothing to package.  You have not created any new equipment."));
             return;
         }
+        chatService.pushFrame(ModPackager.class.getName());
      // clean clear history.  Also less to serialize back to and from client.
         chatMemoryStore.deleteMessages(context.memoryId());
         packageMod();
@@ -105,7 +106,6 @@ public class ModPackager {
             context.response().add(new ObjectMessage("You have not created any new equipment to package."));
             return;
         }
-        chatService.setFrame(ModPackager.class.getName());
         String currentJson = "{}";
         PackageModel current = null;
         if ((current = context.getData(CURRENT_PACKAGE, PackageModel.class)) != null) {
@@ -118,7 +118,7 @@ public class ModPackager {
         Result<String> result = agent.packageMod(context.memoryId(), context.userMessage(), PackageModel.schema, currentJson);
         if (result.content() != null) {
             Log.info("ModPackager with content: " + result.content());
-            context.response().add(new ObjectMessage(result.content()));
+            context.response().add(new ObjectMessage(renderer.markdownToHtml(result.content())));
         }
         String msg = null;
         if (result.toolExecutions().isEmpty()) {
@@ -128,7 +128,7 @@ public class ModPackager {
             Log.info("ModPackager with multiple tool executions");
             for (ToolExecution execution : result.toolExecutions()) {
                 Log.info("ModPackager with tool " + execution.request().name() + " execution: " + execution.result());
-                if (execution.result() == null || execution.result().equals("\"null\"")) {
+                if (execution.result() == null || execution.result().equals("\"null\"") || execution.result().equals("Success")) {
                     continue;
                 } else {
                     if (msg == null || msg.isEmpty()) {
@@ -241,8 +241,9 @@ public class ModPackager {
             return;
         }
         context.setData(EquipmentBuilder.CURRENT_EQUIPMENT, equipment);
-        chatMemoryStore.deleteMessages(context.memoryId());
         ShowEquipmentMessage.addResponse(context, equipment.toEquipmentModel(boostService, library));
+        chatService.pushFrame(equipment.type());
+        chatMemoryStore.deleteMessages(context.memoryId());
         chatService.getFrame(equipment.type()).chat();
     }
 

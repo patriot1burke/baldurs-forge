@@ -33,7 +33,7 @@ public class CloakBuilder extends EquipmentBuilder {
         return CloakModel.schema;
     }
     @Override
-    protected String type() {
+    public String type() {
         return CloakModel.TYPE;
     }
     @Override

@@ -33,7 +33,7 @@ public class RingBuilder extends EquipmentBuilder {
         return RingModel.schema;
     }
     @Override
-    protected String type() {
+    public String type() {
         return RingModel.TYPE;
     }
     @Override

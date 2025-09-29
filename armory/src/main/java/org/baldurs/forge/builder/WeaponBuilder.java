@@ -32,7 +32,7 @@ public class WeaponBuilder extends EquipmentBuilder {
         return WeaponModel.schema;
     }
     @Override
-    protected String type() {
+    public String type() {
         return WeaponModel.TYPE;
     }
     @Override
