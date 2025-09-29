@@ -1,15 +1,15 @@
-package org.baldurs.forge.chat;
+package org.baldurs.forge.services;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import org.baldurs.forge.chat.ChatFrameService;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 
 import io.quarkus.logging.Log;
-import io.quarkus.runtime.Startup;
 
 @ApplicationScoped
 public class MarkdownToHtmlService {
@@ -23,11 +23,6 @@ public class MarkdownToHtmlService {
     public void init() {
         parser = Parser.builder().build();
         renderer = HtmlRenderer.builder().build();
-    }
-
-    @Startup
-    public void start() {
-        chatService.setRender(this::markdownToHtml);
     }
 
     public String markdownToHtml(String markdown) {

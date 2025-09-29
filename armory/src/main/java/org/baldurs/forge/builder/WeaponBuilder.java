@@ -46,7 +46,7 @@ public class WeaponBuilder extends EquipmentBuilder {
 
     @Startup
     public void start() {
-        chatService.register(type(), this::continueBuilding);
+        chatService.register(type(), this::build);
     }
 
     @Tool("Set the name for the current weapon.")
@@ -117,8 +117,8 @@ public class WeaponBuilder extends EquipmentBuilder {
         return super.showVisualModels();
     }
     @Tool(value = "When finished building weapon, call this tool to finish the weapon.", returnBehavior = ReturnBehavior.IMMEDIATE)
-    public String finishEquipment() throws Exception {
-        return super.finishEquipment();
+    public void finishEquipment() throws Exception {
+        super.finishEquipment();
     }
 
 

@@ -1,7 +1,7 @@
 package org.baldurs.forge.builder;
 
 
-import org.baldurs.forge.context.TemporaryChatMemoryProvider;
+import org.baldurs.forge.TemporaryChatMemoryProvider;
 
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.service.SystemMessage;

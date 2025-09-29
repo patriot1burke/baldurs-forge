@@ -1,5 +1,6 @@
-package org.baldurs.forge.chat;
+package org.baldurs.forge.mainmenu;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.baldurs.forge.builder.AmuletBuilder;
@@ -11,6 +12,9 @@ import org.baldurs.forge.builder.HelmetBuilder;
 import org.baldurs.forge.builder.ModPackager;
 import org.baldurs.forge.builder.RingBuilder;
 import org.baldurs.forge.builder.WeaponBuilder;
+import org.baldurs.forge.chat.ChatFrame;
+import org.baldurs.forge.chat.ChatFrameService;
+import org.baldurs.forge.chat.ObjectMessage;
 import org.baldurs.forge.context.ChatContext;
 import org.baldurs.forge.messages.ImportModMessage;
 import org.baldurs.forge.messages.ListEquipmentMessage;
@@ -21,6 +25,8 @@ import org.baldurs.forge.services.LibraryService;
 
 import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
+import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
@@ -82,28 +88,28 @@ public class MainMenuChatFrame implements ChatFrame {
 
     @Startup
     public void start() {
-        chatService.setDefaultChatFrame(this);
+        chatService.setDefaultFrame(this);
     }
 
     public static final String CLEAR_MEMORY_ON_EXIT = "clearMemoryOnExit";
 
     @Override
-    public String chat() {
+    public void chat() {
         Log.info("MainMenu with user message: " + context.userMessage());
         Result<String> result = chat.chat(context.memoryId(), context.userMessage());
         if (result.content() != null) {
-            Log.info("MainMenu with content: " + result.content());
-            return result.content();
+            throw new RuntimeException("This should be unreachable.");
         }
         String msg = null;
         boolean clearMemory = false;
         if (result.toolExecutions().isEmpty()) {
             Log.info("MainMenu with no tool executions");
             chatMemoryStore.deleteMessages(context.memoryId());
-            return null;
+            return;
         } else {
-            Log.info("MainMenu with multiple tool executions");
             for (ToolExecution execution : result.toolExecutions()) {
+                Log.info("MainMenu with tool " + execution.request().name() + " execution: " + execution.result());
+                // exeuctionIds.add(execution.request().id());
                 if (execution.result() == null || execution.result().equals("\"null\"")) {
                     continue;
                 }
@@ -118,11 +124,10 @@ public class MainMenuChatFrame implements ChatFrame {
                 }
             }
         }
-        // If there is a message, assume that a tool is continuing the conversation and has set up chat memory how it wants it.
         if (clearMemory && msg == null) {
             chatMemoryStore.deleteMessages(context.memoryId());
         }
-        return msg;
+        return;
     }
 
     @Tool(value = "Search for armor or weapons or rings or amulets or boots or gloves or helmets or shields in the equipment database based on a natural language query", returnBehavior = ReturnBehavior.IMMEDIATE)
@@ -157,7 +162,7 @@ public class MainMenuChatFrame implements ChatFrame {
             }
         } else {
             context.response().add(new ObjectMessage(
-                "I found what you were looking for."));
+                    "I found what you were looking for."));
             ShowEquipmentMessage.addResponse(context, model);
         }
         return CLEAR_MEMORY_ON_EXIT;
@@ -165,51 +170,59 @@ public class MainMenuChatFrame implements ChatFrame {
     }
 
     @Tool(value = "Create new body armor.", returnBehavior = ReturnBehavior.IMMEDIATE)
-    public String createNewBodyArmor(String userMessage) {
+    public void createNewBodyArmor(String userMessage) {
         Log.info("Creating new body armor");
-        return bodyArmorBuilder.startBuilding();
+        chatMemoryStore.deleteMessages(context.memoryId());
+        bodyArmorBuilder.build();
     }
 
     @Tool(value = "Create new weapon.", returnBehavior = ReturnBehavior.IMMEDIATE)
-    public String createNewWeapon(String userMessage) {
+    public void createNewWeapon(String userMessage) {
         Log.info("Creating new weapon");
-        return weaponBuilder.startBuilding();
+        chatMemoryStore.deleteMessages(context.memoryId());
+        weaponBuilder.build();
     }
 
     @Tool(value = "Create new boots.", returnBehavior = ReturnBehavior.IMMEDIATE)
-    public String createNewBoots(String userMessage) {
+    public void createNewBoots(String userMessage) {
         Log.info("Creating new boots");
-        return bootsBuilder.startBuilding();
+        chatMemoryStore.deleteMessages(context.memoryId());
+        bootsBuilder.build();
     }
 
     @Tool(value = "Create new gloves.", returnBehavior = ReturnBehavior.IMMEDIATE)
-    public String createNewGloves(String userMessage) {
+    public void createNewGloves(String userMessage) {
         Log.info("Creating new gloves");
-        return glovesBuilder.startBuilding();
+        chatMemoryStore.deleteMessages(context.memoryId());
+        glovesBuilder.build();
     }
 
     @Tool(value = "Create new helmet.", returnBehavior = ReturnBehavior.IMMEDIATE)
-    public String createNewHelmet(String userMessage) {
+    public void createNewHelmet(String userMessage) {
         Log.info("Creating new helmet");
-        return helmetBuilder.startBuilding();
+        chatMemoryStore.deleteMessages(context.memoryId());
+        helmetBuilder.build();
     }
 
     @Tool(value = "Create new ring.", returnBehavior = ReturnBehavior.IMMEDIATE)
-    public String createNewRing(String userMessage) {
+    public void createNewRing(String userMessage) {
         Log.info("Creating new ring");
-        return ringBuilder.startBuilding();
+        chatMemoryStore.deleteMessages(context.memoryId());
+        ringBuilder.build();
     }
 
     @Tool(value = "Create new amulet.", returnBehavior = ReturnBehavior.IMMEDIATE)
-    public String createNewAmulet(String userMessage) {
+    public void createNewAmulet(String userMessage) {
         Log.info("Creating new amulet");
-        return amuletBuilder.startBuilding();
+        chatMemoryStore.deleteMessages(context.memoryId());
+        amuletBuilder.build();
     }
 
     @Tool(value = "Create new cloak.", returnBehavior = ReturnBehavior.IMMEDIATE)
-    public String createNewCloak(String userMessage) {
+    public void createNewCloak(String userMessage) {
         Log.info("Creating new cloak");
-        return cloakBuilder.startBuilding();
+        chatMemoryStore.deleteMessages(context.memoryId());
+        cloakBuilder.build();
     }
 
     @Tool(value = "Find all values for data attribute by name.   This is a raw data untyped query.", returnBehavior = ReturnBehavior.IMMEDIATE)
@@ -239,15 +252,15 @@ public class MainMenuChatFrame implements ChatFrame {
     }
 
     @Tool(value = "Delete new equipment item by name.", returnBehavior = ReturnBehavior.IMMEDIATE)
-    public String deleteNewEquipmentByName(String name) {
+    public void deleteNewEquipmentByName(String name) {
         Log.info("deleteNewEquipment: " + name);
-        return modPackager.deleteNewEquipment(name);
+        modPackager.deleteNewEquipment(name);
     }
 
     @Tool(value = "Update new equipment item by name.", returnBehavior = ReturnBehavior.IMMEDIATE)
-    public String updateNewEquipmentByName(String name) {
+    public void updateNewEquipmentByName(String name) {
         Log.info("updateNewEquipment: " + name);
-        return modPackager.updateNewEquipment(name);
+        modPackager.updateNewEquipment(name);
     }
 
     @Tool(value = "Delete all new equipment the user has created.", returnBehavior = ReturnBehavior.IMMEDIATE)
@@ -257,9 +270,9 @@ public class MainMenuChatFrame implements ChatFrame {
     }
 
     @Tool(value = "Package mod with any new equipment the user has created.", returnBehavior = ReturnBehavior.IMMEDIATE)
-    public String packageMod() {
+    public void packageMod() {
         Log.info("packageMod");
-        return modPackager.startPackaging();
+        modPackager.startPackageMod();
     }
 
     @Tool(value = "Import a mod from a file.", returnBehavior = ReturnBehavior.IMMEDIATE)

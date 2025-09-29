@@ -17,7 +17,8 @@ public class ChatFrameService {
     @Inject
     ClientMemoryStore memoryStore;
 
-    Render render;
+    @Inject
+    ChatContext context;
 
     ChatFrame defaultChatFrame;
 
@@ -27,74 +28,58 @@ public class ChatFrameService {
         chatFrames.put(name, chatFrame);
     }
 
-    public void setDefaultChatFrame(ChatFrame chatFrame) {
+    public void setDefaultFrame(ChatFrame chatFrame) {
         defaultChatFrame = chatFrame;
     }
 
-    public void setRender(Render render) {
-        this.render = render;
+    public String currrentFrameId() {
+        return context.getData(CHAT_FRAME, String.class);
     }
 
-    public ChatFrame getChatFrame(String name) {
+    public ChatFrame currentFrame() {
+        String frameId = currrentFrameId();
+        if (frameId == null) {
+            return defaultChatFrame;
+        }
+        return chatFrames.get(frameId);
+    }
+
+    public ChatFrame getFrame(String name) {
         return chatFrames.get(name);
     }
 
     /**
-     * Sets the chat frame for the given context. Also delete the messages for the ChatContext's memoryId.
-     * @param context
+     * Sets the chat frame for the given context.
      * @param chatFrame
      */
-    public void setChatFrame(ChatContext context, String chatFrame) {
+    public void setFrame(String chatFrame) {
         Log.info("Setting chat frame: " + chatFrame);
         context.setData(CHAT_FRAME, chatFrame);
     }
 
     /**
      * Clears the chat frame for the given context. Also delete the messages for the ChatContext's memoryId.
-     * @param context
      */
-    public void popChatFrame(ChatContext context) {
+    public void popFrame() {
         Log.info("Popping chat frame");
         context.setData(CHAT_FRAME, null);
         Log.info("Deleting messages for memoryId: " + context.memoryId());
         memoryStore.deleteMessages(context.memoryId());
     }
 
-    private ObjectMessage message(String message) {
-        return new ObjectMessage(render.render(message));
-    }
-
     public void chat(ChatContext context) {
         String chatFrame = context.getData(CHAT_FRAME, String.class);
         if (chatFrame == null) {
             Log.info("Executing default chat");
-            String msg = defaultChatFrame.chat();
-            if (!context.popSuppressAIResponse()) {
-                if (msg != null) {
-                    Log.info("Adding message: " + msg);
-                    context.response().add(message(msg));
-                }
-            } else {
-                Log.info("Suppressing AI response");
-            }
+            defaultChatFrame.chat();
         } else if (chatFrames.containsKey(chatFrame)) {
             Log.info("Executing chat frame: " + chatFrame);
-            String msg = chatFrames.get(chatFrame).chat();
-            if (!context.popSuppressAIResponse()) {
-                if (msg != null) {
-                    Log.info("Adding message: " + msg);
-                    context.response().add(message(msg));
-                }
-            } else {
-                Log.info("Suppressing AI response");
-            }
+            chatFrames.get(chatFrame).chat();
         }
         else {
             Log.error("Unknown chat frame: " + chatFrame);
-            popChatFrame(context);
-            if (!context.popSuppressAIResponse()) {
-                context.response().add(message("I'm having issues at the moment. Can you retry or rephrase your request?"));
-            }
+            popFrame();
+            context.response().add(new ObjectMessage("I'm having issues at the moment. Can you retry or rephrase your request?"));
         }
 
     }

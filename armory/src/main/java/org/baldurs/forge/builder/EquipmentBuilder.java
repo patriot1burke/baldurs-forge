@@ -19,6 +19,7 @@ import org.baldurs.forge.scanner.StatsArchive;
 import org.baldurs.forge.scanner.StatsArchive.Stat;
 import org.baldurs.forge.services.BoostService;
 import org.baldurs.forge.services.LibraryService;
+import org.baldurs.forge.services.MarkdownToHtmlService;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -54,6 +55,9 @@ public abstract class EquipmentBuilder {
     @Inject
     ChatMemoryStore chatMemoryStore;
 
+    @Inject
+    MarkdownToHtmlService renderer;
+
     @PostConstruct
     public void init() {
         mapper = new ObjectMapper();
@@ -73,15 +77,9 @@ public abstract class EquipmentBuilder {
         return current;
     }
 
-    public String startBuilding() {
-        // clean clear history.  Also less to serialize back to and from client.
-        chatMemoryStore.deleteMessages(context.memoryId());
-        return continueBuilding();
-    }
-
-    public String continueBuilding() {
+    public void build() {
         Log.info("chat: " + context.memoryId() + " " + context.userMessage());
-        chatService.setChatFrame(context, type());
+        chatService.setFrame(type());
         String currentJson = "{}";
         BaseModel current = null;
         if ((current = context.getData(CURRENT_EQUIPMENT, baseModelClass())) != null) {
@@ -98,16 +96,23 @@ public abstract class EquipmentBuilder {
         Result<String> result = agent().build(context.memoryId(), type(), schema(), currentJson, context.userMessage());
         if (result.content() != null) {
             Log.info("EquipmentBuilder with content: " + result.content());
-            return result.content();
+            String html = renderer.markdownToHtml(result.content());
+            context.response().add(new ObjectMessage(html));
+            return;
         }
         String msg = null;
         if (result.toolExecutions().isEmpty()) {
             Log.info("EquipmentBuilder with no tool executions");
-            return null;
+            return;
         } else {
-            Log.info("EquipmentBuilder with multiple tool executions");
             for (ToolExecution execution : result.toolExecutions()) {
-                if (execution.result() == null || execution.result().equals("\"null\"")) {
+                Log.info("EquipmentBuilder with tool " + execution.request().name() + " execution: " + execution.result());
+                if (execution.result() == null) {
+                    Log.info("EquipmentBuilder with null tool execution result");
+                    continue;
+                }
+                if (execution.result().equals("\"null\"")) {
+                    Log.info("EquipmentBuilder with \"null\" tool execution result");
                     continue;
                 } else {
                     if (msg == null || msg.isEmpty()) {
@@ -117,8 +122,11 @@ public abstract class EquipmentBuilder {
                     }
                 }
             }
+            
         }
-        return msg;
+        if (msg != null) {
+            context.response().add(new ObjectMessage(renderer.markdownToHtml(msg)));
+        }
     }
 
 
@@ -130,13 +138,13 @@ public abstract class EquipmentBuilder {
         ShowEquipmentMessage.addResponse(context, equipment);
     }
 
-    public String finishEquipment() throws Exception {
+    public void finishEquipment() throws Exception {
         BaseModel current = null;
         if ((current = context.getData(CURRENT_EQUIPMENT, baseModelClass())) == null) {
-            return "No equipment to finish";
+            throw new RuntimeException("No equipment to finish");
         }
         addShowEquipmentAction(current);
-        chatService.popChatFrame(context);
+        chatService.popFrame();
         context.setData(CURRENT_EQUIPMENT, null);
         if (current.rarity == null) {
             current.rarity = Rarity.Common;
@@ -150,7 +158,6 @@ public abstract class EquipmentBuilder {
         context.response().add(new ObjectMessage("Finished building item!"));
         context.response().add(new UpdateNewEquipmentMessage("To create a mod containing your newly built equipment, tell me to '" + ModPackager.PACKAGE_MODE_CHAT_COMMAND + "'"));
         Log.info("Finished equipment");
-        return null;
     }
 
     protected String logJson(BaseModel equipment)  {

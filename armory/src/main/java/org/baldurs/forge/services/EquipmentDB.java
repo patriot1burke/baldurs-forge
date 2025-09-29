@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.baldurs.forge.chat.MetadataPrompts;
+import org.baldurs.forge.mainmenu.MetadataPrompts;
 import org.baldurs.forge.model.Equipment;
 import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.model.EquipmentSlot;

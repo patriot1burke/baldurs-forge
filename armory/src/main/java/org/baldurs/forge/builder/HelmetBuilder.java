@@ -45,7 +45,7 @@ public class HelmetBuilder extends EquipmentBuilder {
 
     @Startup
     public void start() {
-        chatService.register(type(), this::continueBuilding);
+        chatService.register(type(), this::build);
     }
 
     @Tool("Set the name for the current helmet.")
@@ -112,8 +112,8 @@ public class HelmetBuilder extends EquipmentBuilder {
     }
 
     @Tool(value = "When finished building helmet, call this tool to finish the helmet.", returnBehavior = ReturnBehavior.IMMEDIATE)
-    public String finishEquipment() throws Exception {
-        return super.finishEquipment();
+    public void finishEquipment() throws Exception {
+        super.finishEquipment();
     }
 
 

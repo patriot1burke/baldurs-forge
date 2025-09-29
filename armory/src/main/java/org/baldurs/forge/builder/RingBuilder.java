@@ -46,7 +46,7 @@ public class RingBuilder extends EquipmentBuilder {
 
     @Startup
     public void start() {
-        chatService.register(type(), this::continueBuilding);
+        chatService.register(type(), this::build);
     }
 
     @Tool("Set the name for the current ring.")
@@ -104,8 +104,8 @@ public class RingBuilder extends EquipmentBuilder {
     }
 
     @Tool(value = "When finished building ring, call this tool to finish the ring.", returnBehavior = ReturnBehavior.IMMEDIATE)
-    public String finishEquipment() throws Exception {
-        return super.finishEquipment();
+    public void finishEquipment() throws Exception {
+        super.finishEquipment();
     }
 
 

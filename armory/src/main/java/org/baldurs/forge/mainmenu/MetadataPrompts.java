@@ -1,6 +1,6 @@
-package org.baldurs.forge.chat;
+package org.baldurs.forge.mainmenu;
 
-import org.baldurs.forge.context.TemporaryChatMemoryProvider;
+import org.baldurs.forge.TemporaryChatMemoryProvider;
 import org.baldurs.forge.model.EquipmentSlot;
 import org.baldurs.forge.model.EquipmentType;
 

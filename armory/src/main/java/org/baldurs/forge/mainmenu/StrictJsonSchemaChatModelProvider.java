@@ -1,4 +1,4 @@
-package org.baldurs.forge.chat;
+package org.baldurs.forge.mainmenu;
 
 import java.util.function.Supplier;
 

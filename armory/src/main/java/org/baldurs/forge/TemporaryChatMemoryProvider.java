@@ -1,4 +1,4 @@
-package org.baldurs.forge.context;
+package org.baldurs.forge;
 
 import java.util.function.Supplier;
 

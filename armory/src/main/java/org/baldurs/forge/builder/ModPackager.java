@@ -25,11 +25,15 @@ import org.baldurs.forge.scanner.RootTemplate;
 import org.baldurs.forge.scanner.StatsArchive;
 import org.baldurs.forge.services.BoostService;
 import org.baldurs.forge.services.LibraryService;
+import org.baldurs.forge.services.MarkdownToHtmlService;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
+import dev.langchain4j.service.Result;
+import dev.langchain4j.service.tool.ToolExecution;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.Startup;
@@ -38,7 +42,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 @ApplicationScoped
-public class ModPackager implements ChatFrame {
+public class ModPackager {
 
     public static final String PACKAGE_MODE_CHAT_COMMAND = "Package mod";
 
@@ -63,6 +67,9 @@ public class ModPackager implements ChatFrame {
     @Inject
     ChatMemoryStore chatMemoryStore;
 
+    @Inject
+    MarkdownToHtmlService renderer;
+
     ObjectMapper mapper;
 
     @PostConstruct
@@ -73,23 +80,32 @@ public class ModPackager implements ChatFrame {
 
     @Startup
     public void start() {
-        chatService.register(ModPackager.class.getName(), this);
+        chatService.register(ModPackager.class.getName(), this::packageMod);
     }
 
-    public String startPackaging() {
-        // clean clear history.  Also less to serialize back to and from client.
-        chatMemoryStore.deleteMessages(context.memoryId());
-        return chat();
-    }
-
-
-    @Override
-    public String chat() {
+    /**
+     * Called by menu menu tool.  Resets the chat history and calls packageMod.
+     * @return
+     */
+    public void startPackageMod() {
         NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
         if (newEquipment == null) {
-            return "You have not created any new equipment to package.";
+            context.response().add(new ObjectMessage("Nothing to package.  You have not created any new equipment."));
+            return;
         }
-        chatService.setChatFrame(context, ModPackager.class.getName());
+     // clean clear history.  Also less to serialize back to and from client.
+        chatMemoryStore.deleteMessages(context.memoryId());
+        packageMod();
+    }
+
+
+    public void packageMod() {
+        NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
+        if (newEquipment == null) {
+            context.response().add(new ObjectMessage("You have not created any new equipment to package."));
+            return;
+        }
+        chatService.setFrame(ModPackager.class.getName());
         String currentJson = "{}";
         PackageModel current = null;
         if ((current = context.getData(CURRENT_PACKAGE, PackageModel.class)) != null) {
@@ -99,7 +115,33 @@ public class ModPackager implements ChatFrame {
                 Log.warn("Error serializing package", e);
             }
         }
-        return agent.packageMod(context.memoryId(), context.userMessage(), PackageModel.schema, currentJson);
+        Result<String> result = agent.packageMod(context.memoryId(), context.userMessage(), PackageModel.schema, currentJson);
+        if (result.content() != null) {
+            Log.info("ModPackager with content: " + result.content());
+            context.response().add(new ObjectMessage(result.content()));
+        }
+        String msg = null;
+        if (result.toolExecutions().isEmpty()) {
+            Log.info("ModPackager with no tool executions");
+            return;
+        } else {
+            Log.info("ModPackager with multiple tool executions");
+            for (ToolExecution execution : result.toolExecutions()) {
+                Log.info("ModPackager with tool " + execution.request().name() + " execution: " + execution.result());
+                if (execution.result() == null || execution.result().equals("\"null\"")) {
+                    continue;
+                } else {
+                    if (msg == null || msg.isEmpty()) {
+                        msg = execution.result();
+                    } else {
+                        msg += execution.result() + "\n";
+                    }
+                }
+            }
+        }
+        if (msg != null) {
+            context.response().add(new ObjectMessage(renderer.markdownToHtml(msg)));
+        }
     }
 
     private static final String CURRENT_PACKAGE = "currentPackage";
@@ -123,21 +165,17 @@ public class ModPackager implements ChatFrame {
         return mapper.writeValueAsString(current);
     }
 
-    @Tool("Package the mod.")
-    public String finishPackage(PackageModel packageModel) {
+    @Tool(value = "Finish packaging the mod.", returnBehavior = ReturnBehavior.IMMEDIATE)
+    public void finishPackage(PackageModel packageModel) {
         NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
-        if (newEquipment == null) {
-            return "No equipment to package.";
-        }
         newEquipment.name = packageModel.name;
         newEquipment.author = packageModel.author;
         newEquipment.description = packageModel.description;
         context.setData(NewModModel.NEW_EQUIPMENT, newEquipment);
-        chatService.popChatFrame(context);
+        chatService.popFrame();
         String baseFileName = toAlphaNumericUnderscore(newEquipment.name);
 
         PackageModMessage.addResponse(context, baseFileName + ".pak");
-        return "The mod is finished.";
     }
 
     public List<EquipmentModel> listBuiltEquipment() {
@@ -163,16 +201,18 @@ public class ModPackager implements ChatFrame {
         chatMemoryStore.deleteMessages(context.memoryId());
     }
 
-    public String deleteNewEquipment(String name) {
+    public void deleteNewEquipment(String name) {
         NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
         if (newEquipment == null || newEquipment.isEmpty()) {
-            return "No equipment to delete.";
+            context.response().add(new ObjectMessage("No equipment to delete."));
+            return;
         }
 
         BaseModel equipment = newEquipment.findEquipmentByName(name);
         if (equipment == null) {
             showNewEquipment();
-            return "Equipment with name not found.";
+            context.response().add(new ObjectMessage("Equipment with name not found."));
+            return;
         }
         newEquipment.removeEquipment(equipment);
 
@@ -185,23 +225,25 @@ public class ModPackager implements ChatFrame {
         chatMemoryStore.deleteMessages(context.memoryId());
         context.response().add(new UpdateNewEquipmentMessage(null));
 
-        return "Equipment deleted.";
+        context.response().add(new ObjectMessage("Equipment deleted."));
     }
 
-    public String updateNewEquipment(String name) {
+    public void updateNewEquipment(String name) {
         NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
         if (newEquipment == null || newEquipment.isEmpty()) {
-            return "No equipment to update.";
+            context.response().add(new ObjectMessage("No equipment to update."));
+            return;
         }
         BaseModel equipment = newEquipment.findEquipmentByName(name);
         if (equipment == null) {
             showNewEquipment();
-            return "Equipment with name not found.";
+            context.response().add(new ObjectMessage("Equipment with name not found."));
+            return;
         }
         context.setData(EquipmentBuilder.CURRENT_EQUIPMENT, equipment);
         chatMemoryStore.deleteMessages(context.memoryId());
         ShowEquipmentMessage.addResponse(context, equipment.toEquipmentModel(boostService, library));
-        return chatService.getChatFrame(equipment.type()).chat();
+        chatService.getFrame(equipment.type()).chat();
     }
 
     public void addGameObject(StringBuilder localizations, StringBuilder gameObjects, String name, String description,

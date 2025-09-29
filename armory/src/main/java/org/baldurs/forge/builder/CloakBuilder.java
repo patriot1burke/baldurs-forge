@@ -46,7 +46,7 @@ public class CloakBuilder extends EquipmentBuilder {
 
     @Startup
     public void start() {
-        chatService.register(type(), this::continueBuilding);
+        chatService.register(type(), this::build);
     }
 
     @Tool("Set the name for the current cloak.")
@@ -104,8 +104,8 @@ public class CloakBuilder extends EquipmentBuilder {
     }
 
     @Tool(value = "When finished building cloak, call this tool to finish the cloak.", returnBehavior = ReturnBehavior.IMMEDIATE)
-    public String finishEquipment() throws Exception {
-        return super.finishEquipment();
+    public void finishEquipment() throws Exception {
+        super.finishEquipment();
     }
 
 

@@ -1,4 +1,4 @@
-package org.baldurs.forge.chat;
+package org.baldurs.forge.mainmenu;
 
 
 import dev.langchain4j.service.MemoryId;
