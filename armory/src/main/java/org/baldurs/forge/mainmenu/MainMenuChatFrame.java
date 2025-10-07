@@ -41,6 +41,7 @@ import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+
 @ApplicationScoped
 public class MainMenuChatFrame implements ChatFrame {
     @Inject
@@ -103,8 +104,8 @@ public class MainMenuChatFrame implements ChatFrame {
         Result<String> result = chat.chat(context.memoryId(), context.userMessage());
         if (result.content() != null) {
             context.response().add(new ObjectMessage(renderer.markdownToHtml(result.content())));
+            return;
         }
-        String msg = null;
         boolean clearMemory = false;
         if (result.toolExecutions().isEmpty()) {
             Log.info("MainMenu with no tool executions");
@@ -114,25 +115,18 @@ public class MainMenuChatFrame implements ChatFrame {
             for (ToolExecution execution : result.toolExecutions()) {
                 Log.info("MainMenu with tool " + execution.request().name() + " execution: " + execution.result());
                 // exeuctionIds.add(execution.request().id());
-                if (execution.result() == null || execution.result().equals("\"null\"")) {
+                if (execution.resultObject() == null) {
                     Log.info("MainMenu with null tool execution result");
                     continue;
-                } else if (execution.result().contains(CLEAR_MEMORY_ON_EXIT)) {
+                } else if (execution.resultObject().equals(CLEAR_MEMORY_ON_EXIT)) {
                     Log.info("MainMenu with CLEAR_MEMORY_ON_EXIT tool execution result");
                     clearMemory = true;
-                } else if (execution.result().equals("Success")) {
-                    Log.info("MainMenu with Success tool execution result");
-                    continue;
-                }else {
-                    if (msg == null) {
-                        msg = execution.result();
-                    } else {
-                        msg += execution.result() + "\n";
-                    }
+                } else {
+                    throw new RuntimeException("This should be unreachable resultObject: " + execution.resultObject());
                 }
             }
         }
-        if (clearMemory && msg == null) {
+        if (clearMemory) {
             chatMemoryStore.deleteMessages(context.memoryId());
         }
         return;

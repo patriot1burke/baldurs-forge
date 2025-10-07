@@ -113,14 +113,8 @@ public abstract class EquipmentBuilder {
         } else {
             for (ToolExecution execution : result.toolExecutions()) {
                 Log.info("EquipmentBuilder with tool " + execution.request().name() + " execution: " + execution.result());
-                if (execution.result() == null) {
-                    Log.info("EquipmentBuilder with null tool execution result");
-                    continue;
-                } else if (execution.result().equals("\"null\"")) {
-                    Log.info("EquipmentBuilder with \"null\" tool execution result");
-                    continue;
-                } else if (execution.result().equals("Success")) {
-                    Log.info("EquipmentBuilder with Success tool execution result");
+                if (execution.resultObject() == null) {
+                    Log.info("EquipmentBuilder with null/void tool execution result");
                     continue;
                 } else {
                     if (msg == null || msg.isEmpty()) {
