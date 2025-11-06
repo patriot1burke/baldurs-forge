@@ -1,6 +1,6 @@
 package org.baldurs.forge.messages;
 
-import org.baldurs.forge.chat.ObjectMessage;
+import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 
 public class UpdateNewEquipmentMessage extends ObjectMessage {
 

@@ -1,15 +1,14 @@
-package org.baldurs.forge.chat;
+package io.quarkiverse.langchain4j.chat.frames;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.baldurs.forge.context.ChatContext;
-import org.baldurs.forge.context.ClientMemoryStore;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import io.quarkiverse.langchain4j.chat.context.ChatContext;
+import io.quarkiverse.langchain4j.chat.context.ClientMemoryStore;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

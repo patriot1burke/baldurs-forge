@@ -1,4 +1,4 @@
-package org.baldurs.forge.context;
+package io.quarkiverse.langchain4j.chat.context;
 
 import java.util.List;
 

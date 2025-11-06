@@ -1,4 +1,4 @@
-package org.baldurs.forge.context;
+package io.quarkiverse.langchain4j.chat.context;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,12 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.baldurs.forge.chat.ResponseMessage;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.quarkiverse.langchain4j.chat.frames.ResponseMessage;
 import jakarta.enterprise.context.RequestScoped;
 
 /**

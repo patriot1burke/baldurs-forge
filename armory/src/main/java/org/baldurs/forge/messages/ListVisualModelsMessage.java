@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.baldurs.forge.chat.ResponseMessage;
+import io.quarkiverse.langchain4j.chat.frames.ResponseMessage;
 
 public class ListVisualModelsMessage extends ResponseMessage {
     protected List<Map<String, String>> visualModels = new ArrayList<>();

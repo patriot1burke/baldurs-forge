@@ -3,14 +3,14 @@ package org.bg3.forge;
 import java.io.StringWriter;
 import java.util.List;
 
-import org.baldurs.forge.chat.ObjectMessage;
-import org.baldurs.forge.context.ChatContext;
-import org.baldurs.forge.context.ChatContextWriter;
-import org.baldurs.forge.context.ClientMemoryStore;
 import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.langchain4j.data.message.UserMessage;
+import io.quarkiverse.langchain4j.chat.context.ChatContext;
+import io.quarkiverse.langchain4j.chat.context.ChatContextWriter;
+import io.quarkiverse.langchain4j.chat.context.ClientMemoryStore;
+import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 
 public class ChatContextSerializationTest {
 

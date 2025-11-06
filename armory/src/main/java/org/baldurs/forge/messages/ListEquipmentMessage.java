@@ -2,9 +2,10 @@ package org.baldurs.forge.messages;
 
 import java.util.List;
 
-import org.baldurs.forge.chat.ResponseMessage;
-import org.baldurs.forge.context.ChatContext;
 import org.baldurs.forge.model.EquipmentModel;
+
+import io.quarkiverse.langchain4j.chat.context.ChatContext;
+import io.quarkiverse.langchain4j.chat.frames.ResponseMessage;
 
 public  class ListEquipmentMessage extends ResponseMessage {
     protected List<EquipmentModel> equipment;

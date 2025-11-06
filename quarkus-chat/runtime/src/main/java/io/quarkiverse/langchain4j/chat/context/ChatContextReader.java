@@ -1,4 +1,4 @@
-package org.baldurs.forge.context;
+package io.quarkiverse.langchain4j.chat.context;
 
 import java.io.IOException;
 import java.io.InputStream;

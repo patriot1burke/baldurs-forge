@@ -9,6 +9,7 @@
     <packaging>pom</packaging>
     <name>Baldur's Forge - Parent</name>
     <modules>
+        <module>quarkus-chat</module>
         <module>archivist</module>
         <module>archivist-cli</module>
         <module>armory</module>
@@ -57,6 +58,26 @@
                 <artifactId>baldurs-armory</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.quarkiverse.langchain4j</groupId>
+                <artifactId>quarkus-langchain4j-chat</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.quarkiverse.langchain4j</groupId>
+                <artifactId>quarkus-langchain4j-chat-deployment</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.quarkiverse.langchain4j</groupId>
+                <artifactId>quarkus-langchain4j-core</artifactId>
+                <version>${quarkus-langchain4j.version}</version>
+           </dependency>
+            <dependency>
+                <groupId>io.quarkiverse.langchain4j</groupId>
+                <artifactId>quarkus-langchain4j-core-deployment</artifactId>
+                <version>${quarkus-langchain4j.version}</version>
+           </dependency>
             <dependency>
                 <groupId>io.quarkiverse.langchain4j</groupId>
                 <artifactId>quarkus-langchain4j-openai</artifactId>

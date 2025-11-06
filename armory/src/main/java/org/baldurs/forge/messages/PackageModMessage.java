@@ -1,7 +1,7 @@
 package org.baldurs.forge.messages;
 
-import org.baldurs.forge.chat.ResponseMessage;
-import org.baldurs.forge.context.ChatContext;
+import io.quarkiverse.langchain4j.chat.context.ChatContext;
+import io.quarkiverse.langchain4j.chat.frames.ResponseMessage;
 
 public class PackageModMessage extends ResponseMessage {
     protected String filename;

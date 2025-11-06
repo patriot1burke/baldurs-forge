@@ -4,11 +4,11 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import org.baldurs.forge.chat.ChatFrameService;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameService;
 import io.quarkus.logging.Log;
 
 @ApplicationScoped

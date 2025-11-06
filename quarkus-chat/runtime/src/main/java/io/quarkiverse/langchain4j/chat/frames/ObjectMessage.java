@@ -1,4 +1,4 @@
-package org.baldurs.forge.chat;
+package io.quarkiverse.langchain4j.chat.frames;
 
 public class ObjectMessage extends ResponseMessage {
 

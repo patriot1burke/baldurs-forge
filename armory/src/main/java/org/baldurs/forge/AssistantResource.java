@@ -10,14 +10,14 @@ import java.util.UUID;
 
 import org.baldurs.forge.builder.ModPackager;
 import org.baldurs.forge.builder.NewModModel;
-import org.baldurs.forge.chat.ChatFrameService;
-import org.baldurs.forge.context.ChatContext;
 import org.baldurs.forge.services.EquipmentDB;
 import org.baldurs.forge.services.LibraryService;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestForm;
 import org.jboss.resteasy.reactive.multipart.FileUpload;
 
+import io.quarkiverse.langchain4j.chat.context.ChatContext;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameService;
 import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
