@@ -1268,7 +1268,8 @@
                     postData = JSON.stringify(request);
 
                     const response = await $.ajax({
-                        url: `/assistant/chat`,
+                        //url: `/assistant/chat`,
+                        url: `/chat`,
                         type: 'POST',
                         data: postData,
                         processData: false,

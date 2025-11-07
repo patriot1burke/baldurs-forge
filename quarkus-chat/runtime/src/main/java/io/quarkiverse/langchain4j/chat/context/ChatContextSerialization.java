@@ -2,46 +2,13 @@ package io.quarkiverse.langchain4j.chat.context;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
+import java.io.Writer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.quarkus.logging.Log;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.MultivaluedMap;
-import jakarta.ws.rs.ext.MessageBodyReader;
-import jakarta.ws.rs.ext.Provider;
-
-@Provider
-@Consumes(MediaType.WILDCARD)
-public class ChatContextReader implements MessageBodyReader<ChatContext> {
-    @Inject
-    ObjectMapper mapper;
-
-    @Inject
-    ChatContext context;
-
-    @Inject
-    ClientMemoryStore memory;
-
-    @Override
-    public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return ChatContext.class.isAssignableFrom(type);
-    }
-
-    @Override
-    public ChatContext readFrom(Class<ChatContext> type, Type genericType, Annotation[] annotations,
-            MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
-            throws IOException, WebApplicationException {
-        Log.info("Reading chat context");
-        return deserialize(mapper, context, memory, entityStream);
-    }
+public class ChatContextSerialization {
 
     public static ChatContext deserialize(ObjectMapper mapper, ChatContext context, ClientMemoryStore memory,
             InputStream entityStream) throws IOException, JsonProcessingException {
@@ -66,7 +33,7 @@ public class ChatContextReader implements MessageBodyReader<ChatContext> {
         if (memoryNode != null && !memoryNode.isNull()) {
             memory.readJson(memoryNode);
         }
-
+    
         JsonNode sharedNode = contextNode.get("data");
         if (sharedNode != null && !sharedNode.isNull()) {
             sharedNode.fields().forEachRemaining(field -> {
@@ -78,4 +45,30 @@ public class ChatContextReader implements MessageBodyReader<ChatContext> {
         }
         return context;
     }
+
+    public static void serialize(ChatContext t, ClientMemoryStore memory, ObjectMapper mapper, Writer writer)
+            throws IOException {
+        writer.write("{");
+        writer.write("\"response\":");
+        if (t.response() != null) {
+            mapper.writeValue(writer, t.response());
+        } else {
+            writer.write("null");
+        }
+        writer.write(",");        
+        writer.write("\"context\":");
+        writer.write("{");
+        writer.write("\"memoryId\":");
+        writer.write("\"" + t.memoryId() + "\"");
+        writer.write(",");
+        writer.write("\"data\":");
+        mapper.writeValue(writer, t.data());
+        writer.write(",");
+        writer.write("\"memory\":");
+        memory.writeJson(writer);
+        writer.write("}");
+    
+        writer.write("}");
+    }
+
 }

@@ -40,20 +40,6 @@ public class AssistantResource {
 	@Inject
 	EquipmentDB equipmentDB;
 
-	@Inject
-	ChatFrameService chat;
-	
-
-	@POST
-	@Path("/chat")
-	@Produces(MediaType.TEXT_PLAIN)
-	public ChatContext chat(ChatContext context) throws Exception {
-
-		Log.info("CHAT: " + context.memoryId());
-		chat.chat(context);
-		return context;
-	}
-
 	@POST
 	@Path("/upload-pak")
 	@Produces(MediaType.TEXT_HTML)

@@ -96,11 +96,5 @@ public class ClientMemoryStore {
     public void ping() {
         // exists to test CDI request scope
     }
-
-    public static ClientMemoryStore pojo(ObjectMapper mapper) {
-        ClientMemoryStore memory = new ClientMemoryStore();
-        memory.mapper = mapper;
-        return memory;
-    }
 }
 

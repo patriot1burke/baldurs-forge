@@ -26,7 +26,7 @@ public class ChatFrameService {
     ChatFrame defaultChatFrame;
 
     Map<String, ChatFrame> chatFrames = new HashMap<>();
-
+    
     public void register(String name, ChatFrame chatFrame) {
         chatFrames.put(name, chatFrame);
     }
