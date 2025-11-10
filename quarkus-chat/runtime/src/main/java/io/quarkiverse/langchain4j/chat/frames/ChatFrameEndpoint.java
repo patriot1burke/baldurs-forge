@@ -8,9 +8,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.quarkiverse.langchain4j.chat.context.ChatContext;
-import io.quarkiverse.langchain4j.chat.context.ChatContextSerialization;
-import io.quarkiverse.langchain4j.chat.context.ClientMemoryStore;
 import io.quarkus.arc.Arc;
 import io.quarkus.arc.ManagedContext;
 import io.quarkus.logging.Log;

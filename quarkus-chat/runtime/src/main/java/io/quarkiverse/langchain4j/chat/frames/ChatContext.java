@@ -1,4 +1,4 @@
-package io.quarkiverse.langchain4j.chat.context;
+package io.quarkiverse.langchain4j.chat.frames;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +10,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.quarkiverse.langchain4j.chat.frames.ResponseMessage;
 import jakarta.enterprise.context.RequestScoped;
 
 /**

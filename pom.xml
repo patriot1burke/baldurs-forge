@@ -60,12 +60,12 @@
             </dependency>
             <dependency>
                 <groupId>io.quarkiverse.langchain4j</groupId>
-                <artifactId>quarkus-langchain4j-chat</artifactId>
+                <artifactId>quarkus-langchain4j-chat-frames</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.quarkiverse.langchain4j</groupId>
-                <artifactId>quarkus-langchain4j-chat-deployment</artifactId>
+                <artifactId>quarkus-langchain4j-chat-frames-deployment</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

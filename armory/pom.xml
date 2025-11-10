@@ -36,7 +36,7 @@
         </dependency>
        <dependency>
             <groupId>io.quarkiverse.langchain4j</groupId>
-            <artifactId>quarkus-langchain4j-chat</artifactId>
+            <artifactId>quarkus-langchain4j-chat-frames</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkiverse.langchain4j</groupId>

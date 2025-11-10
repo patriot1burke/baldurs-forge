@@ -7,8 +7,6 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import io.quarkiverse.langchain4j.chat.context.ChatContext;
-import io.quarkiverse.langchain4j.chat.context.ClientMemoryStore;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

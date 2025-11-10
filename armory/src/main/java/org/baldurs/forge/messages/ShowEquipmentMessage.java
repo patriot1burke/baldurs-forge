@@ -2,7 +2,7 @@ package org.baldurs.forge.messages;
 
 import org.baldurs.forge.model.EquipmentModel;
 
-import io.quarkiverse.langchain4j.chat.context.ChatContext;
+import io.quarkiverse.langchain4j.chat.frames.ChatContext;
 import io.quarkiverse.langchain4j.chat.frames.ResponseMessage;
 
 public class ShowEquipmentMessage extends ResponseMessage {

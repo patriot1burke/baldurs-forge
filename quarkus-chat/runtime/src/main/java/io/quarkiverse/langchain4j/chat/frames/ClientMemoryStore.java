@@ -1,4 +1,4 @@
-package io.quarkiverse.langchain4j.chat.context;
+package io.quarkiverse.langchain4j.chat.frames;
 
 import java.io.Writer;
 import java.util.ArrayList;

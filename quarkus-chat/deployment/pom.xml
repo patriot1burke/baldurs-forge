@@ -10,8 +10,8 @@
     </parent>
 
     <groupId>io.quarkiverse.langchain4j</groupId>
-    <artifactId>quarkus-langchain4j-chat-deployment</artifactId>
-    <name>Quarkus - Langchain4j Chat - Deployment</name>
+    <artifactId>quarkus-langchain4j-chat-frames-deployment</artifactId>
+    <name>Quarkus - Langchain4j Chat Frames - Deployment</name>
 
     <dependencies>
          <dependency>
@@ -36,7 +36,7 @@
         </dependency>
        <dependency>
             <groupId>io.quarkiverse.langchain4j</groupId>
-            <artifactId>quarkus-langchain4j-chat</artifactId>
+            <artifactId>quarkus-langchain4j-chat-frames</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
