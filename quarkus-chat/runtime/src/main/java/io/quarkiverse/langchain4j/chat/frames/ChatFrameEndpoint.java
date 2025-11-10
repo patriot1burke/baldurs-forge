@@ -24,7 +24,7 @@ import jakarta.inject.Inject;
 public class ChatFrameEndpoint {
 
     @Inject
-    ChatFrameService chatFrameService;
+    ChatFrameManager chatFrameService;
 
     @Inject
     ClientMemoryStore memoryStore;
@@ -67,7 +67,7 @@ public class ChatFrameEndpoint {
                     ctx.response().setStatusCode(400).end("Failed to deserialize chat context");
                     return null;
                 }
-                chatFrameService.chat(context);
+                chatFrameService.chat();
                 StringWriter writer = new StringWriter();
                 try {
                     ChatContextSerialization.serialize(context, memoryStore, mapper, writer);

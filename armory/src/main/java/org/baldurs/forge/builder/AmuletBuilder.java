@@ -8,6 +8,7 @@ import org.baldurs.forge.model.Rarity;
 
 import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -44,9 +45,10 @@ public class AmuletBuilder extends EquipmentBuilder {
         };
     }
 
-    @Startup
-    public void start() {
-        chatService.register(type(), this::build);
+
+    @ChatFrame(AmuletModel.TYPE)
+    public void build() {
+        super.build();
     }
 
     @Tool("Set the name for the current amulet.")

@@ -33,7 +33,8 @@ import dev.langchain4j.service.tool.ToolExecution;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import io.quarkiverse.langchain4j.chat.frames.ChatContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameService;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameManager;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.Startup;
@@ -50,7 +51,7 @@ public class ModPackager {
     ChatContext context;
 
     @Inject
-    ChatFrameService chatService;
+    ChatFrameManager chatService;
 
     @Inject
     ModPackagePrompt agent;
@@ -78,11 +79,6 @@ public class ModPackager {
         mapper.setSerializationInclusion(Include.NON_NULL);
     }
 
-    @Startup
-    public void start() {
-        chatService.register(ModPackager.class.getName(), this::packageMod);
-    }
-
     /**
      * Called by menu menu tool.  Resets the chat history and calls packageMod.
      * @return
@@ -93,13 +89,14 @@ public class ModPackager {
             context.response().add(new ObjectMessage("Nothing to package.  You have not created any new equipment."));
             return;
         }
-        chatService.pushFrame(ModPackager.class.getName());
+        chatService.pushFrame("packageMod");
      // clean clear history.  Also less to serialize back to and from client.
         chatMemoryStore.deleteMessages(context.memoryId());
         packageMod();
     }
+    
 
-
+    @ChatFrame("packageMod")
     public void packageMod() {
         NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
         if (newEquipment == null) {

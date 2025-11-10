@@ -34,7 +34,9 @@ import dev.langchain4j.service.tool.ToolExecution;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import io.quarkiverse.langchain4j.chat.frames.ChatContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameService;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameManager;
+import io.quarkiverse.langchain4j.chat.frames.DefaultChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.Startup;
@@ -43,7 +45,7 @@ import jakarta.inject.Inject;
 
 
 @ApplicationScoped
-public class MainMenuChatFrame implements ChatFrame {
+public class MainMenuChatFrame {
     @Inject
     ChatContext context;
 
@@ -74,7 +76,7 @@ public class MainMenuChatFrame implements ChatFrame {
     CloakBuilder cloakBuilder;
 
     @Inject
-    ChatFrameService chatService;
+    ChatFrameManager chatService;
 
     @Inject
     LibraryService library;
@@ -91,14 +93,10 @@ public class MainMenuChatFrame implements ChatFrame {
     @Inject
     MarkdownToHtmlService renderer;
 
-    @Startup
-    public void start() {
-        chatService.setDefaultFrame(this);
-    }
-
     public static final String CLEAR_MEMORY_ON_EXIT = "clearMemoryOnExit";
 
-    @Override
+    @ChatFrame
+    @DefaultChatFrame
     public void chat() {
         Log.info("MainMenu with user message: " + context.userMessage());
         Result<String> result = chat.chat(context.memoryId(), context.userMessage());

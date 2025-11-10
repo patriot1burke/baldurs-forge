@@ -9,6 +9,7 @@ import com.google.common.base.Supplier;
 
 import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -45,10 +46,11 @@ public class BodyArmorBuilder extends EquipmentBuilder {
         return () -> new BodyArmorModel();
     }
 
-    @Startup
-    public void start() {
-        chatService.register(type(), this::build);
+    @ChatFrame(BodyArmorModel.TYPE)
+    public void build() {
+        super.build();
     }
+
 
     @Tool("Set the name for the current body armor.")
     public void setName(String name) {
