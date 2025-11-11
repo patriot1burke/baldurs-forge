@@ -1,5 +1,8 @@
 package io.quarkiverse.langchain4j.chat.frames;
 
+/**
+ * Manages and routes chat frames
+ */
 public interface ChatFrameController {
 
     void register(String name, ChatFrameExecution chatFrame);
@@ -26,7 +29,7 @@ public interface ChatFrameController {
     void pushFrame(String chatFrame);
 
     /**
-     * Pops current frame off of the frame stack and also deletes the messages for the ChatContext's memoryId.
+     * Pops current frame off of the frame stack and also deletes the messages for the ChatContext's current memoryId.
      */
     void popFrame();
 

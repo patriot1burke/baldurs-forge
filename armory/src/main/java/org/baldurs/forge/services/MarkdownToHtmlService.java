@@ -2,13 +2,11 @@ package org.baldurs.forge.services;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
 import io.quarkus.logging.Log;
 
 @ApplicationScoped
@@ -16,10 +14,7 @@ public class MarkdownToHtmlService {
     Parser parser;
     HtmlRenderer renderer;
 
-    @Inject
-    ChatFrameController chatService;
-
-    @PostConstruct
+     @PostConstruct
     public void init() {
         parser = Parser.builder().build();
         renderer = HtmlRenderer.builder().build();

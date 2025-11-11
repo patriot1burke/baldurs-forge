@@ -97,4 +97,28 @@ public interface ChatContext {
      * @return
      */
     List<ResponseMessage> response();
+
+    String currentFrameId();
+
+    ChatFrameExecution currentFrame();
+
+    ChatFrameExecution getFrame(String name);
+
+    /**
+     * Clears the frame stack and sets the chat frame.
+     * @param chatFrame
+     */
+    void setFrame(String chatFrame);
+
+    /**
+     * Pushes the given chat frame onto the frame stack.
+     * 
+     * @param chatFrame
+     */
+    void pushFrame(String chatFrame);
+
+    /**
+     * Pops current frame off of the frame stack and also deletes the messages for the ChatContext's current memoryId.
+     */
+    void popFrame();
 }

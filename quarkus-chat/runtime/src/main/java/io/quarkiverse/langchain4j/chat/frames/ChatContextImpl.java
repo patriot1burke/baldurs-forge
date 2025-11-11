@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
 
 @RequestScoped
 public class ChatContextImpl implements ChatContext {
@@ -23,6 +24,9 @@ public class ChatContextImpl implements ChatContext {
     String memoryId = UUID.randomUUID().toString();
 
     boolean ignoreAIResponse = false;
+
+    @Inject
+    ChatFrameController chatFrameController;
 
     @Override
     public String userMessage() {
@@ -134,4 +138,38 @@ public class ChatContextImpl implements ChatContext {
     public List<ResponseMessage> response() {
         return response;
     }
+
+    // ChatFrameController methods
+
+    @Override
+    public String currentFrameId() {
+        return chatFrameController.currentFrameId();
+    }
+
+    @Override
+    public ChatFrameExecution currentFrame() {
+        return chatFrameController.currentFrame();
+    }
+
+    @Override
+    public ChatFrameExecution getFrame(String name) {
+        return chatFrameController.getFrame(name);
+    }
+
+    @Override
+    public void setFrame(String chatFrame) {
+        chatFrameController.setFrame(chatFrame);
+    }
+
+    @Override
+    public void pushFrame(String chatFrame) {
+        chatFrameController.pushFrame(chatFrame);
+    }
+
+    @Override
+    public void popFrame() {
+        chatFrameController.popFrame();
+    }
+
+
 }

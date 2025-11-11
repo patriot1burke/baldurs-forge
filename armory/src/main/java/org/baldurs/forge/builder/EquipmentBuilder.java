@@ -20,13 +20,10 @@ import org.baldurs.forge.services.MarkdownToHtmlService;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.Result;
 import dev.langchain4j.service.tool.ToolExecution;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import io.quarkiverse.langchain4j.chat.frames.ChatContext;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 import io.quarkus.logging.Log;
 import jakarta.annotation.PostConstruct;
@@ -39,9 +36,6 @@ public abstract class EquipmentBuilder {
     ChatContext context;
 
     ObjectMapper mapper;
-
-    @Inject
-    ChatFrameController chatService;
 
     @Inject
     BoostService boostService;
@@ -80,7 +74,7 @@ public abstract class EquipmentBuilder {
     public void startBuild() {
         // clear chat history and start conversation with this builder
         chatMemoryStore.deleteMessages(context.memoryId());
-        chatService.pushFrame(type());
+        context.pushFrame(type());
         build();
     }
 
@@ -146,7 +140,7 @@ public abstract class EquipmentBuilder {
             throw new RuntimeException("No equipment to finish");
         }
         addShowEquipmentAction(current);
-        chatService.popFrame();
+        context.popFrame();
         context.setData(CURRENT_EQUIPMENT, null);
         if (current.rarity == null) {
             current.rarity = Rarity.Common;

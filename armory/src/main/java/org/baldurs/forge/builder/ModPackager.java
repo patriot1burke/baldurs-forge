@@ -33,8 +33,6 @@ import dev.langchain4j.service.tool.ToolExecution;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import io.quarkiverse.langchain4j.chat.frames.ChatContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.Startup;
@@ -49,9 +47,6 @@ public class ModPackager {
 
     @Inject
     ChatContext context;
-
-    @Inject
-    ChatFrameController chatService;
 
     @Inject
     ModPackagePrompt agent;
@@ -89,7 +84,7 @@ public class ModPackager {
             context.response().add(new ObjectMessage("Nothing to package.  You have not created any new equipment."));
             return;
         }
-        chatService.pushFrame("packageMod");
+        context.pushFrame("packageMod");
      // clean clear history.  Also less to serialize back to and from client.
         chatMemoryStore.deleteMessages(context.memoryId());
         packageMod();
@@ -169,7 +164,7 @@ public class ModPackager {
         newEquipment.author = packageModel.author;
         newEquipment.description = packageModel.description;
         context.setData(NewModModel.NEW_EQUIPMENT, newEquipment);
-        chatService.popFrame();
+        context.popFrame();
         String baseFileName = toAlphaNumericUnderscore(newEquipment.name);
 
         PackageModMessage.addResponse(context, baseFileName + ".pak");
@@ -239,9 +234,9 @@ public class ModPackager {
         }
         context.setData(EquipmentBuilder.CURRENT_EQUIPMENT, equipment);
         ShowEquipmentMessage.addResponse(context, equipment.toEquipmentModel(boostService, library));
-        chatService.pushFrame(equipment.type());
+        context.pushFrame(equipment.type());
         chatMemoryStore.deleteMessages(context.memoryId());
-        chatService.getFrame(equipment.type()).chat();
+        context.getFrame(equipment.type()).chat();
     }
 
     public void addGameObject(StringBuilder localizations, StringBuilder gameObjects, String name, String description,

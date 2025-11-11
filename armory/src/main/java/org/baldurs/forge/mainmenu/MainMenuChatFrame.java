@@ -26,7 +26,6 @@ import dev.langchain4j.service.tool.ToolExecution;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import io.quarkiverse.langchain4j.chat.frames.ChatContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
 import io.quarkiverse.langchain4j.chat.frames.DefaultChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 import io.quarkus.logging.Log;
@@ -64,9 +63,6 @@ public class MainMenuChatFrame {
     AmuletBuilder amuletBuilder;
     @Inject
     CloakBuilder cloakBuilder;
-
-    @Inject
-    ChatFrameController chatService;
 
     @Inject
     LibraryService library;
