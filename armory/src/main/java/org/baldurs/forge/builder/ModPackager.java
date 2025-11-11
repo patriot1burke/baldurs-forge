@@ -34,7 +34,7 @@ import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import io.quarkiverse.langchain4j.chat.frames.ChatContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameManager;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.Startup;
@@ -51,7 +51,7 @@ public class ModPackager {
     ChatContext context;
 
     @Inject
-    ChatFrameManager chatService;
+    ChatFrameController chatService;
 
     @Inject
     ModPackagePrompt agent;

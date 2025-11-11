@@ -26,7 +26,7 @@ import dev.langchain4j.service.tool.ToolExecution;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import io.quarkiverse.langchain4j.chat.frames.ChatContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameManager;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 import io.quarkus.logging.Log;
 import jakarta.annotation.PostConstruct;
@@ -41,7 +41,7 @@ public abstract class EquipmentBuilder {
     ObjectMapper mapper;
 
     @Inject
-    ChatFrameManager chatService;
+    ChatFrameController chatService;
 
     @Inject
     BoostService boostService;

@@ -1,10 +1,10 @@
 package io.quarkiverse.langchain4j.chat.frames;
 
-public interface ChatFrameManager {
+public interface ChatFrameController {
 
     void register(String name, ChatFrameExecution chatFrame);
 
-    void setDefaultFrame(ChatFrameExecution chatFrame);
+    void setDefaultFrame(String chatFrame);
 
     String currentFrameId();
 

@@ -8,7 +8,7 @@ import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameManager;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
 import io.quarkus.logging.Log;
 
 @ApplicationScoped
@@ -17,7 +17,7 @@ public class MarkdownToHtmlService {
     HtmlRenderer renderer;
 
     @Inject
-    ChatFrameManager chatService;
+    ChatFrameController chatService;
 
     @PostConstruct
     public void init() {

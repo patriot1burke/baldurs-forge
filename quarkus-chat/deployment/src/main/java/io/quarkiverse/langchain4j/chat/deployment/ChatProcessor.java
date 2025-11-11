@@ -27,7 +27,7 @@ import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 
-import io.quarkiverse.langchain4j.chat.frames.ChatContext;
+import io.quarkiverse.langchain4j.chat.frames.ChatContextImpl;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameEndpoint;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameRecorder;
@@ -41,7 +41,7 @@ public class ChatProcessor {
     @BuildStep
     public void registerBeans(BuildProducer<AdditionalBeanBuildItem> additionalBeanProducer) {
         AdditionalBeanBuildItem.builder()
-                               .addBeanClasses(ChatFrameService.class, ChatFrameEndpoint.class, ClientMemoryStoreBean.class, ChatContext.class)
+                               .addBeanClasses(ChatFrameService.class, ChatFrameEndpoint.class, ClientMemoryStoreBean.class, ChatContextImpl.class)
                                .setUnremovable().build();
 
     }

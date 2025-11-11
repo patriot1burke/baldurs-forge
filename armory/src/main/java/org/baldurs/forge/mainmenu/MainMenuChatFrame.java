@@ -1,6 +1,5 @@
 package org.baldurs.forge.mainmenu;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.baldurs.forge.builder.AmuletBuilder;
@@ -22,24 +21,15 @@ import org.baldurs.forge.services.MarkdownToHtmlService;
 
 import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
-import dev.langchain4j.data.message.ChatMessage;
-import dev.langchain4j.data.message.ToolExecutionResultMessage;
-import dev.langchain4j.memory.ChatMemory;
-import dev.langchain4j.memory.chat.MessageWindowChatMemory;
-import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.service.AiServiceContext;
-import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.Result;
 import dev.langchain4j.service.tool.ToolExecution;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import io.quarkiverse.langchain4j.chat.frames.ChatContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameManager;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
 import io.quarkiverse.langchain4j.chat.frames.DefaultChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 import io.quarkus.logging.Log;
-import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -76,7 +66,7 @@ public class MainMenuChatFrame {
     CloakBuilder cloakBuilder;
 
     @Inject
-    ChatFrameManager chatService;
+    ChatFrameController chatService;
 
     @Inject
     LibraryService library;
@@ -95,7 +85,7 @@ public class MainMenuChatFrame {
 
     public static final String CLEAR_MEMORY_ON_EXIT = "clearMemoryOnExit";
 
-    @ChatFrame
+    @ChatFrame("mainMenu")
     @DefaultChatFrame
     public void chat() {
         Log.info("MainMenu with user message: " + context.userMessage());

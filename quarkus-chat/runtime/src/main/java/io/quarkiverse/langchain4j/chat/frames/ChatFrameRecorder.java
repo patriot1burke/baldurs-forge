@@ -11,7 +11,7 @@ import io.quarkus.runtime.annotations.Recorder;
 public class ChatFrameRecorder {
 
     public static ConcurrentHashMap<String, ChatFrameExecution> chatFrames = new ConcurrentHashMap<>();
-    public static ChatFrameExecution defaultChatFrame = null;
+    public static String defaultChatFrame = null;
     public static volatile BeanContainer CONTAINER = null;
 
     public void setContainer(BeanContainer container) {
@@ -21,7 +21,7 @@ public class ChatFrameRecorder {
     public void registerChatFrame(String frameName, ChatFrameExecution chatFrame, boolean isDefault) {
         chatFrames.put(frameName, chatFrame);
         if (isDefault) {
-            defaultChatFrame = chatFrame;
+            defaultChatFrame = frameName;
         }
     }
 
@@ -30,7 +30,7 @@ public class ChatFrameRecorder {
             ChatFrameExecution chatFrameExecution = new ReflectiveChatFrameExecution(targetClass, targetClass.getMethod(methodName));
             chatFrames.put(frameName, chatFrameExecution);
             if (isDefault) {
-                defaultChatFrame = chatFrameExecution;
+                defaultChatFrame = frameName;
             }
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(e);

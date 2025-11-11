@@ -24,7 +24,7 @@ import jakarta.inject.Inject;
 public class ChatFrameEndpoint {
 
     @Inject
-    ChatFrameManager chatFrameService;
+    ChatFrameController chatFrameService;
 
     @Inject
     ClientMemoryStore memoryStore;

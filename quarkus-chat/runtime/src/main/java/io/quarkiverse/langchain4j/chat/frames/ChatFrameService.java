@@ -12,7 +12,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 @ApplicationScoped
-public class ChatFrameService implements ChatFrameManager {
+public class ChatFrameService implements ChatFrameController {
     public static final String CHAT_FRAME = "chatFrame";
 
     @Inject
@@ -27,7 +27,7 @@ public class ChatFrameService implements ChatFrameManager {
     }
 
     @Override
-    public void setDefaultFrame(ChatFrameExecution chatFrame) {
+    public void setDefaultFrame(String chatFrame) {
         ChatFrameRecorder.defaultChatFrame = chatFrame;
     }
 
@@ -48,7 +48,10 @@ public class ChatFrameService implements ChatFrameManager {
     public ChatFrameExecution currentFrame() {
         String frameId = currentFrameId();
         if (frameId == null) {
-            return ChatFrameRecorder.defaultChatFrame;
+            if (ChatFrameRecorder.defaultChatFrame == null) {
+                return null;
+            }
+            return ChatFrameRecorder.chatFrames.get(ChatFrameRecorder.defaultChatFrame);
         }
         return ChatFrameRecorder.chatFrames.get(frameId);
     }
@@ -108,13 +111,18 @@ public class ChatFrameService implements ChatFrameManager {
     public void chat() {
         String chatFrame = currentFrameId();
         if (chatFrame == null) {
+            if (ChatFrameRecorder.defaultChatFrame == null) {
+                Log.error("Current frame not set and no default chat frame found");
+                context.response().add(new ObjectMessage("I'm having issues at the moment. Can you retry or rephrase your request?"));
+                return;
+            }
             Log.info("Executing default chat");
-            ChatFrameRecorder.defaultChatFrame.chat();
+            pushFrame(ChatFrameRecorder.defaultChatFrame);
+            ChatFrameRecorder.chatFrames.get(ChatFrameRecorder.defaultChatFrame).chat();
         } else if (ChatFrameRecorder.chatFrames.containsKey(chatFrame)) {
             Log.info("Executing chat frame: " + chatFrame);
             ChatFrameRecorder.chatFrames.get(chatFrame).chat();
-        }
-        else {
+        } else {
             Log.error("Unknown chat frame: " + chatFrame);
             popFrame();
             context.response().add(new ObjectMessage("I'm having issues at the moment. Can you retry or rephrase your request?"));
