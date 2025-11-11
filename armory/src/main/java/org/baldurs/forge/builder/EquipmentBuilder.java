@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.langchain4j.service.Result;
 import dev.langchain4j.service.tool.ToolExecution;
-import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import io.quarkiverse.langchain4j.chat.frames.ChatContext;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 import io.quarkus.logging.Log;
@@ -45,9 +44,6 @@ public abstract class EquipmentBuilder {
 
     @Inject
     BoostBuilderPrompt boostBuilder;
-
-    @Inject
-    ChatMemoryStore chatMemoryStore;
 
     @Inject
     MarkdownToHtmlService renderer;
@@ -73,7 +69,6 @@ public abstract class EquipmentBuilder {
 
     public void startBuild() {
         // clear chat history and start conversation with this builder
-        chatMemoryStore.deleteMessages(context.memoryId());
         context.pushFrame(type());
         build();
     }

@@ -23,7 +23,6 @@ import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.service.Result;
 import dev.langchain4j.service.tool.ToolExecution;
-import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import io.quarkiverse.langchain4j.chat.frames.ChatContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.DefaultChatFrame;
@@ -74,9 +73,6 @@ public class MainMenuChatFrame {
     MainMenuPrompt chat;
 
     @Inject
-    ChatMemoryStore chatMemoryStore;
-
-    @Inject
     MarkdownToHtmlService renderer;
 
     public static final String CLEAR_MEMORY_ON_EXIT = "clearMemoryOnExit";
@@ -93,7 +89,7 @@ public class MainMenuChatFrame {
         boolean clearMemory = false;
         if (result.toolExecutions().isEmpty()) {
             Log.info("MainMenu with no tool executions");
-            chatMemoryStore.deleteMessages(context.memoryId());
+            context.clearMemory();
             return;
         } else {
             for (ToolExecution execution : result.toolExecutions()) {
@@ -111,7 +107,7 @@ public class MainMenuChatFrame {
             }
         }
         if (clearMemory) {
-            chatMemoryStore.deleteMessages(context.memoryId());
+            context.clearMemory();
         }
         return;
     }

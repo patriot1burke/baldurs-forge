@@ -30,12 +30,10 @@ import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.service.Result;
 import dev.langchain4j.service.tool.ToolExecution;
-import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import io.quarkiverse.langchain4j.chat.frames.ChatContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 import io.quarkus.logging.Log;
-import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -61,9 +59,6 @@ public class ModPackager {
     BoostService boostService;
 
     @Inject
-    ChatMemoryStore chatMemoryStore;
-
-    @Inject
     MarkdownToHtmlService renderer;
 
     ObjectMapper mapper;
@@ -85,8 +80,6 @@ public class ModPackager {
             return;
         }
         context.pushFrame("packageMod");
-     // clean clear history.  Also less to serialize back to and from client.
-        chatMemoryStore.deleteMessages(context.memoryId());
         packageMod();
     }
     
@@ -190,7 +183,7 @@ public class ModPackager {
     public void deleteAllNewEquipment() {
         context.setData(NewModModel.NEW_EQUIPMENT, null);
         context.response().add(new UpdateNewEquipmentMessage(null));
-        chatMemoryStore.deleteMessages(context.memoryId());
+        context.clearMemory();
     }
 
     public void deleteNewEquipment(String name) {
@@ -214,7 +207,7 @@ public class ModPackager {
             context.setData(NewModModel.NEW_EQUIPMENT, newEquipment);
             showNewEquipment();
         }
-        chatMemoryStore.deleteMessages(context.memoryId());
+        context.clearMemory();
         context.response().add(new UpdateNewEquipmentMessage(null));
 
         context.response().add(new ObjectMessage("Equipment deleted."));
@@ -235,7 +228,6 @@ public class ModPackager {
         context.setData(EquipmentBuilder.CURRENT_EQUIPMENT, equipment);
         ShowEquipmentMessage.addResponse(context, equipment.toEquipmentModel(boostService, library));
         context.pushFrame(equipment.type());
-        chatMemoryStore.deleteMessages(context.memoryId());
         context.getFrame(equipment.type()).chat();
     }
 

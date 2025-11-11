@@ -63,29 +63,55 @@ public class ChatFrameService implements ChatFrameController {
 
     /**
      * Clears the stack and sets the chat frame for the given context.
+     * Also deletes the messages for the ChatContext's memoryId.
      * @param chatFrame
      */
     @Override
     public void setFrame(String chatFrame) {
+        setFrame(chatFrame, true);
+    }
+
+    /**
+     * Clears the stack and sets the chat frame for the given context.
+     * @param chatFrame
+     * @param deleteMessages if true, deletes the messages for the ChatContext's memoryId.
+     */
+    public void setFrame(String chatFrame, boolean deleteMessages) {
         Log.info("Setting chat frame: " + chatFrame);
         List<String> frameStack = new ArrayList<>();
         frameStack.add(chatFrame);
         context.setData(CHAT_FRAME, frameStack);
+        if (deleteMessages) {
+            memoryStore.deleteMessages(context.memoryId());
+        }
     }
 
     /**
      * Pushes the given chat frame onto the frame stack.
      * 
+     * Also deletes the messages for the ChatContext's memoryId.
      * @param chatFrame
      */
     @Override
     public void pushFrame(String chatFrame) {
+        pushFrame(chatFrame, true);
+    }
+
+    /**
+     * Pushes the given chat frame onto the frame stack.
+     * @param chatFrame
+     * @param deleteMessages if true, deletes the messages for the ChatContext's memoryId.
+     */
+    public void pushFrame(String chatFrame, boolean deleteMessages) {
         List<String> frameStack = getFrameStack();
         if (frameStack == null) {
             frameStack = new ArrayList<>();
         }
         frameStack.add(chatFrame);
         context.setData(CHAT_FRAME, frameStack);
+        if (deleteMessages) {
+            memoryStore.deleteMessages(context.memoryId());
+        }
     }
 
     /**
@@ -93,8 +119,18 @@ public class ChatFrameService implements ChatFrameController {
      */
     @Override
     public void popFrame() {
-        Log.info("Popping chat frame");
+        popFrame(true);
+    }
+
+    /**
+     * Pops current frame off of the frame stack and also deletes the messages for the ChatContext's memoryId.
+     * @param deleteMessages if true, deletes the messages for the ChatContext's memoryId.
+     */
+    public void popFrame(boolean deleteMessages) {
         List<String> frameStack = getFrameStack();
+        if (frameStack == null) {
+            frameStack = new ArrayList<>();
+        }
         if (frameStack != null && !frameStack.isEmpty()) {
             frameStack.remove(frameStack.size() - 1);
             if (frameStack.isEmpty()) {
@@ -103,7 +139,15 @@ public class ChatFrameService implements ChatFrameController {
                 context.setData(CHAT_FRAME, frameStack);
             }
         }
-        Log.info("Deleting messages for memoryId: " + context.memoryId());
+        if (deleteMessages) {
+            memoryStore.deleteMessages(context.memoryId());
+        }
+    }
+
+    /**
+     * Clears chat memory for the ChatContext's current memoryId.
+     */
+    public void clearMemory() {
         memoryStore.deleteMessages(context.memoryId());
     }
 

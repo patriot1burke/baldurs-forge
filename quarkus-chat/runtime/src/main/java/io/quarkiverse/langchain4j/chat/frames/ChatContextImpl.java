@@ -170,6 +170,21 @@ public class ChatContextImpl implements ChatContext {
     public void popFrame() {
         chatFrameController.popFrame();
     }
-
+    @Override
+    public void popFrame(boolean deleteMessages) {
+        chatFrameController.popFrame(deleteMessages);
+    }
+    @Override
+    public void pushFrame(String chatFrame, boolean deleteMessages) {
+        chatFrameController.pushFrame(chatFrame, deleteMessages);
+    }
+    @Override
+    public void setFrame(String chatFrame, boolean deleteMessages) {
+        chatFrameController.setFrame(chatFrame, deleteMessages);
+    }
+    @Override
+    public void clearMemory() {
+        chatFrameController.clearMemory();
+    }
 
 }
