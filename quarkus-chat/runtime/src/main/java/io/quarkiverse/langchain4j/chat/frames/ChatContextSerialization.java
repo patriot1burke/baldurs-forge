@@ -8,6 +8,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.quarkiverse.langchain4j.chat.frames.internal.ClientMemoryStore;
+
 public class ChatContextSerialization {
 
     public static ChatContext deserialize(ObjectMapper mapper, ChatContext context, ClientMemoryStore memory,

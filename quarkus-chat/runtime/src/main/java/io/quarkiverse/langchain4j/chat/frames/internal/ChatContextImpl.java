@@ -1,4 +1,4 @@
-package io.quarkiverse.langchain4j.chat.frames;
+package io.quarkiverse.langchain4j.chat.frames.internal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,10 +10,16 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.quarkiverse.langchain4j.chat.frames.ChatContext;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
+import io.quarkiverse.langchain4j.chat.frames.ResponseMessage;
 import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 
 @RequestScoped
+@Default
 public class ChatContextImpl implements ChatContext {
 
     Map<String, Object> data = new HashMap<>();

@@ -1,8 +1,9 @@
-package io.quarkiverse.langchain4j.chat.frames;
+package io.quarkiverse.langchain4j.chat.frames.internal;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
 import io.quarkus.arc.runtime.BeanContainer;
 
 public class ReflectiveChatFrameExecution implements ChatFrameExecution {

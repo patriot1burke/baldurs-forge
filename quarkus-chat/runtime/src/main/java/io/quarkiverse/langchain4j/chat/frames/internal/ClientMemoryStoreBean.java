@@ -1,4 +1,4 @@
-package io.quarkiverse.langchain4j.chat.frames;
+package io.quarkiverse.langchain4j.chat.frames.internal;
 
 import java.util.List;
 

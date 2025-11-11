@@ -27,13 +27,13 @@ import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.jandex.Type;
 
-import io.quarkiverse.langchain4j.chat.frames.ChatContextImpl;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameEndpoint;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameRecorder;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameService;
-import io.quarkiverse.langchain4j.chat.frames.ClientMemoryStoreBean;
 import io.quarkiverse.langchain4j.chat.frames.DefaultChatFrame;
+import io.quarkiverse.langchain4j.chat.frames.internal.ChatContextImpl;
+import io.quarkiverse.langchain4j.chat.frames.internal.ChatFrameEndpoint;
+import io.quarkiverse.langchain4j.chat.frames.internal.ChatFrameRecorder;
+import io.quarkiverse.langchain4j.chat.frames.internal.ChatFrameService;
+import io.quarkiverse.langchain4j.chat.frames.internal.ClientMemoryStoreBean;
 
 public class ChatProcessor {
     public static final DotName CHAT_FRAME = DotName.createSimple(ChatFrame.class.getName());

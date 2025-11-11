@@ -1,4 +1,4 @@
-package io.quarkiverse.langchain4j.chat.frames;
+package io.quarkiverse.langchain4j.chat.frames.internal;
 
 import java.io.Writer;
 import java.util.ArrayList;
@@ -12,10 +12,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.ChatMessageDeserializer;
 import dev.langchain4j.data.message.ChatMessageSerializer;
-import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.RequestScoped;
-import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 
 /**

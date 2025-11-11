@@ -1,4 +1,4 @@
-package io.quarkiverse.langchain4j.chat.frames;
+package io.quarkiverse.langchain4j.chat.frames.internal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,6 +7,10 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import io.quarkiverse.langchain4j.chat.frames.ChatContext;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
+import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
