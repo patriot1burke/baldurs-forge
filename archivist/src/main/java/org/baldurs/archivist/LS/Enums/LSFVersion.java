@@ -64,4 +64,4 @@ public enum LSFVersion {
         }
         throw new IllegalArgumentException("Invalid LSF version: " + value);
     }
-} 
+}

@@ -36,7 +36,7 @@ public class RingModel extends BaseModel {
     public String type() {
         return TYPE;
     }
-    
+
     @Override
     public String baseStat() {
         return "ARM_Ring";

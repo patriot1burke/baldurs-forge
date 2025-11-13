@@ -17,4 +17,4 @@ public class Resource {
         metadata = new LSMetadata();
         metadata.majorVersion = 3;
     }
-} 
+}

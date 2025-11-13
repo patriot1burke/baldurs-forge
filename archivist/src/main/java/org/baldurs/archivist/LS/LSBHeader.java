@@ -19,4 +19,4 @@ public class LSBHeader {
     public long bigEndian;
     public long unknown;
     public LSMetadata metadata;
-} 
+}

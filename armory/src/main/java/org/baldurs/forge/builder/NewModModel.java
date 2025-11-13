@@ -11,8 +11,7 @@ import org.baldurs.forge.services.LibraryService;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class 
-NewModModel {
+public class NewModModel {
     public static final String NEW_EQUIPMENT = "newEquipment";
 
     public String name;
@@ -29,7 +28,6 @@ NewModModel {
     public Map<String, GlovesModel> gloves;
     public Map<String, BootsModel> boots;
     public Map<String, CloakModel> cloaks;
-
 
     @JsonIgnore
     public boolean isEmpty() {
@@ -93,7 +91,7 @@ NewModModel {
             for (CloakModel cloak : cloaks.values()) {
                 equipmentModels.add(cloak.toEquipmentModel(boostService, library));
             }
-        }   
+        }
         return equipmentModels;
     }
 

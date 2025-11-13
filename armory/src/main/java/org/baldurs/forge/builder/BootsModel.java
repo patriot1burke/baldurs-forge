@@ -18,9 +18,9 @@ public class BootsModel extends AppendageModel {
             String parentModel) {
         super(category, rarity, name, description, boostMacro, parentModel);
     }
+
     public BootsModel() {
     }
-
 
     public static final String schema;
 
@@ -37,6 +37,7 @@ public class BootsModel extends AppendageModel {
     public String type() {
         return TYPE;
     }
+
     @Override
     public String baseStat() {
         return "ARM_Boots_Leather";

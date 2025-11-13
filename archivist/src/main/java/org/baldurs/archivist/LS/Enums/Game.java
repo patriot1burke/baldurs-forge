@@ -67,4 +67,4 @@ public enum Game {
                 return LSXVersion.V4;
         }
     }
-} 
+}

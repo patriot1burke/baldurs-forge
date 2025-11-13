@@ -12,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import dev.langchain4j.model.output.structured.Description;
 
-
 public abstract class BaseModel {
     @Description("The rarity and uniqueness of the item.")
     public Rarity rarity;
@@ -27,12 +26,11 @@ public abstract class BaseModel {
     public String visualModel;
 
     protected BaseModel(
-                Rarity rarity,
-                String name,
-                String description,
-                String boosts,
-                String parentModel
-                ) {
+            Rarity rarity,
+            String name,
+            String description,
+            String boosts,
+            String parentModel) {
         this.rarity = rarity;
         this.name = name;
         this.description = description;
@@ -44,9 +42,11 @@ public abstract class BaseModel {
     }
 
     public abstract String schema();
+
     public abstract String type();
+
     public abstract String baseStat();
-    
+
     public EquipmentModel toEquipmentModel(BoostService boostService, LibraryService library) {
         EquipmentModel equipment = new EquipmentModel();
         equipment.rarity = rarity;
@@ -69,7 +69,5 @@ public abstract class BaseModel {
         equipment.icon = library.icons().get(template.resolveIcon());
         return equipment;
     }
- 
-    
 
 }

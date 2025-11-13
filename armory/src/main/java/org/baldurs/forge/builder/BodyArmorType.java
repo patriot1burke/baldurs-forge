@@ -16,6 +16,7 @@ public enum BodyArmorType {
     StuddedLeather(ArmorCategory.Light, "ARM_StuddedLeather_Body")
 
     ;
+
     final private ArmorCategory category;
     final String baseStat;
 
@@ -23,9 +24,11 @@ public enum BodyArmorType {
         this.category = category;
         this.baseStat = baseStat;
     }
+
     public ArmorCategory getCategory() {
         return category;
     }
+
     public String getBaseStat() {
         return baseStat;
     }

@@ -1,6 +1,5 @@
 package org.baldurs.forge.builder;
 
-
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.Result;
 import dev.langchain4j.service.SystemMessage;
@@ -12,6 +11,7 @@ import io.quarkiverse.langchain4j.ToolBox;
 public interface RingBuilderPrompt extends BuilderPrompt {
     @Override
     @SystemMessage(fromResource = "prompts/equipmentBuilder.txt")
-    @ToolBox({RingBuilder.class})
-    public Result<String> build(@MemoryId String memoryId, String type, String schema, String currentJson, @UserMessage String userMessage);
+    @ToolBox({ RingBuilder.class })
+    public Result<String> build(@MemoryId String memoryId, String type, String schema, String currentJson,
+            @UserMessage String userMessage);
 }

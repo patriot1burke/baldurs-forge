@@ -2,16 +2,18 @@ package io.quarkiverse.langchain4j.chat.frames.internal;
 
 import java.util.List;
 
-import dev.langchain4j.data.message.ChatMessage;
-import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.store.memory.chat.ChatMemoryStore;
+
 /**
  * Wraps the ClientMemoryStore in a ChatMemoryStore.
- * ChatMemoryStore.deleteMessages can be called by QuarkusAiServiceContext.close() out of scope of a request.  Since ClientMemoryStore is request scoped,
+ * ChatMemoryStore.deleteMessages can be called by QuarkusAiServiceContext.close() out of scope of a request. Since
+ * ClientMemoryStore is request scoped,
  * this wrapper catches any CDI exceptions and eats them to avoid logging errors when this happens.
- * 
+ *
  */
 @ApplicationScoped
 public class ClientMemoryStoreBean implements ChatMemoryStore {

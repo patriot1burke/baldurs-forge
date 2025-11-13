@@ -5,10 +5,10 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.baldurs.forge.scanner.StatsArchive;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+
+import org.baldurs.forge.scanner.StatsArchive;
 
 @ApplicationScoped
 public class BoostService {
@@ -86,8 +86,6 @@ public class BoostService {
             sb.append("<img class='spell-icon' src='").append(spellIconPath(icon)).append("' alt='").append(displayName)
                     .append("'>");
         }
-
-    
 
         @Override
         public void unlockSpell(StatsArchive.Stat spell) {
@@ -224,8 +222,6 @@ public class BoostService {
         }
         return this;
     }
-
-    
 
     public void macros(String macro, BoostWriter writer) {
         if (macro != null) {

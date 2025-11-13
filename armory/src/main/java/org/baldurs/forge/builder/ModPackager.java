@@ -8,10 +8,14 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
 import org.baldurs.archivist.IdMaker;
-import org.baldurs.archivist.PackageWriter;
 import org.baldurs.archivist.LS.Converter;
 import org.baldurs.archivist.LS.PackedVersion;
+import org.baldurs.archivist.PackageWriter;
 import org.baldurs.forge.messages.ListEquipmentMessage;
 import org.baldurs.forge.messages.PackageModMessage;
 import org.baldurs.forge.messages.ShowEquipmentMessage;
@@ -34,9 +38,6 @@ import io.quarkiverse.langchain4j.chat.frames.ChatContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 import io.quarkus.logging.Log;
-import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class ModPackager {
@@ -70,7 +71,8 @@ public class ModPackager {
     }
 
     /**
-     * Called by menu menu tool.  Resets the chat history and calls packageMod.
+     * Called by menu menu tool. Resets the chat history and calls packageMod.
+     *
      * @return
      */
     public void startPackageMod() {
@@ -82,7 +84,6 @@ public class ModPackager {
         context.pushFrame("packageMod");
         packageMod();
     }
-    
 
     @ChatFrame("packageMod")
     public void packageMod() {
@@ -113,7 +114,8 @@ public class ModPackager {
             Log.info("ModPackager with multiple tool executions");
             for (ToolExecution execution : result.toolExecutions()) {
                 Log.info("ModPackager with tool " + execution.request().name() + " execution: " + execution.result());
-                if (execution.result() == null || execution.result().equals("\"null\"") || execution.result().equals("Success")) {
+                if (execution.result() == null || execution.result().equals("\"null\"")
+                        || execution.result().equals("Success")) {
                     continue;
                 } else {
                     if (msg == null || msg.isEmpty()) {
@@ -266,7 +268,8 @@ public class ModPackager {
         gameObjects.append("        </node>\n");
     }
 
-    public void addArmor(BaseModel armor, String statPrefix, StringBuilder localizations, StringBuilder gameObjects, StringBuilder treasure, StringBuilder armorData) {
+    public void addArmor(BaseModel armor, String statPrefix, StringBuilder localizations, StringBuilder gameObjects,
+            StringBuilder treasure, StringBuilder armorData) {
         String name = armor.name;
         String description = armor.description;
         String visualModel = armor.visualModel;
@@ -384,7 +387,7 @@ public class ModPackager {
             }
         }
         String weaponData = "";
-        
+
         if (newEquipment.weapons != null) {
             for (WeaponModel weapon : newEquipment.weapons.values()) {
                 String statName = statPrefix + "_" + toAlphaNumericUnderscore(weapon.name);

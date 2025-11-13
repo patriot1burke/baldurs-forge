@@ -5,6 +5,9 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
+
 import org.baldurs.forge.messages.ListVisualModelsMessage;
 import org.baldurs.forge.messages.ShowEquipmentMessage;
 import org.baldurs.forge.messages.UpdateNewEquipmentMessage;
@@ -25,8 +28,6 @@ import dev.langchain4j.service.tool.ToolExecution;
 import io.quarkiverse.langchain4j.chat.frames.ChatContext;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 import io.quarkus.logging.Log;
-import jakarta.annotation.PostConstruct;
-import jakarta.inject.Inject;
 
 public abstract class EquipmentBuilder {
     public static final String CURRENT_EQUIPMENT = "currentEquipment";
@@ -55,9 +56,13 @@ public abstract class EquipmentBuilder {
     }
 
     protected abstract BuilderPrompt agent();
+
     protected abstract Class<? extends BaseModel> baseModelClass();
+
     protected abstract String schema();
+
     public abstract String type();
+
     protected abstract Supplier<BaseModel> supplier();
 
     protected BaseModel create() {
@@ -113,13 +118,12 @@ public abstract class EquipmentBuilder {
                     }
                 }
             }
-            
+
         }
         if (msg != null) {
             context.response().add(new ObjectMessage(renderer.markdownToHtml(msg)));
         }
     }
-
 
     public void addShowEquipmentAction(BaseModel baseModel) {
         if (baseModel == null || baseModel.baseStat() == null) {
@@ -147,20 +151,22 @@ public abstract class EquipmentBuilder {
         newEquipment.addEquipment(current);
         context.setData(NewModModel.NEW_EQUIPMENT, newEquipment);
         context.response().add(new ObjectMessage("Finished building item!"));
-        context.response().add(new UpdateNewEquipmentMessage("To create a mod containing your newly built equipment, tell me to '" + ModPackager.PACKAGE_MODE_CHAT_COMMAND + "'"));
+        context.response()
+                .add(new UpdateNewEquipmentMessage("To create a mod containing your newly built equipment, tell me to '"
+                        + ModPackager.PACKAGE_MODE_CHAT_COMMAND + "'"));
         Log.info("Finished equipment");
     }
 
-    protected String logJson(BaseModel equipment)  {
+    protected String logJson(BaseModel equipment) {
         try {
-        String equipmentJson = mapper.writeValueAsString(equipment);
-        Log.info("Equipment JSON: " + equipmentJson);
-        return equipmentJson;
+            String equipmentJson = mapper.writeValueAsString(equipment);
+            Log.info("Equipment JSON: " + equipmentJson);
+            return equipmentJson;
         } catch (Exception e) {
             throw new RuntimeException("Error logging weapon json", e);
         }
     }
-    
+
     protected void set(Consumer<BaseModel> consumer) {
         BaseModel current = context.getData(CURRENT_EQUIPMENT, baseModelClass());
         if (current == null) {
@@ -186,15 +192,15 @@ public abstract class EquipmentBuilder {
             }
         }
         if (!found) {
-            throw new RuntimeException("Could not find visual model." );
+            throw new RuntimeException("Could not find visual model.");
         }
         set(current -> current.visualModel = visualModel);
     }
 
     public void addBoost(String boostDescription) throws Exception {
-         // keep the boostMacro parameter as tool invocation is flaky otherwise
+        // keep the boostMacro parameter as tool invocation is flaky otherwise
         // AI gets confused
-        Log.info("addBoost: "  + boostDescription);
+        Log.info("addBoost: " + boostDescription);
         String enchantment = boostBuilder.createBoostMacro(context.userMessage());
         Log.info("Enchantment: " + enchantment);
         if (enchantment.indexOf('(') < 0) {
@@ -219,7 +225,7 @@ public abstract class EquipmentBuilder {
     public void setBoost(String boostDescription) throws Exception {
         // keep the boostMacro parameter as tool invocation is flaky otherwise
         // AI gets confused
-        Log.info("setBoost: "  + boostDescription);
+        Log.info("setBoost: " + boostDescription);
         String enchantment = boostBuilder.createBoostMacro(context.userMessage());
         Log.info("Enchantment: " + enchantment);
         if (enchantment.indexOf('(') < 0) {
@@ -239,7 +245,7 @@ public abstract class EquipmentBuilder {
             context.response().add(new ObjectMessage("Item not finished yet.  Cannot search for visual models."));
             return null;
         }
-       List<RootTemplate> rootTemplates = library.findRootIconsFrom(visualModelPredicate);
+        List<RootTemplate> rootTemplates = library.findRootIconsFrom(visualModelPredicate);
         ListVisualModelsMessage action = new ListVisualModelsMessage();
         for (RootTemplate rootTemplate : rootTemplates) {
             String icon = rootTemplate.resolveIcon();
@@ -253,7 +259,8 @@ public abstract class EquipmentBuilder {
             action.add(iconPath, rootTemplate.MapKey);
         }
         context.response().add(action);
-        String message = "There are " + rootTemplates.size() + " visual models available. Choose one of the parent ids from the list above if you want a different look for your weapon.";
+        String message = "There are " + rootTemplates.size()
+                + " visual models available. Choose one of the parent ids from the list above if you want a different look for your weapon.";
         context.response().add(new ObjectMessage(message));
 
         return null;

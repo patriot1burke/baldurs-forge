@@ -7,4 +7,4 @@ import java.util.List;
  */
 public class TranslatedFSString extends TranslatedString {
     public List<TranslatedFSStringArgument> arguments;
-} 
+}

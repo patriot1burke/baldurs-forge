@@ -2,6 +2,9 @@ package org.baldurs.forge.builder;
 
 import java.util.function.Predicate;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
 import org.baldurs.forge.model.Rarity;
 import org.baldurs.forge.scanner.StatsArchive;
 
@@ -11,9 +14,6 @@ import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkus.logging.Log;
-import io.quarkus.runtime.Startup;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class BodyArmorBuilder extends EquipmentBuilder {
@@ -50,7 +50,6 @@ public class BodyArmorBuilder extends EquipmentBuilder {
     public void build() {
         super.build();
     }
-
 
     @Tool("Set the name for the current body armor.")
     public void setName(String name) {
@@ -107,7 +106,8 @@ public class BodyArmorBuilder extends EquipmentBuilder {
         return stat -> {
             String armorType = stat.getField("ArmorType");
             String slot = stat.getField("Slot");
-            return armor != null && armorType != null && armor.type != null && armorType.equals(armor.type.name()) && slot != null && slot.equals("Breast");
+            return armor != null && armorType != null && armor.type != null && armorType.equals(armor.type.name())
+                    && slot != null && slot.equals("Breast");
         };
     }
 

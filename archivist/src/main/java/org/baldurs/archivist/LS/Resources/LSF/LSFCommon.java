@@ -5,12 +5,12 @@ package org.baldurs.archivist.LS.Resources.LSF;
  * Converted from C# LSFCommon.cs
  */
 public class LSFCommon {
-    
+
     /**
      * LSOF file signature
      */
     public static final byte[] SIGNATURE = "LSOF".getBytes();
-    
+
     // All classes have been moved to separate files:
     // - LSFMagic.java
     // - LSFHeader.java
@@ -25,4 +25,4 @@ public class LSFCommon {
     // - LSFAttributeEntryV2.java
     // - LSFAttributeEntryV3.java
     // - LSFAttributeInfo.java
-} 
+}

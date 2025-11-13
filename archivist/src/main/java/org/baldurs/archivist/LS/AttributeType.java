@@ -39,17 +39,17 @@ public enum AttributeType {
     UUID(31),
     Int64(32),
     TranslatedFSString(33);
-    
+
     private final int value;
-    
+
     AttributeType(int value) {
         this.value = value;
     }
-    
+
     public int getValue() {
         return value;
     }
-    
+
     public static AttributeType fromInt(int value) {
         for (AttributeType type : values()) {
             if (type.value == value) {
@@ -58,7 +58,7 @@ public enum AttributeType {
         }
         return None;
     }
-    
+
     public int getRows() {
         switch (this) {
             case IVec2:
@@ -68,57 +68,57 @@ public enum AttributeType {
             case Vec3:
             case Vec4:
                 return 1;
-                
+
             case Mat2:
                 return 2;
-                
+
             case Mat3:
             case Mat3x4:
                 return 3;
-                
+
             case Mat4x3:
             case Mat4:
                 return 4;
-                
+
             default:
                 throw new UnsupportedOperationException("Data type does not have rows");
         }
     }
-    
+
     public int getColumns() {
         switch (this) {
             case IVec2:
             case Vec2:
             case Mat2:
                 return 2;
-                
+
             case IVec3:
             case Vec3:
             case Mat3:
             case Mat4x3:
                 return 3;
-                
+
             case IVec4:
             case Vec4:
             case Mat3x4:
             case Mat4:
                 return 4;
-                
+
             default:
                 throw new UnsupportedOperationException("Data type does not have columns");
         }
     }
-    
+
     public boolean isNumeric() {
         return this == Byte
-            || this == Short
-            || this == UShort
-            || this == Int
-            || this == UInt
-            || this == Float
-            || this == Double
-            || this == ULongLong
-            || this == Long
-            || this == Int8;
+                || this == Short
+                || this == UShort
+                || this == Int
+                || this == UInt
+                || this == Float
+                || this == Double
+                || this == ULongLong
+                || this == Long
+                || this == Int8;
     }
-} 
+}

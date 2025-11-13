@@ -3,9 +3,9 @@ package org.baldurs.forge.messages;
 import org.baldurs.forge.model.EquipmentModel;
 
 import io.quarkiverse.langchain4j.chat.frames.ChatContext;
-import io.quarkiverse.langchain4j.chat.frames.ResponseMessage;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameMessage;
 
-public class ShowEquipmentMessage extends ResponseMessage {
+public class ShowEquipmentMessage extends ChatFrameMessage {
     protected EquipmentModel equipment;
 
     private ShowEquipmentMessage(EquipmentModel equipment) {
@@ -22,8 +22,9 @@ public class ShowEquipmentMessage extends ResponseMessage {
     }
 
     /**
-     * Add ShowEquipmentAction to the response.  If there is already one, remove it before adding the new one.
+     * Add ShowEquipmentAction to the response. If there is already one, remove it before adding the new one.
      * This is to prevent duplicate displays of the same equipment in the UI chat.
+     *
      * @param context
      * @param equipment
      */

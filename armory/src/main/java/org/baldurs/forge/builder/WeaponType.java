@@ -33,8 +33,8 @@ public enum WeaponType {
     Spear("WPN_Spear"),
     Trident("WPN_Trident"),
     Warhammer("WPN_Warhammer"),
-    Warpick("WPN_Warpick")
-    ;
+    Warpick("WPN_Warpick");
+
     String baseStat;
     boolean ranged;
 
@@ -42,6 +42,7 @@ public enum WeaponType {
         this.baseStat = baseStat;
         this.ranged = ranged;
     }
+
     WeaponType(String baseStat) {
         this.baseStat = baseStat;
     }
@@ -49,6 +50,7 @@ public enum WeaponType {
     public String getBaseStat() {
         return baseStat;
     }
+
     public boolean isRanged() {
         return ranged;
     }

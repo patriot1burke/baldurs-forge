@@ -7,4 +7,4 @@ public class TranslatedFSStringArgument {
     public String key;
     public TranslatedFSString string;
     public String value;
-} 
+}

@@ -8,9 +8,11 @@ public class BaldursArchive {
     public LocalizationArchive getLocalizations() {
         return localizations;
     }
+
     public StatsArchive getStats() {
         return stats;
     }
+
     public RootTemplateArchive getRootTemplates() {
         return rootTemplates;
     }

@@ -11,9 +11,10 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.baldurs.archivist.LZ4CompressionUtil;
 import org.baldurs.archivist.LS.AttributeType;
 import org.baldurs.archivist.LS.BinUtils;
+import org.baldurs.archivist.LS.Enums.CompressionMethod;
+import org.baldurs.archivist.LS.Enums.LSFVersion;
 import org.baldurs.archivist.LS.InvalidDataException;
 import org.baldurs.archivist.LS.Node;
 import org.baldurs.archivist.LS.NodeAttribute;
@@ -23,9 +24,7 @@ import org.baldurs.archivist.LS.Resource;
 import org.baldurs.archivist.LS.TranslatedFSString;
 import org.baldurs.archivist.LS.TranslatedFSStringArgument;
 import org.baldurs.archivist.LS.TranslatedString;
-import org.baldurs.archivist.LS.Enums.CompressionMethod;
-import org.baldurs.archivist.LS.Enums.LSCompressionLevel;
-import org.baldurs.archivist.LS.Enums.LSFVersion;
+import org.baldurs.archivist.LZ4CompressionUtil;
 
 /**
  * LSF (Larian Save Format) reader
@@ -235,7 +234,7 @@ public class LSFReader implements AutoCloseable {
             LSFNodeInfo node = nodes.get((int) key.nodeIndex);
             node.keyAttribute = keyAttribute;
 
-         }
+        }
     }
 
     private ByteBuffer decompress(int sizeOnDisk, int uncompressedSize,
@@ -410,8 +409,8 @@ public class LSFReader implements AutoCloseable {
         if (metadata.metadataFormat == LSFMetadataFormat.KEYS_AND_ADJACENCY) {
             ByteBuffer keysStream = decompress(metadata.keysSizeOnDisk,
                     metadata.keysUncompressedSize, "keys.bin", true);
-        //System.out.println("reading keys");
-        readKeys(keysStream);
+            //System.out.println("reading keys");
+            readKeys(keysStream);
         }
 
         Resource resource = new Resource();
@@ -430,7 +429,7 @@ public class LSFReader implements AutoCloseable {
     private void readRegions(Resource resource, ByteBuffer attrReader) throws IOException {
         nodeInstances = new ArrayList<>();
         //System.out.println("READ REGIONS: nodes.size(): " + nodes.size());
- 
+
         for (int i = 0; i < nodes.size(); i++) {
             //System.out.println("i: " + i);
             LSFNodeInfo defn = nodes.get(i);
@@ -464,7 +463,6 @@ public class LSFReader implements AutoCloseable {
         node.name = names.get(defn.nameIndex).get(defn.nameOffset);
         //System.out.printf("Begin node %s%n", node.name);
         //System.out.printf("Defn firstAttributeIndex: %d%n", defn.firstAttributeIndex);
-
 
         if (defn.firstAttributeIndex != -1) {
             LSFAttributeInfo attribute = attributes.get(defn.firstAttributeIndex);

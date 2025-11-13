@@ -2,7 +2,6 @@ package org.baldurs.archivist.LS.Resources.LSF;
 
 import java.nio.ByteBuffer;
 
-
 /**
  * LSF metadata structure for V5
  */
@@ -53,7 +52,7 @@ public class LSFMetadataV5 {
      * Extended node/attribute format indicator, 0 for V2, 0/1 for V3
      */
     public LSFMetadataFormat metadataFormat;
-    
+
     public static LSFMetadataV5 fromBuffer(ByteBuffer buffer) {
         LSFMetadataV5 metadata = new LSFMetadataV5();
         metadata.stringsUncompressedSize = buffer.getInt();
@@ -70,7 +69,7 @@ public class LSFMetadataV5 {
         metadata.metadataFormat = LSFMetadataFormat.fromInt(buffer.getInt());
         return metadata;
     }
-    
+
     public void writeToBuffer(ByteBuffer buffer) {
         buffer.putInt(stringsUncompressedSize);
         buffer.putInt(stringsSizeOnDisk);
@@ -85,4 +84,4 @@ public class LSFMetadataV5 {
         buffer.putShort(unknown3);
         buffer.putInt(metadataFormat.getValue());
     }
-} 
+}

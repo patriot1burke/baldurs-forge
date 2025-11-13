@@ -17,7 +17,8 @@ public class RootTemplate {
     public RootTemplate() {
     }
 
-    public RootTemplate(String stats, String mapKey, String displayName, String description, String parentTemplateId, String icon, ArchiveSource source, RootTemplateArchive archive) {
+    public RootTemplate(String stats, String mapKey, String displayName, String description, String parentTemplateId,
+            String icon, ArchiveSource source, RootTemplateArchive archive) {
         Stats = stats;
         MapKey = mapKey;
         DisplayName = displayName;
@@ -29,8 +30,9 @@ public class RootTemplate {
     }
 
     public String resolveIcon() {
-        if (icon != null) return icon;
-        
+        if (icon != null)
+            return icon;
+
         RootTemplate parent = archive.templates.get(ParentTemplateId);
         if (parent != null) {
             return parent.resolveIcon();
@@ -40,10 +42,13 @@ public class RootTemplate {
     }
 
     public RootTemplate resolveTemplateThatDefinesIcon() {
-        if (icon != null) return this;
-        if (ParentTemplateId == null) return null;
+        if (icon != null)
+            return this;
+        if (ParentTemplateId == null)
+            return null;
         RootTemplate parent = archive.templates.get(ParentTemplateId);
-        if (parent == null) return null;
+        if (parent == null)
+            return null;
         return parent.resolveTemplateThatDefinesIcon();
     }
 }

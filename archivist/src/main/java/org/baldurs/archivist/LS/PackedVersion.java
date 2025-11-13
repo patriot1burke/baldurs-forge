@@ -40,4 +40,4 @@ public class PackedVersion {
                 (((long) revision & 0xffff) << 31) |
                 (((long) build & 0x7fffffff) << 0);
     }
-} 
+}

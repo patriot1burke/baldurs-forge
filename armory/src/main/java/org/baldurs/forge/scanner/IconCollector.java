@@ -34,25 +34,27 @@ public class IconCollector {
 
         String command = "/home/bburke/bin/squashfs-root/magick";
         for (Icon icon : icons.icons()) {
-            String cmd = String.format("%s %s -crop %dx%d+%d+%d %s", command, imagePath, icons.iconSize().width(), icons.iconSize().height(), icon.x(), icon.y(), destdirPath.resolve(icon.name() + ".png").toString());
+            String cmd = String.format("%s %s -crop %dx%d+%d+%d %s", command, imagePath, icons.iconSize().width(),
+                    icons.iconSize().height(), icon.x(), icon.y(), destdirPath.resolve(icon.name() + ".png").toString());
             System.out.println(cmd);
             Process process = new ProcessBuilder(cmd.split(" "))
-            //.redirectOutput(ProcessBuilder.Redirect.INHERIT)
-            //.redirectError(ProcessBuilder.Redirect.INHERIT)
-            .start();
+                    //.redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                    //.redirectError(ProcessBuilder.Redirect.INHERIT)
+                    .start();
             process.waitFor();
             System.out.println(icon.name + " " + icon.x + " " + icon.y);
         }
 
-        
-
-        
     }
-    private static record Icons(Size iconSize, Size textureSize, List<Icon> icons) {}
 
-    private static record Size(int height, int width) {}
+    private static record Icons(Size iconSize, Size textureSize, List<Icon> icons) {
+    }
 
-    private static record Icon(String name, int x, int y) {}
+    private static record Size(int height, int width) {
+    }
+
+    private static record Icon(String name, int x, int y) {
+    }
 
     public static Icons extractXml(String srcXml) throws Exception {
         Path srcXmlPath = Path.of(srcXml);
@@ -78,24 +80,23 @@ public class IconCollector {
     private static List<Element> getAttributeElements(Element element) {
         List<Element> attributeElements = new ArrayList<>();
         NodeList children = element.getChildNodes();
-        
+
         for (int i = 0; i < children.getLength(); i++) {
             Node child = children.item(i);
             if (child.getNodeType() == Node.ELEMENT_NODE && "attribute".equals(child.getNodeName())) {
                 attributeElements.add((Element) child);
             }
         }
-        
+
         return attributeElements;
     }
 
-
     private static List<Icon> getIcons(Document document, Size iconSize, Size textureSize) throws Exception {
-        String xpathExpression = "//save/region[@id=\"IconUVList\"]/node[@id=\"root\"]/children/node[@id=\"IconUV\"]";        
+        String xpathExpression = "//save/region[@id=\"IconUVList\"]/node[@id=\"root\"]/children/node[@id=\"IconUV\"]";
         XPathFactory xPathFactory = XPathFactory.newInstance();
         XPath xPath = xPathFactory.newXPath();
 
-        NodeList result = (NodeList)xPath.evaluate(xpathExpression, document, XPathConstants.NODESET);
+        NodeList result = (NodeList) xPath.evaluate(xpathExpression, document, XPathConstants.NODESET);
 
         List<Icon> icons = new ArrayList<>();
 
@@ -124,7 +125,6 @@ public class IconCollector {
                         v2 = Double.parseDouble(value);
                     }
 
- 
                 }
                 int x = (int) (u1 * textureSize.width);
                 int y = (int) (v1 * textureSize.height);
@@ -134,13 +134,13 @@ public class IconCollector {
         }
         icons.sort(Comparator.comparing(Icon::y).thenComparing(Icon::x));
         return icons;
- }
+    }
 
     private static Size getDimensions(Document document, String xpathExpression) throws XPathExpressionException {
         XPathFactory xPathFactory = XPathFactory.newInstance();
         XPath xPath = xPathFactory.newXPath();
 
-        NodeList result = (NodeList)xPath.evaluate(xpathExpression, document, XPathConstants.NODESET);
+        NodeList result = (NodeList) xPath.evaluate(xpathExpression, document, XPathConstants.NODESET);
 
         String Height = "";
         String Width = "";

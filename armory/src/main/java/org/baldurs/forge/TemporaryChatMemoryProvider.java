@@ -18,7 +18,8 @@ public class TemporaryChatMemoryProvider implements Supplier<ChatMemoryProvider>
         return new ChatMemoryProvider() {
             @Override
             public ChatMemory get(Object id) {
-                return MessageWindowChatMemory.builder().id(id).chatMemoryStore(new InMemoryChatMemoryStore()).maxMessages(30).build();
+                return MessageWindowChatMemory.builder().id(id).chatMemoryStore(new InMemoryChatMemoryStore()).maxMessages(30)
+                        .build();
             }
         };
     }

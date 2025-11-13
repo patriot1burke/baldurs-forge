@@ -100,6 +100,7 @@ public class StatsArchive {
     public StatsArchive(ArchiveSource source) {
         this.source = source;
     }
+
     public StatsArchive() {
         this.source = null;
     }

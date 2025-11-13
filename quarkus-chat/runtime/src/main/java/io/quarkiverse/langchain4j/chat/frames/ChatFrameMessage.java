@@ -1,13 +1,13 @@
 package io.quarkiverse.langchain4j.chat.frames;
 
-public class ResponseMessage {
+public class ChatFrameMessage {
     protected String type;
 
-    public ResponseMessage(String name) {
+    protected ChatFrameMessage(String name) {
         this.type = name;
     }
 
-    public ResponseMessage() {
+    public ChatFrameMessage() {
     }
 
     public String getType() {
@@ -17,7 +17,4 @@ public class ResponseMessage {
     public void setType(String name) {
         this.type = name;
     }
-
-
-
 }

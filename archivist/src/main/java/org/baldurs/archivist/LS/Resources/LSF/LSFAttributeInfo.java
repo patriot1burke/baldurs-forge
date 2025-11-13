@@ -29,4 +29,4 @@ public class LSFAttributeInfo {
      * (-1: this is the last attribute)
      */
     public int nextAttributeIndex;
-} 
+}

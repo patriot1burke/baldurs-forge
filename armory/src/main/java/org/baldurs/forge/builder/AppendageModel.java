@@ -9,13 +9,12 @@ public abstract class AppendageModel extends BaseModel {
     public ArmorCategory armorCategory = ArmorCategory.None;
 
     public AppendageModel(
-                ArmorCategory category,
-                Rarity rarity,
-                String name,
-                String description,
-                String boostMacro,
-                String parentModel
-                ) {
+            ArmorCategory category,
+            Rarity rarity,
+            String name,
+            String description,
+            String boostMacro,
+            String parentModel) {
         super(rarity, name, description, boostMacro, parentModel);
         this.armorCategory = category;
     }

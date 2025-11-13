@@ -1,17 +1,18 @@
 package org.baldurs.forge.messages;
 
 import io.quarkiverse.langchain4j.chat.frames.ChatContext;
-import io.quarkiverse.langchain4j.chat.frames.ResponseMessage;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameMessage;
 
-public class ImportModMessage extends ResponseMessage {
+public class ImportModMessage extends ChatFrameMessage {
 
     private ImportModMessage() {
         super("ImportMod");
     }
 
     /**
-     * Add ImportModAction to the response.  If there is already one, remove it before adding the new one.
+     * Add ImportModAction to the response. If there is already one, remove it before adding the new one.
      * This is to prevent duplicate import events sent to the client.
+     *
      * @param context
      */
     public static void addResponse(ChatContext context) {

@@ -25,14 +25,13 @@ public class WeaponModel extends BaseModel {
     public Boolean magical;
 
     public WeaponModel(
-                WeaponType type,
-                Rarity rarity,
-                String name,
-                String description,
-                String boosts,
-                boolean magical,
-                String parentModel
-                ) {
+            WeaponType type,
+            Rarity rarity,
+            String name,
+            String description,
+            String boosts,
+            boolean magical,
+            String parentModel) {
         super(rarity, name, description, boosts, parentModel);
         this.type = type;
         this.magical = magical;
@@ -56,6 +55,7 @@ public class WeaponModel extends BaseModel {
     public String type() {
         return TYPE;
     }
+
     @Override
     public String baseStat() {
         return type == null ? null : type.baseStat;

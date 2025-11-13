@@ -1,4 +1,5 @@
 package io.quarkiverse.langchain4j.chat.deployment;
+
 import io.quarkus.builder.item.MultiBuildItem;
 
 public final class ChatFrameBuildItem extends MultiBuildItem {
@@ -7,6 +8,7 @@ public final class ChatFrameBuildItem extends MultiBuildItem {
     protected String className;
     private final String methodName;
     private final boolean defaultFrame;
+
     public ChatFrameBuildItem(String frameName, String className, String methodName, boolean defaultFrame) {
         this.frameName = frameName;
         this.className = className;

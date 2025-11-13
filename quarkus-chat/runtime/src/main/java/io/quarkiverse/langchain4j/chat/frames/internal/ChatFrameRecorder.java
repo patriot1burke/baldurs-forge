@@ -26,7 +26,8 @@ public class ChatFrameRecorder {
 
     public void registerChatFrame(String frameName, Class<?> targetClass, String methodName, boolean isDefault) {
         try {
-            ChatFrameExecution chatFrameExecution = new ReflectiveChatFrameExecution(targetClass, targetClass.getMethod(methodName));
+            ChatFrameExecution chatFrameExecution = new ReflectiveChatFrameExecution(targetClass,
+                    targetClass.getMethod(methodName));
             chatFrames.put(frameName, chatFrameExecution);
             if (isDefault) {
                 defaultChatFrame = frameName;

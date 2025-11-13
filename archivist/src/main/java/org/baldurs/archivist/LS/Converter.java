@@ -1,12 +1,8 @@
 package org.baldurs.archivist.LS;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.file.Path;
-
-import javax.xml.stream.XMLStreamException;
 
 import org.baldurs.archivist.LS.Localization.LocaReader;
 import org.baldurs.archivist.LS.Localization.LocaWriter;

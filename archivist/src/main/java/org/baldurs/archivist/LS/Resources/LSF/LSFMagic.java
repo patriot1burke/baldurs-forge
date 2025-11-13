@@ -8,23 +8,24 @@ import java.nio.ByteBuffer;
 public class LSFMagic {
     public int magic;
     public int version;
-    
-    public LSFMagic() {}
-    
+
+    public LSFMagic() {
+    }
+
     public LSFMagic(int magic, int version) {
         this.magic = magic;
         this.version = version;
     }
-    
+
     public static LSFMagic fromBuffer(ByteBuffer buffer) {
         LSFMagic magic = new LSFMagic();
         magic.magic = buffer.getInt();
         magic.version = buffer.getInt();
         return magic;
     }
-    
+
     public void writeToBuffer(ByteBuffer buffer) {
         buffer.putInt(magic);
         buffer.putInt(version);
     }
-} 
+}

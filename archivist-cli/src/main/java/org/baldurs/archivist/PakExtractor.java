@@ -1,17 +1,16 @@
 package org.baldurs.archivist;
 
-import io.quarkus.picocli.runtime.annotations.TopCommand;
-import picocli.CommandLine.Command;
-import picocli.CommandLine;
 import jakarta.inject.Inject;
 
+import io.quarkus.picocli.runtime.annotations.TopCommand;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
 
 @TopCommand
-@Command(name = "archivist", mixinStandardHelpOptions = true, 
-subcommands = {ExtractCommand.class, ArchiveCommand.class, ConvertCommand.class},
-description = "Tool for extracting and archiving Larian Studios .pak files and converting between formats")
+@Command(name = "archivist", mixinStandardHelpOptions = true, subcommands = { ExtractCommand.class, ArchiveCommand.class,
+        ConvertCommand.class }, description = "Tool for extracting and archiving Larian Studios .pak files and converting between formats")
 public class PakExtractor implements Runnable {
-    
+
     @Inject
     CommandLine.IFactory factory;
 

@@ -3,6 +3,9 @@ package org.baldurs.forge.builder;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
 import org.baldurs.forge.model.Rarity;
 import org.baldurs.forge.scanner.StatsArchive;
 
@@ -10,9 +13,6 @@ import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkus.logging.Log;
-import io.quarkus.runtime.Startup;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class GlovesBuilder extends EquipmentBuilder {
@@ -29,14 +29,17 @@ public class GlovesBuilder extends EquipmentBuilder {
     protected Class<? extends BaseModel> baseModelClass() {
         return GlovesModel.class;
     }
+
     @Override
     protected String schema() {
         return GlovesModel.schema;
     }
+
     @Override
     public String type() {
         return GlovesModel.TYPE;
     }
+
     @Override
     protected Supplier<BaseModel> supplier() {
         return () -> {
@@ -55,7 +58,6 @@ public class GlovesBuilder extends EquipmentBuilder {
         Log.info("Setting name: " + name);
         set(current -> current.name = name);
     }
-
 
     @Tool("Set the description for the current gloves.")
     public void setDescription(String description) {
@@ -118,6 +120,5 @@ public class GlovesBuilder extends EquipmentBuilder {
     public void finishEquipment() throws Exception {
         super.finishEquipment();
     }
-
 
 }

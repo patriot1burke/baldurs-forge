@@ -9,11 +9,11 @@ import dev.langchain4j.model.openai.OpenAiChatModel;
 public class StrictJsonSchemaChatModelProvider implements Supplier<ChatModel> {
     @Override
     public ChatModel get() {
-        return OpenAiChatModel.builder() 
+        return OpenAiChatModel.builder()
                 .apiKey(System.getenv("QUARKUS_LANGCHAIN4J_OPENAI_API_KEY"))
                 .modelName("gpt-4o-2024-08-06")
                 .supportedCapabilities(Capability.RESPONSE_FORMAT_JSON_SCHEMA)
-                .strictJsonSchema(true) 
+                .strictJsonSchema(true)
                 .logRequests(false)
                 .logResponses(false)
                 .build();

@@ -11,6 +11,7 @@ import io.quarkiverse.langchain4j.ToolBox;
 public interface CloakBuilderPrompt extends BuilderPrompt {
     @Override
     @SystemMessage(fromResource = "prompts/equipmentBuilder.txt")
-    @ToolBox({CloakBuilder.class})
-    public Result<String> build(@MemoryId String memoryId, String type, String schema, String currentJson, @UserMessage String userMessage);
+    @ToolBox({ CloakBuilder.class })
+    public Result<String> build(@MemoryId String memoryId, String type, String schema, String currentJson,
+            @UserMessage String userMessage);
 }

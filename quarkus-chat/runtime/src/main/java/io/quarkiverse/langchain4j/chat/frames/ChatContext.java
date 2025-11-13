@@ -1,16 +1,10 @@
 package io.quarkiverse.langchain4j.chat.frames;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.enterprise.context.RequestScoped;
 
 /**
  * Expects the following JSON format for requests:
@@ -25,7 +19,7 @@ import jakarta.enterprise.context.RequestScoped;
  * }
  * }
  * }
- * 
+ *
  * Outputs the following JSON format for responses:
  * {
  * "response": "[...]",
@@ -49,43 +43,43 @@ public interface ChatContext {
 
     /**
      * Data serialized and shared with client.
-     * 
+     *
      * This is raw data and could contain JsonNode objects.
      * Preferably use the {@link #getData(String, Class)} method to get the data
      * as a specific type.
-     * 
+     *
      * @return
      */
     Map<String, Object> data();
 
     /**
      * Data serialized and shared with client.
-     * 
+     *
      * Tools should only add data to the shared context if they need to pass data
      * back to the client.
-     * 
+     *
      * @return
      */
     <T> T getData(String key, Class<T> type);
 
     /**
      * Data serialized and shared with client.
-     * 
+     *
      * Tools should only add data to the shared context if they need to pass data
      * back to the client.
-     * 
+     *
      * @return
      */
     <T> T getData(String key, TypeReference<T> type);
 
     /**
      * Data serialized and shared with client.
-     * 
+     *
      * Tools should only add data to the shared context if they need to pass data
      * back to the client.
-     * 
+     *
      * Values should be automatically serializable to JSON via Jackson.
-     * 
+     *
      * @return
      */
     void setData(String key, Object value);
@@ -93,10 +87,10 @@ public interface ChatContext {
     /**
      * Arbitrary list of response objects serialized to JSON and sent back to
      * client.
-     * 
+     *
      * @return
      */
-    List<ResponseMessage> response();
+    List<ChatFrameMessage> response();
 
     String currentFrameId();
 
@@ -106,12 +100,14 @@ public interface ChatContext {
 
     /**
      * Clears the stack and sets the chat frame for the given context.
+     *
      * @param chatFrame
      */
     void setFrame(String chatFrame);
 
     /**
      * Clears the stack and sets the chat frame for the given context.
+     *
      * @param chatFrame
      * @param deleteMessages if true, deletes the messages for the ChatContext's memoryId.
      */
@@ -119,14 +115,16 @@ public interface ChatContext {
 
     /**
      * Pushes the given chat frame onto the frame stack.
-     * 
+     *
      * Also deletes the messages for the ChatContext's memoryId.
+     *
      * @param chatFrame
      */
     void pushFrame(String chatFrame);
 
     /**
      * Pushes the given chat frame onto the frame stack.
+     *
      * @param chatFrame
      * @param deleteMessages if true, deletes the messages for the ChatContext's memoryId.
      */
@@ -139,6 +137,7 @@ public interface ChatContext {
 
     /**
      * Pops current frame off of the frame stack and also deletes the messages for the ChatContext's current memoryId.
+     *
      * @param deleteMessages if true, deletes the messages for the ChatContext's memoryId.
      */
     void popFrame(boolean deleteMessages);

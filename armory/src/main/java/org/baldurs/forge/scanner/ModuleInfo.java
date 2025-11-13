@@ -1,5 +1,11 @@
 package org.baldurs.forge.scanner;
 
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
@@ -10,12 +16,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import java.nio.file.Path;
-import java.util.List;
-import java.nio.file.Files;
-import java.nio.file.DirectoryStream;
-import java.io.IOException;
 
 public record ModuleInfo(String name, String folder) {
 
@@ -35,7 +35,7 @@ public record ModuleInfo(String name, String folder) {
     public static ModuleInfo scan(Path mod) throws Exception {
         Path metaDir = findFirstDirectory(mod.resolve("Mods"));
         Path metaFile = metaDir.resolve("meta.lsx");
-        
+
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document document = builder.parse(metaFile.toFile());

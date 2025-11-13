@@ -81,4 +81,4 @@ public class AttributeTypeMaps {
         ID_TO_TYPE.put(AttributeType.Int64, "int64");
         ID_TO_TYPE.put(AttributeType.TranslatedFSString, "TranslatedFSString");
     }
-} 
+}

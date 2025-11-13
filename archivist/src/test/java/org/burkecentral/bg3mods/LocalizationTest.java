@@ -1,17 +1,16 @@
 package org.burkecentral.bg3mods;
-import org.baldurs.archivist.LS.Localization;
-import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
+
+import org.baldurs.archivist.LS.Localization;
+import org.junit.jupiter.api.Test;
+
 public class LocalizationTest {
 
     @Test
@@ -23,7 +22,7 @@ public class LocalizationTest {
         Localization.LocaResource resource = reader.read();
 
         Localization.LocaXmlWriter writer = new Localization.LocaXmlWriter(
-            new FileOutputStream(resourcePath.resolveSibling("Localization.loca.xml").toFile()));
+                new FileOutputStream(resourcePath.resolveSibling("Localization.loca.xml").toFile()));
         writer.write(resource);
     }
 

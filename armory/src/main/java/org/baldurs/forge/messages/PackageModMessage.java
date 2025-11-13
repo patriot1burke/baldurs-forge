@@ -1,9 +1,9 @@
 package org.baldurs.forge.messages;
 
 import io.quarkiverse.langchain4j.chat.frames.ChatContext;
-import io.quarkiverse.langchain4j.chat.frames.ResponseMessage;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameMessage;
 
-public class PackageModMessage extends ResponseMessage {
+public class PackageModMessage extends ChatFrameMessage {
     protected String filename;
 
     private PackageModMessage(String filename) {
@@ -16,8 +16,9 @@ public class PackageModMessage extends ResponseMessage {
     }
 
     /**
-     * Add PackageModAction to the response.  If there is already one, remove it before adding the new one.
+     * Add PackageModAction to the response. If there is already one, remove it before adding the new one.
      * This is to prevent duplicate package events sent to the client.
+     *
      * @param context
      * @param filename
      */

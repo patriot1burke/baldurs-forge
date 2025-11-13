@@ -1,9 +1,10 @@
 package io.quarkiverse.langchain4j.chat.frames.internal;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -12,8 +13,6 @@ import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 import io.quarkus.logging.Log;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class ChatFrameService implements ChatFrameController {
@@ -45,7 +44,8 @@ public class ChatFrameService implements ChatFrameController {
     }
 
     protected List<String> getFrameStack() {
-        return context.getData(CHAT_FRAME, new TypeReference<List<String>>() {});
+        return context.getData(CHAT_FRAME, new TypeReference<List<String>>() {
+        });
     }
 
     @Override
@@ -68,6 +68,7 @@ public class ChatFrameService implements ChatFrameController {
     /**
      * Clears the stack and sets the chat frame for the given context.
      * Also deletes the messages for the ChatContext's memoryId.
+     *
      * @param chatFrame
      */
     @Override
@@ -77,6 +78,7 @@ public class ChatFrameService implements ChatFrameController {
 
     /**
      * Clears the stack and sets the chat frame for the given context.
+     *
      * @param chatFrame
      * @param deleteMessages if true, deletes the messages for the ChatContext's memoryId.
      */
@@ -92,8 +94,9 @@ public class ChatFrameService implements ChatFrameController {
 
     /**
      * Pushes the given chat frame onto the frame stack.
-     * 
+     *
      * Also deletes the messages for the ChatContext's memoryId.
+     *
      * @param chatFrame
      */
     @Override
@@ -103,6 +106,7 @@ public class ChatFrameService implements ChatFrameController {
 
     /**
      * Pushes the given chat frame onto the frame stack.
+     *
      * @param chatFrame
      * @param deleteMessages if true, deletes the messages for the ChatContext's memoryId.
      */
@@ -128,6 +132,7 @@ public class ChatFrameService implements ChatFrameController {
 
     /**
      * Pops current frame off of the frame stack and also deletes the messages for the ChatContext's memoryId.
+     *
      * @param deleteMessages if true, deletes the messages for the ChatContext's memoryId.
      */
     public void popFrame(boolean deleteMessages) {
@@ -161,7 +166,8 @@ public class ChatFrameService implements ChatFrameController {
         if (chatFrame == null) {
             if (ChatFrameRecorder.defaultChatFrame == null) {
                 Log.error("Current frame not set and no default chat frame found");
-                context.response().add(new ObjectMessage("I'm having issues at the moment. Can you retry or rephrase your request?"));
+                context.response()
+                        .add(new ObjectMessage("I'm having issues at the moment. Can you retry or rephrase your request?"));
                 return;
             }
             Log.info("Executing default chat");
@@ -173,7 +179,8 @@ public class ChatFrameService implements ChatFrameController {
         } else {
             Log.error("Unknown chat frame: " + chatFrame);
             popFrame();
-            context.response().add(new ObjectMessage("I'm having issues at the moment. Can you retry or rephrase your request?"));
+            context.response()
+                    .add(new ObjectMessage("I'm having issues at the moment. Can you retry or rephrase your request?"));
         }
 
     }

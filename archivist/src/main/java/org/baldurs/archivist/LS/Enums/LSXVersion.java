@@ -5,7 +5,7 @@ public enum LSXVersion {
      * Version used in D:OS 2 (DE)
      */
     V3(3),
-    
+
     /**
      * Version used in BG3
      * Replaces type IDs with type names
@@ -21,4 +21,4 @@ public enum LSXVersion {
     public int getValue() {
         return value;
     }
-} 
+}

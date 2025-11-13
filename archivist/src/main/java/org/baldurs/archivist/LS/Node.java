@@ -32,4 +32,4 @@ public class Node {
     public void appendChild(Node child) {
         children.computeIfAbsent(child.name, k -> new ArrayList<>()).add(child);
     }
-} 
+}

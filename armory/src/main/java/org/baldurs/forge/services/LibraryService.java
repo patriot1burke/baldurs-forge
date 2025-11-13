@@ -15,6 +15,10 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
 import org.baldurs.forge.model.StatModel;
 import org.baldurs.forge.scanner.ArchiveSource;
 import org.baldurs.forge.scanner.BaldursArchive;
@@ -25,9 +29,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import dev.langchain4j.agent.tool.P;
 import io.quarkus.logging.Log;
-import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class LibraryService {
@@ -72,7 +73,6 @@ public class LibraryService {
         icons.putAll(source.icons);
     }
 
-
     private void scanFiles() {
         if (initialized)
             return;
@@ -85,6 +85,7 @@ public class LibraryService {
             throw new RuntimeException(e);
         }
     }
+
     private void loadMods() throws Exception {
         for (Path modPath : Files.list(modsPath).toList()) {
             if (Files.isDirectory(modPath)) {
@@ -157,6 +158,7 @@ public class LibraryService {
     public BaldursArchive archive() {
         return archive;
     }
+
     public Map<String, String> icons() {
         return icons;
     }
@@ -171,7 +173,6 @@ public class LibraryService {
     public String findLocalization(String handle) {
         return archive.localizations.getLocalization(handle);
     }
-
 
     public RootTemplate findRootTemplateByStatName(String statName) {
         //Log.infof("Finding root template for stat: %s", statName);
@@ -281,18 +282,17 @@ public class LibraryService {
 
     public List<RootTemplate> findRootIconsFrom(Predicate<? super Stat> predicate) {
         return archive.stats.byName().values().stream()
-                    .filter(predicate)
-                    .map(stat -> stat.getField("RootTemplate"))
-                    .filter(Objects::nonNull)
-                    .distinct()
-                    .map(archive.getRootTemplates()::getRootTemplate)
-                    .filter(Objects::nonNull)
-                    .map(RootTemplate::resolveTemplateThatDefinesIcon)
-                    .filter(Objects::nonNull)
-                    .distinct()
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+                .filter(predicate)
+                .map(stat -> stat.getField("RootTemplate"))
+                .filter(Objects::nonNull)
+                .distinct()
+                .map(archive.getRootTemplates()::getRootTemplate)
+                .filter(Objects::nonNull)
+                .map(RootTemplate::resolveTemplateThatDefinesIcon)
+                .filter(Objects::nonNull)
+                .distinct()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
-
 
 }

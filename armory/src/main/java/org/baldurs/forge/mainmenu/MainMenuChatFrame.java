@@ -2,6 +2,9 @@ package org.baldurs.forge.mainmenu;
 
 import java.util.List;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
 import org.baldurs.forge.builder.AmuletBuilder;
 import org.baldurs.forge.builder.BodyArmorBuilder;
 import org.baldurs.forge.builder.BootsBuilder;
@@ -28,9 +31,6 @@ import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.DefaultChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 import io.quarkus.logging.Log;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 
 @ApplicationScoped
 public class MainMenuChatFrame {

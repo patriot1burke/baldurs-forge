@@ -2,17 +2,17 @@ package org.baldurs.forge.builder;
 
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import org.baldurs.forge.scanner.StatsArchive;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.baldurs.forge.model.Rarity;
+import org.baldurs.forge.scanner.StatsArchive;
 
 import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkus.logging.Log;
-import io.quarkus.runtime.Startup;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class AmuletBuilder extends EquipmentBuilder {
@@ -29,14 +29,17 @@ public class AmuletBuilder extends EquipmentBuilder {
     protected Class<? extends BaseModel> baseModelClass() {
         return AmuletModel.class;
     }
+
     @Override
     protected String schema() {
         return AmuletModel.schema;
     }
+
     @Override
     public String type() {
         return AmuletModel.TYPE;
     }
+
     @Override
     protected Supplier<BaseModel> supplier() {
         return () -> {
@@ -44,7 +47,6 @@ public class AmuletBuilder extends EquipmentBuilder {
             return amuletModel;
         };
     }
-
 
     @ChatFrame(AmuletModel.TYPE)
     public void build() {
@@ -56,7 +58,6 @@ public class AmuletBuilder extends EquipmentBuilder {
         Log.info("Setting name: " + name);
         set(current -> current.name = name);
     }
-
 
     @Tool("Set the description for the current amulet.")
     public void setDescription(String description) {
@@ -109,6 +110,5 @@ public class AmuletBuilder extends EquipmentBuilder {
     public void finishEquipment() throws Exception {
         super.finishEquipment();
     }
-
 
 }

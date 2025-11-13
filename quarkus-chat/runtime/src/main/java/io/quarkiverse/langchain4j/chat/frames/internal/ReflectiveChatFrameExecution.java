@@ -11,7 +11,6 @@ public class ReflectiveChatFrameExecution implements ChatFrameExecution {
     private final Method method;
     protected volatile BeanContainer.Factory<?> factory;
 
-
     public ReflectiveChatFrameExecution(Class<?> beanClass, Method method) {
         this.beanClass = beanClass;
         this.method = method;

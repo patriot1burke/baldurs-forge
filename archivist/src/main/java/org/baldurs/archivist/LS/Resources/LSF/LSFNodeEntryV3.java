@@ -26,21 +26,21 @@ public class LSFNodeEntryV3 {
      * (-1: node has no attributes)
      */
     public int firstAttributeIndex;
-    
+
     /**
      * Index into name hash table
      */
     public int getNameIndex() {
         return (nameHashTableIndex >> 16) & 0xffff;
     }
-    
+
     /**
      * Offset in hash chain
      */
     public int getNameOffset() {
         return nameHashTableIndex & 0xffff;
     }
-    
+
     public static LSFNodeEntryV3 fromBuffer(ByteBuffer buffer) {
         LSFNodeEntryV3 entry = new LSFNodeEntryV3();
         entry.nameHashTableIndex = buffer.getInt();
@@ -49,11 +49,11 @@ public class LSFNodeEntryV3 {
         entry.firstAttributeIndex = buffer.getInt();
         return entry;
     }
-    
+
     public void writeToBuffer(ByteBuffer buffer) {
         buffer.putInt(nameHashTableIndex);
         buffer.putInt(parentIndex);
         buffer.putInt(nextSiblingIndex);
         buffer.putInt(firstAttributeIndex);
     }
-} 
+}

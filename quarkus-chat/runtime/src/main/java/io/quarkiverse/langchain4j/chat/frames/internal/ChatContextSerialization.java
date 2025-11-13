@@ -1,4 +1,4 @@
-package io.quarkiverse.langchain4j.chat.frames;
+package io.quarkiverse.langchain4j.chat.frames.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,7 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.quarkiverse.langchain4j.chat.frames.internal.ClientMemoryStore;
+import io.quarkiverse.langchain4j.chat.frames.ChatContext;
 
 public class ChatContextSerialization {
 
@@ -23,7 +23,7 @@ public class ChatContextSerialization {
         if (userMessageNode != null && !userMessageNode.isNull()) {
             context.setUserMessage(userMessageNode.asText());
         }
-         JsonNode contextNode = node.get("context");
+        JsonNode contextNode = node.get("context");
         if (contextNode == null || contextNode.isNull()) {
             return context;
         }
@@ -35,7 +35,7 @@ public class ChatContextSerialization {
         if (memoryNode != null && !memoryNode.isNull()) {
             memory.readJson(memoryNode);
         }
-    
+
         JsonNode sharedNode = contextNode.get("data");
         if (sharedNode != null && !sharedNode.isNull()) {
             sharedNode.fields().forEachRemaining(field -> {
@@ -57,7 +57,7 @@ public class ChatContextSerialization {
         } else {
             writer.write("null");
         }
-        writer.write(",");        
+        writer.write(",");
         writer.write("\"context\":");
         writer.write("{");
         writer.write("\"memoryId\":");
@@ -69,7 +69,7 @@ public class ChatContextSerialization {
         writer.write("\"memory\":");
         memory.writeJson(writer);
         writer.write("}");
-    
+
         writer.write("}");
     }
 

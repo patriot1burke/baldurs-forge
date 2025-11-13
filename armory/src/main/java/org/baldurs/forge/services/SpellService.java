@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
+
 import org.baldurs.forge.model.Spell;
 import org.baldurs.forge.scanner.StatsArchive;
 import org.baldurs.forge.services.BoostService.BoostWriter;
@@ -23,8 +26,6 @@ import dev.langchain4j.store.embedding.filter.Filter;
 import dev.langchain4j.store.embedding.filter.MetadataFilterBuilder;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.StartupEvent;
-import jakarta.enterprise.event.Observes;
-import jakarta.inject.Inject;
 
 public class SpellService {
     @Inject
@@ -38,7 +39,6 @@ public class SpellService {
 
     @Inject
     BoostService boostService;
-
 
     Map<String, Spell> spellDB = new HashMap<>();
 
@@ -66,10 +66,11 @@ public class SpellService {
         }
         String description = boostService.statDescription(item);
         String icon = item.getField("Icon");
-        icon = libraryService.icons().get(icon);    
+        icon = libraryService.icons().get(icon);
         Spell spell = new Spell(id, name, description, icon);
         db.put(id, spell);
     }
+
     private void load() throws Exception {
 
         Log.info("Loading items...");
@@ -114,7 +115,6 @@ public class SpellService {
     public List<Spell> ragSearch(String queryString) {
         Filter filter = new MetadataFilterBuilder("type").isEqualTo("Spell");
         Log.infof("Querying for: %s", queryString);
-
 
         Embedding embedding = embeddingModel.embed(queryString).content();
         EmbeddingSearchRequest request = EmbeddingSearchRequest.builder()

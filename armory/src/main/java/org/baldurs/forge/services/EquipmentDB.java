@@ -4,10 +4,12 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 
 import org.baldurs.forge.mainmenu.MetadataPrompts;
 import org.baldurs.forge.model.Equipment;
@@ -33,9 +35,6 @@ import dev.langchain4j.store.embedding.filter.Filter;
 import dev.langchain4j.store.embedding.filter.MetadataFilterBuilder;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.StartupEvent;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
-import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class EquipmentDB {
@@ -270,7 +269,7 @@ public class EquipmentDB {
                     if (slot != null && slot != EquipmentSlot.Unknown) {
                         Log.infof("Filter Slot: %s", slot);
                         Filter slotFilter = new MetadataFilterBuilder("slot").isEqualTo(slot.name());
-                        filter =filter.and(slotFilter);
+                        filter = filter.and(slotFilter);
                     }
                 } catch (Exception e) {
                     Log.warnf("Error getting equipment slot metadata from prompt query: %s", e.getMessage());
@@ -307,7 +306,7 @@ public class EquipmentDB {
 
     /**
      * Utility method to find capital letters in a string
-     * 
+     *
      * @param str the input string
      * @return a list of capital letters found in the string
      */
@@ -327,7 +326,7 @@ public class EquipmentDB {
 
     /**
      * Alternative method to find capital letters using regex
-     * 
+     *
      * @param str the input string
      * @return a list of capital letters found in the string
      */
@@ -350,7 +349,7 @@ public class EquipmentDB {
 
     /**
      * Method to get positions of capital letters in a string
-     * 
+     *
      * @param str the input string
      * @return a map of character to list of positions where it appears
      */
@@ -371,7 +370,7 @@ public class EquipmentDB {
 
     /**
      * Adds spaces between capital letters in a string
-     * 
+     *
      * @param str the input string
      * @return the string with spaces added between capital letters
      */

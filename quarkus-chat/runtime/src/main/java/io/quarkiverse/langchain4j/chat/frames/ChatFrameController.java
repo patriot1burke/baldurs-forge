@@ -17,12 +17,14 @@ public interface ChatFrameController {
 
     /**
      * Clears the stack and sets the chat frame for the given context.
+     *
      * @param chatFrame
      */
     void setFrame(String chatFrame);
 
     /**
      * Clears the stack and sets the chat frame for the given context.
+     *
      * @param chatFrame
      * @param deleteMessages if true, deletes the messages for the ChatContext's memoryId.
      */
@@ -30,14 +32,16 @@ public interface ChatFrameController {
 
     /**
      * Pushes the given chat frame onto the frame stack.
-     * 
+     *
      * Also deletes the messages for the ChatContext's memoryId.
+     *
      * @param chatFrame
      */
     void pushFrame(String chatFrame);
 
     /**
      * Pushes the given chat frame onto the frame stack.
+     *
      * @param chatFrame
      * @param deleteMessages if true, deletes the messages for the ChatContext's memoryId.
      */
@@ -50,6 +54,7 @@ public interface ChatFrameController {
 
     /**
      * Pops current frame off of the frame stack and also deletes the messages for the ChatContext's current memoryId.
+     *
      * @param deleteMessages if true, deletes the messages for the ChatContext's memoryId.
      */
     void popFrame(boolean deleteMessages);

@@ -3,6 +3,9 @@ package org.baldurs.forge.builder;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
 import org.baldurs.forge.model.Rarity;
 import org.baldurs.forge.scanner.StatsArchive;
 
@@ -10,15 +13,13 @@ import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkus.logging.Log;
-import io.quarkus.runtime.Startup;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class WeaponBuilder extends EquipmentBuilder {
 
     @Inject
     WeaponBuilderPrompt agent;
+
     @Override
     protected BuilderPrompt agent() {
         return agent;
@@ -28,14 +29,17 @@ public class WeaponBuilder extends EquipmentBuilder {
     protected Class<? extends BaseModel> baseModelClass() {
         return WeaponModel.class;
     }
+
     @Override
     protected String schema() {
         return WeaponModel.schema;
     }
+
     @Override
     public String type() {
         return WeaponModel.TYPE;
     }
+
     @Override
     protected Supplier<BaseModel> supplier() {
         return () -> {
@@ -55,7 +59,6 @@ public class WeaponBuilder extends EquipmentBuilder {
         Log.info("Setting name: " + name);
         set(current -> current.name = name);
     }
-
 
     @Tool("Set the description for the current weapon.")
     public void setDescription(String description) {
@@ -96,6 +99,7 @@ public class WeaponBuilder extends EquipmentBuilder {
     public void setBoost(String boostDescription) throws Exception {
         super.setBoost(boostDescription);
     }
+
     @Override
     protected Predicate<? super StatsArchive.Stat> visualModelPredicate() {
         WeaponModel weapon = context.getData(CURRENT_EQUIPMENT, WeaponModel.class);
@@ -117,10 +121,10 @@ public class WeaponBuilder extends EquipmentBuilder {
         }
         return super.showVisualModels();
     }
+
     @Tool(value = "When finished building weapon, call this tool to finish the weapon.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void finishEquipment() throws Exception {
         super.finishEquipment();
     }
-
 
 }

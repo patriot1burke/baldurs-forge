@@ -5,9 +5,9 @@ import java.util.List;
 import org.baldurs.forge.model.EquipmentModel;
 
 import io.quarkiverse.langchain4j.chat.frames.ChatContext;
-import io.quarkiverse.langchain4j.chat.frames.ResponseMessage;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameMessage;
 
-public  class ListEquipmentMessage extends ResponseMessage {
+public class ListEquipmentMessage extends ChatFrameMessage {
     protected List<EquipmentModel> equipment;
 
     private ListEquipmentMessage(List<EquipmentModel> equipment) {
@@ -24,8 +24,9 @@ public  class ListEquipmentMessage extends ResponseMessage {
     }
 
     /**
-     * Add ListEquipmentAction to the response.  If there is already one, remove it before adding the new one.
+     * Add ListEquipmentAction to the response. If there is already one, remove it before adding the new one.
      * This is to prevent duplicate displays of the same equipment in the UI chat.
+     *
      * @param context
      * @param equipment
      */

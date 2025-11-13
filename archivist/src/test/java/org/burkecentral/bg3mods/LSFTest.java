@@ -1,14 +1,11 @@
 package org.burkecentral.bg3mods;
 
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -21,7 +18,8 @@ import org.baldurs.archivist.LS.Resources.LSF.LSFReader;
 import org.baldurs.archivist.LS.Resources.LSF.LSFWriter;
 import org.baldurs.archivist.LS.Resources.LSX.LSXReader;
 import org.baldurs.archivist.LS.Resources.LSX.LSXWriter;
-    
+import org.junit.jupiter.api.Test;
+
 public class LSFTest {
     @Test
     public void testLSFtoLSX() throws Exception {
@@ -62,10 +60,10 @@ public class LSFTest {
                 assertEquals(children1.size(), children2.size());
             }
         }
-     }
-     
-     @Test
-     public void testLSFWriter() throws Exception {
+    }
+
+    @Test
+    public void testLSFWriter() throws Exception {
         System.out.println("////////////////////////////////////////////////");
         System.out.println("testLSFWriter");
         System.out.println("////////////////////////////////////////////////");
@@ -80,10 +78,10 @@ public class LSFTest {
 
         System.out.flush();
         System.out.println("************************************************");
-        System.out.println("************************************************"); 
-        System.out.println("************************************************"); 
-        System.out.println("************************************************"); 
-        System.out.println("************************************************"); 
+        System.out.println("************************************************");
+        System.out.println("************************************************");
+        System.out.println("************************************************");
+        System.out.println("************************************************");
         System.out.flush();
 
         LSFReader lsfReader = new LSFReader(lsfPath);
@@ -91,7 +89,7 @@ public class LSFTest {
         System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++");
         Resource resource3 = lsfReader.read();
         System.out.println("------------------------------------------------");
-        System.out.println("------------------------------------------------"); 
+        System.out.println("------------------------------------------------");
         assertEquals(resource.metadataFormat, resource3.metadataFormat);
         assertEquals(resource.metadata.majorVersion, resource3.metadata.majorVersion);
         assertEquals(resource.metadata.minorVersion, resource3.metadata.minorVersion);
@@ -113,12 +111,13 @@ public class LSFTest {
                 assertEquals(children1.size(), children2.size());
             }
         }
-     }
-     @Test
-     public void test2() throws Exception {
+    }
+
+    @Test
+    public void test2() throws Exception {
         URL resourceUrl = getClass().getClassLoader().getResource("test2.lsx");
         Path resourcePath = Paths.get(resourceUrl.toURI());
         Converter.lsxToLsf(resourcePath, resourcePath.resolveSibling("test2.lsf"));
 
-     }
-} 
+    }
+}

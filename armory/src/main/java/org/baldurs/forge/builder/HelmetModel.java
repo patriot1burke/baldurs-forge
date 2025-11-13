@@ -22,7 +22,7 @@ public class HelmetModel extends AppendageModel {
     public HelmetModel() {
 
     }
-    
+
     public static final String schema;
 
     static {

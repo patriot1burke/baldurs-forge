@@ -7,7 +7,7 @@ import picocli.CommandLine.Parameters;
 
 @Command(name = "extract", description = "Extract all files from a .pak file")
 class ExtractCommand implements Runnable {
-    
+
     @Parameters(index = "0", description = "The input .pak file")
     File pakFile;
 

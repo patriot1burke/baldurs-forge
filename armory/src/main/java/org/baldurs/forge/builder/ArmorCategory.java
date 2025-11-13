@@ -4,6 +4,5 @@ public enum ArmorCategory {
     None,
     Light,
     Medium,
-    Heavy
-;
+    Heavy;
 }

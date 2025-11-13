@@ -23,4 +23,4 @@ public class LSFNodeInfo {
      */
     public int firstAttributeIndex;
     public String keyAttribute = null;
-} 
+}

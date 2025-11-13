@@ -6,6 +6,7 @@ import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
 import dev.langchain4j.model.output.structured.Description;
 import dev.langchain4j.service.output.JsonSchemas;
+
 public class PackageModel {
 
     @Description("The name of the mod.")
@@ -18,13 +19,14 @@ public class PackageModel {
     @JsonProperty(required = true)
     public String description;
 
-    public static final String schema; 
+    public static final String schema;
 
     static {
-        JsonObjectSchema packageModelSchema = (JsonObjectSchema)JsonSchemas.jsonSchemaFrom(PackageModel.class).get().rootElement();
+        JsonObjectSchema packageModelSchema = (JsonObjectSchema) JsonSchemas.jsonSchemaFrom(PackageModel.class).get()
+                .rootElement();
         JsonSchema.Builder builder = JsonSchema.builder();
         builder.name("packageModel")
-               .rootElement(packageModelSchema);
+                .rootElement(packageModelSchema);
         schema = builder.build().toString();
     }
 }

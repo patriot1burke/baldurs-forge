@@ -5,13 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
 import org.baldurs.forge.scanner.StatsArchive.Stat;
 import org.baldurs.forge.services.BoostService.BoostWriter;
 
 import io.quarkus.logging.Log;
-import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class MacroService {
@@ -48,13 +49,14 @@ public class MacroService {
         return argList.toArray(new String[argList.size()]);
     }
 
-    public boolean isMacro(String macroString) {    
+    public boolean isMacro(String macroString) {
         return macroString.indexOf('(') > -1;
     }
 
     public void writeMacro(String macroString, BoostWriter writer) {
         Macro macro = fromString(macroString);
-        if (macro != null) macro.transformer.transform(macro, writer);
+        if (macro != null)
+            macro.transformer.transform(macro, writer);
     }
 
     public Macro fromString(String macroString) {
@@ -86,7 +88,7 @@ public class MacroService {
                 depth++;
             } else if (params.charAt(index) == ')') {
                 depth--;
-            } 
+            }
             if (depth == 0) {
                 if (params.charAt(index) == ',') {
                     argList.add(params.substring(paramIndex, index).trim());
@@ -112,20 +114,17 @@ public class MacroService {
     }
 
     static Map<String, String> dieRollTargets = Map.of(
-        "Attack", "Attack",
-        "DeathSavingThrow", "Death Saving Throws",
-        "MeleeSpellAttack", "Melee Spell Attack",
-        "MeleeUnarmedAttack", "Unarmed Attack",
-        "MeleeWeaponAttack", "Weapon Attack",
-        "RangedOffHandWeaponAttack", "Ranged Offhand Weapon Attack",
-        "RangedSpellAttack", "Spell Attack",
-        "RangedUnarmedAttack", "Ranged Unarmed Attack",
-        "RangedWeaponAttack", "Ranged Weapon Attack"
-    );
-
+            "Attack", "Attack",
+            "DeathSavingThrow", "Death Saving Throws",
+            "MeleeSpellAttack", "Melee Spell Attack",
+            "MeleeUnarmedAttack", "Unarmed Attack",
+            "MeleeWeaponAttack", "Weapon Attack",
+            "RangedOffHandWeaponAttack", "Ranged Offhand Weapon Attack",
+            "RangedSpellAttack", "Spell Attack",
+            "RangedUnarmedAttack", "Ranged Unarmed Attack",
+            "RangedWeaponAttack", "Ranged Weapon Attack");
 
     Map<String, DescriptionTransformer> transformers = new HashMap<>();
-
 
     void initTransformers() {
         transformers.put("AC", (macro, writer) -> {
@@ -140,18 +139,20 @@ public class MacroService {
             writer.write(description);
         });
         transformers.put("AbilityOverrideMinimum", (macro, writer) -> {
-            writer.write("Set the wearer's " + macro.args[0] + " to " + macro.args[1] + " unless the wearer's " + macro.args[0] + " is already higher");
+            writer.write("Set the wearer's " + macro.args[0] + " to " + macro.args[1] + " unless the wearer's " + macro.args[0]
+                    + " is already higher");
         });
         transformers.put("ActionResource", (macro, writer) -> {
             if (macro.args[0].endsWith("Point")) {
                 writer.write(macro.args[1] + " " + macro.args[0].substring(0, macro.args[1].indexOf("Point")) + " Points");
                 return;
             }
-            
+
             if (macro.args[0].endsWith("SpellSlot")) {
                 String description = macro.args[1];
                 if (!macro.args[0].equals("SpellSlot")) {
-                    description += " " + macro.args[0].substring(0, macro.args[0].indexOf("SpellSlot")) + " Spell Slots of Level " + macro.args[2];
+                    description += " " + macro.args[0].substring(0, macro.args[0].indexOf("SpellSlot"))
+                            + " Spell Slots of Level " + macro.args[2];
                 }
                 writer.write(description);
                 return;
@@ -177,7 +178,7 @@ public class MacroService {
         transformers.put("Advantage", (macro, writer) -> {
             if (macro.args.length == 2) {
                 writer.write("Advantage on " + macro.args[1] + " checks");
-            } else if (macro.args[0].equals("AttackRoll")) {   
+            } else if (macro.args[0].equals("AttackRoll")) {
                 writer.write("Advantage on attack rolls");
             } else if (macro.args[0].equals("AllAbilities")) {
                 writer.write("Advantage on all ability checks");
@@ -196,7 +197,7 @@ public class MacroService {
             float multiplier = Float.parseFloat(macro.args[0]);
             multiplier = multiplier * 100;
             int percent = (int) multiplier - 100;
-            writer.write("Carry Capacity Increased by "  + percent + "%");
+            writer.write("Carry Capacity Increased by " + percent + "%");
         });
         transformers.put("CharacterUnarmedDamage", (macro, writer) -> {
             String description = "Your unarmed attacks deal an additional " + macro.args[0];
@@ -238,7 +239,7 @@ public class MacroService {
             description += " damage";
             writer.write(description);
         });
-         
+
         transformers.put("DamageReduction", (macro, writer) -> {
             String description = "Reduce " + macro.args[0] + " damage by ";
 
@@ -261,7 +262,7 @@ public class MacroService {
             if (macro.args.length == 2) {
                 writer.write("Disadvantage on " + macro.args[1] + " checks");
             }
-            if (macro.args[0].equals("AttackRoll")) {   
+            if (macro.args[0].equals("AttackRoll")) {
                 writer.write("Disadvantage on attack rolls");
             }
             if (macro.args[0].equals("AllAbilities")) {
@@ -286,7 +287,7 @@ public class MacroService {
                 writer.write("Ignore immunity to " + macro.args[0]);
             }
         });
-      
+
         transformers.put("ItemReturnToOwner", (macro, writer) -> {
             writer.write("Weapon returns to you when thrown or dropped.");
         });
@@ -311,7 +312,8 @@ public class MacroService {
             writer.write("Reduce the number to roll a critical strike by " + macro.args[0]);
         });
         transformers.put("Reroll", (macro, writer) -> {
-            writer.write("Re-roll " + macro.args[0] + " if die is " + macro.args[1] + " or less." + (macro.args[2].equals("true") ? " Keep the higher result" : " You must keep that new roll"));
+            writer.write("Re-roll " + macro.args[0] + " if die is " + macro.args[1] + " or less."
+                    + (macro.args[2].equals("true") ? " Keep the higher result" : " You must keep that new roll"));
         });
         transformers.put("Resistance", (macro, writer) -> {
             writer.write("You are " + macro.args[1] + " to " + macro.args[0]);
@@ -337,7 +339,7 @@ public class MacroService {
                 }
             } else if (macro.args[0].equals("SavingThrow")) {
                 if (macro.args.length == 2) {
-                    description +="All ";
+                    description += "All ";
                 }
                 description += "Saving Throws ";
             } else {
@@ -349,7 +351,7 @@ public class MacroService {
         transformers.put("Skill", (macro, writer) -> {
             writer.write(macro.args[0] + " +" + macro.args[1]);
         });
-         transformers.put("SpellSaveDC", (macro, writer) -> {
+        transformers.put("SpellSaveDC", (macro, writer) -> {
             writer.write("Spell Save DC +" + macro.args[0]);
         });
         transformers.put("UnlockSpell", (macro, writer) -> {
@@ -376,7 +378,7 @@ public class MacroService {
         transformers.put("WeaponEnchantment", (macro, writer) -> {
             writer.write("Weapon Enchantment +" + macro.args[0]);
         });
-   
+
         transformers.put("WeaponProperty", (macro, writer) -> {
             if (macro.args[0].equals("Magical")) {
                 writer.write("Weapon is magical.");
@@ -384,14 +386,7 @@ public class MacroService {
                 //writer.write(null);
             }
         });
-   
 
-
- 
-  
     }
-
-    
-
 
 }

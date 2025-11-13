@@ -27,7 +27,6 @@ public class PackageReader {
         public byte Priority;
         public byte[] Md5 = new byte[16];
 
-    
         public short NumParts;
 
         public static final int SIZE = 36;
@@ -43,22 +42,26 @@ public class PackageReader {
             }
             NumParts = map.getShort(offset + 34);
         }
+
         public String toString() {
-            return "Header(Version: " + Version + ", FileListOffset: " + FileListOffset + ", FileListSize: " + FileListSize + ", Flags: " + Flags + ", Priority: " + Priority + ", Md5: " + Arrays.toString(Md5) + ", NumParts: " + NumParts + ")";
+            return "Header(Version: " + Version + ", FileListOffset: " + FileListOffset + ", FileListSize: " + FileListSize
+                    + ", Flags: " + Flags + ", Priority: " + Priority + ", Md5: " + Arrays.toString(Md5) + ", NumParts: "
+                    + NumParts + ")";
         }
     }
 
     public static class FileEntry {
         /*
-[MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
-    public byte[] Name;
-
-    public UInt32 OffsetInFile1;
-    public UInt16 OffsetInFile2;
-    public Byte ArchivePart;
-    public Byte Flags;
-    public UInt32 SizeOnDisk;
-    public UInt32 UncompressedSize;         */
+         * [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
+         * public byte[] Name;
+         *
+         * public UInt32 OffsetInFile1;
+         * public UInt16 OffsetInFile2;
+         * public Byte ArchivePart;
+         * public Byte Flags;
+         * public UInt32 SizeOnDisk;
+         * public UInt32 UncompressedSize;
+         */
 
         public String Name;
         public int OffsetInFile1;
@@ -82,9 +85,8 @@ public class PackageReader {
                 }
             }
 
-             Name = new String(nameBuffer, 0, i, StandardCharsets.UTF_8);
-            
-            
+            Name = new String(nameBuffer, 0, i, StandardCharsets.UTF_8);
+
             OffsetInFile1 = buffer.getInt();
             OffsetInFile2 = buffer.getShort();
             ArchivePart = buffer.get();
@@ -95,7 +97,9 @@ public class PackageReader {
         }
 
         public String toString() {
-            return "FileEntry(Name: " + Name + ", OffsetInFile1: " + OffsetInFile1 + ", OffsetInFile2: " + OffsetInFile2 + ", ArchivePart: " + ArchivePart + ", Flags: " + Flags + ", SizeOnDisk: " + SizeOnDisk + ", UncompressedSize: " + UncompressedSize + ")";
+            return "FileEntry(Name: " + Name + ", OffsetInFile1: " + OffsetInFile1 + ", OffsetInFile2: " + OffsetInFile2
+                    + ", ArchivePart: " + ArchivePart + ", Flags: " + Flags + ", SizeOnDisk: " + SizeOnDisk
+                    + ", UncompressedSize: " + UncompressedSize + ")";
         }
 
         public static final int SIZE = 256 + 4 + 2 + 1 + 1 + 4 + 4;
@@ -113,7 +117,6 @@ public class PackageReader {
     private PackageHeader header;
     private FileEntry[] fileList;
 
-
     public PackageReader(Path pakPath) {
         this.pakPath = pakPath;
         try {
@@ -122,16 +125,16 @@ public class PackageReader {
             map.order(ByteOrder.LITTLE_ENDIAN);
             //System.out.println("Channel size: " + channel.size());
             int signature = map.getInt(0);
-            
+
             if (signature != 0x4B50534C) {
                 System.err.printf("Signature: 0x%08X%n", signature);
                 throw new RuntimeException("Invalid signature");
             }
             int version = map.getInt(4);
             //System.out.println("Version: " + version);
-            header = new PackageHeader(map, (int)4);
+            header = new PackageHeader(map, (int) 4);
             System.out.println("Header: " + header);
-            fileListOffset = (int)header.FileListOffset;
+            fileListOffset = (int) header.FileListOffset;
             LZ4Factory factory = LZ4Factory.fastestInstance();
             LZ4SafeDecompressor decompressor = factory.safeDecompressor();
 
@@ -146,7 +149,8 @@ public class PackageReader {
                 compressedFileList[i] = map.get(index);
             }
             byte[] decompressedFileList = new byte[FileEntry.SIZE * numFiles];
-            decompressor.decompress(compressedFileList, 0, compressedFileList.length, decompressedFileList, 0, decompressedFileList.length);
+            decompressor.decompress(compressedFileList, 0, compressedFileList.length, decompressedFileList, 0,
+                    decompressedFileList.length);
             ByteBuffer fileListBuf = ByteBuffer.wrap(decompressedFileList);
             fileListBuf.order(ByteOrder.LITTLE_ENDIAN);
             fileList = new FileEntry[numFiles];
@@ -156,8 +160,8 @@ public class PackageReader {
                 fileList[i] = fileEntry;
             }
             channel.close();
-        } catch (Exception e) {   
-           throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -180,7 +184,7 @@ public class PackageReader {
                 throw new RuntimeException("File is larger than the archive");
             }
             byte[] compressedData = new byte[fileEntry.SizeOnDisk];
-            map.position((int)fileEntry.offsetInFile);
+            map.position((int) fileEntry.offsetInFile);
             map.get(compressedData, 0, fileEntry.SizeOnDisk);
             byte[] uncompressedData = new byte[fileEntry.UncompressedSize];
             LZ4SafeDecompressor decompressor = factory.safeDecompressor();
@@ -191,4 +195,3 @@ public class PackageReader {
         }
     }
 }
-    

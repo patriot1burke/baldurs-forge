@@ -1,17 +1,17 @@
 package org.baldurs.archivist.LS.Resources.LSX;
 
-import org.baldurs.archivist.LS.*;
-import org.baldurs.archivist.LS.Enums.LSXVersion;
-import org.baldurs.archivist.LS.Resources.LSF.LSFMetadataFormat;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+
+import org.baldurs.archivist.LS.*;
+import org.baldurs.archivist.LS.Enums.LSXVersion;
 
 /**
  * LSX Reader class for parsing LSX format files
@@ -46,10 +46,11 @@ public class LSXReader implements AutoCloseable {
 
         int arguments = Integer.parseInt(reader.getAttributeValue(null, "arguments"));
         fs.arguments = new ArrayList<>(arguments);
-        
+
         if (arguments > 0) {
             // Skip to arguments element
-            while (reader.hasNext() && reader.next() != XMLStreamConstants.START_ELEMENT);
+            while (reader.hasNext() && reader.next() != XMLStreamConstants.START_ELEMENT)
+                ;
             if (!"arguments".equals(reader.getLocalName())) {
                 throw new InvalidFormatException("Expected <arguments>: " + reader.getLocalName());
             }
@@ -67,7 +68,8 @@ public class LSXReader implements AutoCloseable {
                     arg.value = reader.getAttributeValue(null, "value");
 
                     // Skip to string element
-                    while (reader.hasNext() && reader.next() != XMLStreamConstants.START_ELEMENT);
+                    while (reader.hasNext() && reader.next() != XMLStreamConstants.START_ELEMENT)
+                        ;
                     if (!"string".equals(reader.getLocalName())) {
                         throw new InvalidFormatException("Expected <string>: " + reader.getLocalName());
                     }
@@ -79,21 +81,24 @@ public class LSXReader implements AutoCloseable {
                     processedArgs++;
 
                     // Skip to end of argument
-                    while (reader.hasNext() && reader.next() != XMLStreamConstants.END_ELEMENT);
+                    while (reader.hasNext() && reader.next() != XMLStreamConstants.END_ELEMENT)
+                        ;
                 }
             }
 
             // Skip to end of arguments
-            while (reader.hasNext() && reader.next() != XMLStreamConstants.END_ELEMENT);
+            while (reader.hasNext() && reader.next() != XMLStreamConstants.END_ELEMENT)
+                ;
             // Close outer element
-            while (reader.hasNext() && reader.next() != XMLStreamConstants.END_ELEMENT);
+            while (reader.hasNext() && reader.next() != XMLStreamConstants.END_ELEMENT)
+                ;
             assert processedArgs == arguments;
         }
     }
 
     private void readElement() throws XMLStreamException {
         String elementName = reader.getLocalName();
-        
+
         switch (elementName) {
             case "save":
                 // Root element
@@ -181,17 +186,36 @@ public class LSXReader implements AutoCloseable {
                 } else {
                     // Preallocate value for vector/matrix types
                     switch (attr.getType()) {
-                        case Vec2: attr.setValue(new float[2]); break;
-                        case Vec3: attr.setValue(new float[3]); break;
-                        case Vec4: attr.setValue(new float[4]); break;
-                        case Mat2: attr.setValue(new float[2*2]); break;
-                        case Mat3: attr.setValue(new float[3*3]); break;
-                        case Mat3x4: attr.setValue(new float[3*4]); break;
-                        case Mat4: attr.setValue(new float[4*4]); break;
-                        case Mat4x3: attr.setValue(new float[4*3]); break;
-                        case TranslatedString: break;
-                        case TranslatedFSString: break;
-                        default: throw new RuntimeException("Attribute of type " + attr.getType() + " should have an inline value!");
+                        case Vec2:
+                            attr.setValue(new float[2]);
+                            break;
+                        case Vec3:
+                            attr.setValue(new float[3]);
+                            break;
+                        case Vec4:
+                            attr.setValue(new float[4]);
+                            break;
+                        case Mat2:
+                            attr.setValue(new float[2 * 2]);
+                            break;
+                        case Mat3:
+                            attr.setValue(new float[3 * 3]);
+                            break;
+                        case Mat3x4:
+                            attr.setValue(new float[3 * 4]);
+                            break;
+                        case Mat4:
+                            attr.setValue(new float[4 * 4]);
+                            break;
+                        case Mat4x3:
+                            attr.setValue(new float[4 * 3]);
+                            break;
+                        case TranslatedString:
+                            break;
+                        case TranslatedFSString:
+                            break;
+                        default:
+                            throw new RuntimeException("Attribute of type " + attr.getType() + " should have an inline value!");
                     }
 
                     valueOffset = 0;
@@ -220,32 +244,29 @@ public class LSXReader implements AutoCloseable {
                 stack.get(stack.size() - 1).attributes.put(attrName, attr);
                 break;
 
-            case "float2":
-                {
-                    float[] val = (float[]) lastAttribute.getValue();
-                    val[valueOffset++] = Float.parseFloat(reader.getAttributeValue(null, "x"));
-                    val[valueOffset++] = Float.parseFloat(reader.getAttributeValue(null, "y"));
-                    break;
-                }
+            case "float2": {
+                float[] val = (float[]) lastAttribute.getValue();
+                val[valueOffset++] = Float.parseFloat(reader.getAttributeValue(null, "x"));
+                val[valueOffset++] = Float.parseFloat(reader.getAttributeValue(null, "y"));
+                break;
+            }
 
-            case "float3":
-                {
-                    float[] val = (float[]) lastAttribute.getValue();
-                    val[valueOffset++] = Float.parseFloat(reader.getAttributeValue(null, "x"));
-                    val[valueOffset++] = Float.parseFloat(reader.getAttributeValue(null, "y"));
-                    val[valueOffset++] = Float.parseFloat(reader.getAttributeValue(null, "z"));
-                    break;
-                }
+            case "float3": {
+                float[] val = (float[]) lastAttribute.getValue();
+                val[valueOffset++] = Float.parseFloat(reader.getAttributeValue(null, "x"));
+                val[valueOffset++] = Float.parseFloat(reader.getAttributeValue(null, "y"));
+                val[valueOffset++] = Float.parseFloat(reader.getAttributeValue(null, "z"));
+                break;
+            }
 
-            case "float4":
-                {
-                    float[] val = (float[]) lastAttribute.getValue();
-                    val[valueOffset++] = Float.parseFloat(reader.getAttributeValue(null, "x"));
-                    val[valueOffset++] = Float.parseFloat(reader.getAttributeValue(null, "y"));
-                    val[valueOffset++] = Float.parseFloat(reader.getAttributeValue(null, "z"));
-                    val[valueOffset++] = Float.parseFloat(reader.getAttributeValue(null, "w"));
-                    break;
-                }
+            case "float4": {
+                float[] val = (float[]) lastAttribute.getValue();
+                val[valueOffset++] = Float.parseFloat(reader.getAttributeValue(null, "x"));
+                val[valueOffset++] = Float.parseFloat(reader.getAttributeValue(null, "y"));
+                val[valueOffset++] = Float.parseFloat(reader.getAttributeValue(null, "z"));
+                val[valueOffset++] = Float.parseFloat(reader.getAttributeValue(null, "w"));
+                break;
+            }
 
             case "mat2":
             case "mat3":
@@ -264,7 +285,7 @@ public class LSXReader implements AutoCloseable {
 
     private void readEndElement() {
         String elementName = reader.getLocalName();
-        
+
         switch (elementName) {
             case "save":
             case "header":
@@ -302,7 +323,7 @@ public class LSXReader implements AutoCloseable {
     private void readInternal() throws XMLStreamException {
         XMLInputFactory factory = XMLInputFactory.newInstance();
         reader = factory.createXMLStreamReader(stream);
-        
+
         try {
             while (reader.hasNext()) {
                 int eventType = reader.next();
@@ -334,7 +355,8 @@ public class LSXReader implements AutoCloseable {
             readInternal();
         } catch (Exception e) {
             if (lastLine > 0) {
-                throw new RuntimeException("Parsing error at or near line " + lastLine + ", column " + lastColumn + ":\n" + e.getMessage(), e);
+                throw new RuntimeException(
+                        "Parsing error at or near line " + lastLine + ", column " + lastColumn + ":\n" + e.getMessage(), e);
             } else {
                 throw new RuntimeException(e);
             }
@@ -346,4 +368,4 @@ public class LSXReader implements AutoCloseable {
 
         return resultResource;
     }
-} 
+}

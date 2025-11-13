@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -13,17 +16,15 @@ import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.ChatMessageDeserializer;
 import dev.langchain4j.data.message.ChatMessageSerializer;
 import io.quarkus.logging.Log;
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.inject.Inject;
 
 /**
- * 
+ *
  * QuarkusAiServiceContext.close() will call deleteMessages() and this
  * bean is @RequestScoped so it would be out of scope.
- * 
- * So, we do not implement ChatMemoryStore directly and instead 
+ *
+ * So, we do not implement ChatMemoryStore directly and instead
  * wrap it in a ClientMemoryStoreBean.
- * 
+ *
  */
 @RequestScoped
 public class ClientMemoryStore {
@@ -95,4 +96,3 @@ public class ClientMemoryStore {
         // exists to test CDI request scope
     }
 }
-

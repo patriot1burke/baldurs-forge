@@ -23,7 +23,6 @@ public class DescriptionParam {
         return fromString(paramString).transform();
     }
 
-
     public static DescriptionParam fromString(String paramString) {
 
         int index = paramString.indexOf("(");
@@ -56,12 +55,12 @@ public class DescriptionParam {
                     paramIndex = index + 1;
                 } else if (index + 1 == params.length()) {
                     String paramValue = params.substring(paramIndex, index + 1).trim();
-                    paramValue = param(paramValue); 
+                    paramValue = param(paramValue);
                     argList.add(paramValue);
                 }
             }
         }
-            
+
         descriptionParam.args = argList.toArray(new String[argList.size()]);
         DescriptionTransformer descriptionTransformer = transformers.get(function);
         if (descriptionTransformer != null) {
@@ -69,7 +68,6 @@ public class DescriptionParam {
         }
         return descriptionParam;
     }
-
 
     static Map<String, DescriptionTransformer> transformers = new HashMap<>();
 

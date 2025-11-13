@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.inject.Default;
+import jakarta.inject.Inject;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,10 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkiverse.langchain4j.chat.frames.ChatContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
-import io.quarkiverse.langchain4j.chat.frames.ResponseMessage;
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.enterprise.inject.Default;
-import jakarta.inject.Inject;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameMessage;
 
 @RequestScoped
 @Default
@@ -24,7 +25,7 @@ public class ChatContextImpl implements ChatContext {
 
     Map<String, Object> data = new HashMap<>();
 
-    List<ResponseMessage> response = new ArrayList<>();
+    List<ChatFrameMessage> response = new ArrayList<>();
 
     String userMessage = null;
     String memoryId = UUID.randomUUID().toString();
@@ -56,11 +57,11 @@ public class ChatContextImpl implements ChatContext {
 
     /**
      * Data serialized and shared with client.
-     * 
+     *
      * This is raw data and could contain JsonNode objects.
      * Preferably use the {@link #getData(String, Class)} method to get the data
      * as a specific type.
-     * 
+     *
      * @return
      */
     @Override
@@ -70,10 +71,10 @@ public class ChatContextImpl implements ChatContext {
 
     /**
      * Data serialized and shared with client.
-     * 
+     *
      * Tools should only add data to the shared context if they need to pass data
      * back to the client.
-     * 
+     *
      * @return
      */
     @Override
@@ -96,10 +97,10 @@ public class ChatContextImpl implements ChatContext {
 
     /**
      * Data serialized and shared with client.
-     * 
+     *
      * Tools should only add data to the shared context if they need to pass data
      * back to the client.
-     * 
+     *
      * @return
      */
     @Override
@@ -122,12 +123,12 @@ public class ChatContextImpl implements ChatContext {
 
     /**
      * Data serialized and shared with client.
-     * 
+     *
      * Tools should only add data to the shared context if they need to pass data
      * back to the client.
-     * 
+     *
      * Values should be automatically serializable to JSON via Jackson.
-     * 
+     *
      * @return
      */
     @Override
@@ -136,12 +137,12 @@ public class ChatContextImpl implements ChatContext {
     }
 
     /**
-     * Arbitrary list of response objects serialized to JSON and sent back to client.  
-     * 
+     * Arbitrary list of response objects serialized to JSON and sent back to client.
+     *
      * @return
      */
     @Override
-    public List<ResponseMessage> response() {
+    public List<ChatFrameMessage> response() {
         return response;
     }
 
@@ -176,18 +177,22 @@ public class ChatContextImpl implements ChatContext {
     public void popFrame() {
         chatFrameController.popFrame();
     }
+
     @Override
     public void popFrame(boolean deleteMessages) {
         chatFrameController.popFrame(deleteMessages);
     }
+
     @Override
     public void pushFrame(String chatFrame, boolean deleteMessages) {
         chatFrameController.pushFrame(chatFrame, deleteMessages);
     }
+
     @Override
     public void setFrame(String chatFrame, boolean deleteMessages) {
         chatFrameController.setFrame(chatFrame, deleteMessages);
     }
+
     @Override
     public void clearMemory() {
         chatFrameController.clearMemory();

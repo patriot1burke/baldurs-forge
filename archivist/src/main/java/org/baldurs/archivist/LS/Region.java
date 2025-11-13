@@ -5,4 +5,4 @@ package org.baldurs.archivist.LS;
  */
 public class Region extends Node {
     public String regionName;
-} 
+}

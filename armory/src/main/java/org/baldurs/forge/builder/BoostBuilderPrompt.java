@@ -1,5 +1,6 @@
 package org.baldurs.forge.builder;
 
+import jakarta.enterprise.context.RequestScoped;
 
 import org.baldurs.forge.TemporaryChatMemoryProvider;
 
@@ -7,7 +8,6 @@ import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.RegisterAiService;
-import jakarta.enterprise.context.RequestScoped;
 
 @RequestScoped
 @RegisterAiService(chatMemoryProviderSupplier = TemporaryChatMemoryProvider.class)

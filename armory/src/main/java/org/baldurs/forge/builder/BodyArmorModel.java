@@ -20,14 +20,13 @@ public class BodyArmorModel extends BaseModel {
     public Integer armorClass;
 
     public BodyArmorModel(
-                BodyArmorType type,
-                Rarity rarity,
-                String name,
-                String description,
-                Integer armorClass, 
-                String boosts,
-                String parentModel
-                ) {
+            BodyArmorType type,
+            Rarity rarity,
+            String name,
+            String description,
+            Integer armorClass,
+            String boosts,
+            String parentModel) {
         super(rarity, name, description, boosts, parentModel);
         this.armorClass = armorClass;
         this.type = type;

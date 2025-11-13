@@ -36,6 +36,7 @@ public class CloakModel extends BaseModel {
     public String type() {
         return TYPE;
     }
+
     @Override
     public String baseStat() {
         return "ARM_Cloak";

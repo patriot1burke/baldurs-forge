@@ -14,7 +14,7 @@ public class MarkdownToHtmlService {
     Parser parser;
     HtmlRenderer renderer;
 
-     @PostConstruct
+    @PostConstruct
     public void init() {
         parser = Parser.builder().build();
         renderer = HtmlRenderer.builder().build();
@@ -29,7 +29,5 @@ public class MarkdownToHtmlService {
             return markdown;
         }
     }
-
-    
 
 }

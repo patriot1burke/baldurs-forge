@@ -3,6 +3,9 @@ package org.baldurs.forge.builder;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
 import org.baldurs.forge.model.Rarity;
 import org.baldurs.forge.scanner.StatsArchive;
 
@@ -10,15 +13,13 @@ import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkus.logging.Log;
-import io.quarkus.runtime.Startup;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class HelmetBuilder extends EquipmentBuilder {
 
     @Inject
     HelmetBuilderPrompt agent;
+
     @Override
     protected BuilderPrompt agent() {
         return agent;
@@ -28,14 +29,17 @@ public class HelmetBuilder extends EquipmentBuilder {
     protected Class<? extends BaseModel> baseModelClass() {
         return HelmetModel.class;
     }
+
     @Override
     protected String schema() {
         return HelmetModel.schema;
     }
+
     @Override
     public String type() {
         return HelmetModel.TYPE;
     }
+
     @Override
     protected Supplier<BaseModel> supplier() {
         return () -> {
@@ -54,7 +58,6 @@ public class HelmetBuilder extends EquipmentBuilder {
         Log.info("Setting name: " + name);
         set(current -> current.name = name);
     }
-
 
     @Tool("Set the description for the current helmet.")
     public void setDescription(String description) {
@@ -89,6 +92,7 @@ public class HelmetBuilder extends EquipmentBuilder {
     public void setBoost(String boostDescription) throws Exception {
         super.setBoost(boostDescription);
     }
+
     @Override
     protected Predicate<? super StatsArchive.Stat> visualModelPredicate() {
         HelmetModel helmet = context.getData(CURRENT_EQUIPMENT, HelmetModel.class);
@@ -116,6 +120,5 @@ public class HelmetBuilder extends EquipmentBuilder {
     public void finishEquipment() throws Exception {
         super.finishEquipment();
     }
-
 
 }

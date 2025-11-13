@@ -21,21 +21,21 @@ public class LSFNodeEntryV2 {
      * (-1: this node is a root region)
      */
     public int parentIndex;
-    
+
     /**
      * Index into name hash table
      */
     public int getNameIndex() {
         return (nameHashTableIndex >> 16) & 0xffff;
     }
-    
+
     /**
      * Offset in hash chain
      */
     public int getNameOffset() {
         return nameHashTableIndex & 0xffff;
     }
-    
+
     public static LSFNodeEntryV2 fromBuffer(ByteBuffer buffer) {
         LSFNodeEntryV2 entry = new LSFNodeEntryV2();
         entry.nameHashTableIndex = buffer.getInt();
@@ -43,10 +43,10 @@ public class LSFNodeEntryV2 {
         entry.parentIndex = buffer.getInt();
         return entry;
     }
-    
+
     public void writeToBuffer(ByteBuffer buffer) {
         buffer.putInt(nameHashTableIndex);
         buffer.putInt(firstAttributeIndex);
         buffer.putInt(parentIndex);
     }
-} 
+}

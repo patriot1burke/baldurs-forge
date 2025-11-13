@@ -8,8 +8,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.baldurs.archivist.PackageReader;
 import org.baldurs.archivist.LS.Converter;
+import org.baldurs.archivist.PackageReader;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -180,7 +180,7 @@ public class ArchiveSource {
             String cmd = String.format("magick %s %s", ddsFile, pngPath);
             //Log.infof("Converting DDS to PNG: %s", cmd);
             Process process = new ProcessBuilder(cmd.split(" "))
-            .start();
+                    .start();
             process.waitFor();
             archiveSource.icons.put(iconName, pngPath.toString());
             //Log.infof("Scanned item icon file: %s", ddsFile);

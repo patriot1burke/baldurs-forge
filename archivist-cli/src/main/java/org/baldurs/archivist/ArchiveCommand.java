@@ -7,7 +7,7 @@ import picocli.CommandLine.Parameters;
 
 @Command(name = "archive", description = "Create a .pak file from a directory")
 class ArchiveCommand implements Runnable {
-    
+
     @Parameters(index = "0", description = "The input directory")
     File inputDir;
 
@@ -23,7 +23,7 @@ class ArchiveCommand implements Runnable {
                 System.err.println("Input directory does not exist");
                 return;
             }
- 
+
             PackageWriter writer = new PackageWriter();
             writer.archive(inputDir.toPath(), outputPak.toPath());
         } catch (Exception e) {
