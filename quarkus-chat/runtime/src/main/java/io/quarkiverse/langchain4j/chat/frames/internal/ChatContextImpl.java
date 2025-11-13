@@ -32,6 +32,9 @@ public class ChatContextImpl implements ChatContext {
 
     boolean ignoreAIResponse = false;
 
+    boolean wipeScheduled = false;
+    boolean wipeAborted = false;
+
     @Inject
     ChatFrameController chatFrameController;
 
@@ -198,4 +201,18 @@ public class ChatContextImpl implements ChatContext {
         chatFrameController.clearMemory();
     }
 
+    @Override
+    public void scheduleWipe() {
+        wipeScheduled = true;
+    }
+
+    @Override
+    public boolean wipeScheduled() {
+        return wipeScheduled && !wipeAborted;
+    }
+
+    @Override
+    public void abortWipe() {
+        wipeAborted = true;
+    }
 }

@@ -86,7 +86,6 @@ public class MainMenuChatFrame {
             context.response().add(new ObjectMessage(renderer.markdownToHtml(result.content())));
             return;
         }
-        boolean clearMemory = false;
         if (result.toolExecutions().isEmpty()) {
             Log.info("MainMenu with no tool executions");
             context.clearMemory();
@@ -98,16 +97,10 @@ public class MainMenuChatFrame {
                 if (execution.resultObject() == null) {
                     Log.info("MainMenu with null tool execution result");
                     continue;
-                } else if (execution.resultObject().equals(CLEAR_MEMORY_ON_EXIT)) {
-                    Log.info("MainMenu with CLEAR_MEMORY_ON_EXIT tool execution result");
-                    clearMemory = true;
                 } else {
                     throw new RuntimeException("This should be unreachable resultObject: " + execution.resultObject());
                 }
             }
-        }
-        if (clearMemory) {
-            context.clearMemory();
         }
         return;
     }
@@ -125,7 +118,8 @@ public class MainMenuChatFrame {
             context.response().add(new ObjectMessage("I found some possible matches for your query."));
             ListEquipmentMessage.addResponse(context, models);
         }
-        return CLEAR_MEMORY_ON_EXIT;
+        context.scheduleWipe();
+        return null;
     }
 
     @Tool(value = "Find armor or weapons or rings or amulets or boots or gloves or helmets or shields in the equipment database by name", returnBehavior = ReturnBehavior.IMMEDIATE)
@@ -147,7 +141,9 @@ public class MainMenuChatFrame {
                     "I found what you were looking for."));
             ShowEquipmentMessage.addResponse(context, model);
         }
-        return CLEAR_MEMORY_ON_EXIT;
+        context.scheduleWipe();
+        // can the tool return void or will it confuse LLM?
+        return null;
 
     }
 
@@ -208,7 +204,8 @@ public class MainMenuChatFrame {
         } else {
             context.response().add(new ObjectMessage(values));
         }
-        return CLEAR_MEMORY_ON_EXIT;
+        context.scheduleWipe();
+        return null;
     }
 
     @Tool(value = "Show all new equipment the user has created.", returnBehavior = ReturnBehavior.IMMEDIATE)
@@ -222,7 +219,8 @@ public class MainMenuChatFrame {
             ListEquipmentMessage.addResponse(context, equipment);
             context.response().add(new ObjectMessage("Ask me to <i>Package Mod</i> to package up your new equipment."));
         }
-        return CLEAR_MEMORY_ON_EXIT;
+        context.scheduleWipe();
+        return null;
     }
 
     @Tool(value = "Delete new equipment item by name.", returnBehavior = ReturnBehavior.IMMEDIATE)
@@ -254,6 +252,7 @@ public class MainMenuChatFrame {
         Log.info("importMod");
         ImportModMessage.addResponse(context);
         context.response().add(new ObjectMessage("Please select a file to import."));
-        return CLEAR_MEMORY_ON_EXIT;
+        context.scheduleWipe();
+        return null;
     }
 }

@@ -71,7 +71,13 @@ public class ChatFrameEndpoint {
                     ctx.response().setStatusCode(400).end("Failed to deserialize chat context");
                     return null;
                 }
-                chatFrameService.chat();
+                try {
+                    chatFrameService.chat();
+                } finally {
+                    if (context.wipeScheduled()) {
+                        context.clearMemory();
+                    }
+                }
                 StringWriter writer = new StringWriter();
                 try {
                     ChatContextSerialization.serialize(context, memoryStore, mapper, writer);

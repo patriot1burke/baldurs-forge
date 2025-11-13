@@ -146,4 +146,22 @@ public interface ChatContext {
      * Clears chat memory for the ChatContext's current memoryId.
      */
     void clearMemory();
+
+    /**
+     * Schedule a wipe of chat memory for the ChatContext's current memoryId before returning to client.
+     */
+    void scheduleWipe();
+
+    /**
+     * Abort a scheduled wipe of chat memory for the ChatContext's current memoryId.
+     * An abort cannot be canceled or overridden.
+     */
+    void abortWipe();
+
+    /**
+     * Checks if a wipe of chat memory is scheduled
+     *
+     * @return true if a wipe is scheduled, false otherwise
+     */
+    boolean wipeScheduled();
 }
