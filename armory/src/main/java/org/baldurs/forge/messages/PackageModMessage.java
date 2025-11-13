@@ -1,6 +1,6 @@
 package org.baldurs.forge.messages;
 
-import io.quarkiverse.langchain4j.chat.frames.ChatContext;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameMessage;
 
 public class PackageModMessage extends ChatFrameMessage {
@@ -22,7 +22,7 @@ public class PackageModMessage extends ChatFrameMessage {
      * @param context
      * @param filename
      */
-    public static void addResponse(ChatContext context, String filename) {
+    public static void addResponse(ChatFrameContext context, String filename) {
         context.response().removeIf(action -> action instanceof PackageModMessage);
         context.response().add(new PackageModMessage(filename));
     }

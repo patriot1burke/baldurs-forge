@@ -8,11 +8,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.quarkiverse.langchain4j.chat.frames.ChatContext;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 
-public class ChatContextSerialization {
+public class ChatFrameContextSerialization {
 
-    public static ChatContext deserialize(ObjectMapper mapper, ChatContext context, ClientMemoryStore memory,
+    public static ChatFrameContext deserialize(ObjectMapper mapper, ChatFrameContext context, ClientMemoryStore memory,
             InputStream entityStream) throws IOException, JsonProcessingException {
         // we have a static method for unit testing unmarshalling
         JsonNode node = mapper.readTree(entityStream);
@@ -48,7 +48,7 @@ public class ChatContextSerialization {
         return context;
     }
 
-    public static void serialize(ChatContext t, ClientMemoryStore memory, ObjectMapper mapper, Writer writer)
+    public static void serialize(ChatFrameContext t, ClientMemoryStore memory, ObjectMapper mapper, Writer writer)
             throws IOException {
         writer.write("{");
         writer.write("\"response\":");

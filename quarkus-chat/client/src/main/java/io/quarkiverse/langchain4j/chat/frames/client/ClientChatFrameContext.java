@@ -9,9 +9,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-@JsonSerialize(using = ClientChatContextSerializer.class)
-@JsonDeserialize(using = ClientChatContextDeserializer.class)
-public class ClientChatContext {
+@JsonSerialize(using = ClientChatFrameContextSerializer.class)
+@JsonDeserialize(using = ClientChatFrameContextDeserializer.class)
+public class ClientChatFrameContext {
     Map<String, Object> data = new HashMap<>();
     JsonNode memory = null;
     String memoryId = null;

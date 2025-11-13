@@ -12,7 +12,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.quarkiverse.langchain4j.chat.frames.ChatContext;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
 import io.quarkus.arc.Arc;
 import io.quarkus.arc.ManagedContext;
@@ -33,7 +33,7 @@ public class ChatFrameEndpoint {
     ClientMemoryStore memoryStore;
 
     @Inject
-    ChatContext context;
+    ChatFrameContext context;
 
     @Inject
     ObjectMapper mapper;
@@ -64,7 +64,7 @@ public class ChatFrameEndpoint {
             }
             try {
                 try {
-                    ChatContextSerialization.deserialize(mapper, context, memoryStore,
+                    ChatFrameContextSerialization.deserialize(mapper, context, memoryStore,
                             new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)));
                 } catch (Exception e) {
                     Log.error("Failed to deserialize chat context", e);
@@ -80,7 +80,7 @@ public class ChatFrameEndpoint {
                 }
                 StringWriter writer = new StringWriter();
                 try {
-                    ChatContextSerialization.serialize(context, memoryStore, mapper, writer);
+                    ChatFrameContextSerialization.serialize(context, memoryStore, mapper, writer);
                 } catch (Exception e) {
                     Log.error("Failed to serialize chat context", e);
                     ctx.response().setStatusCode(500).end("Failed to serialize chat context");

@@ -6,14 +6,14 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
-public class ClientChatContextSerializer extends StdSerializer<ClientChatContext> {
+public class ClientChatFrameContextSerializer extends StdSerializer<ClientChatFrameContext> {
 
-    public ClientChatContextSerializer() {
-        super(ClientChatContext.class);
+    public ClientChatFrameContextSerializer() {
+        super(ClientChatFrameContext.class);
     }
 
     @Override
-    public void serialize(ClientChatContext value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(ClientChatFrameContext value, JsonGenerator gen, SerializerProvider provider) throws IOException {
         gen.writeStartObject();
         gen.writeObjectField("data", value.data);
         gen.writeObjectField("memory", value.memory);

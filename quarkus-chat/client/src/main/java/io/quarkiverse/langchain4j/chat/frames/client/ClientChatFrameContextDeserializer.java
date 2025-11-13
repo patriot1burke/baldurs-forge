@@ -7,19 +7,19 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
-public class ClientChatContextDeserializer extends StdDeserializer<ClientChatContext> {
+public class ClientChatFrameContextDeserializer extends StdDeserializer<ClientChatFrameContext> {
 
-    public ClientChatContextDeserializer() {
-        super(ClientChatContext.class);
+    public ClientChatFrameContextDeserializer() {
+        super(ClientChatFrameContext.class);
     }
 
     @Override
-    public ClientChatContext deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+    public ClientChatFrameContext deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         JsonNode contextNode = p.getCodec().readTree(p);
         if (contextNode == null || contextNode.isNull()) {
             return null;
         }
-        ClientChatContext context = new ClientChatContext();
+        ClientChatFrameContext context = new ClientChatFrameContext();
         JsonNode dataNode = contextNode.get("data");
         JsonNode memoryNode = contextNode.get("memory");
         JsonNode memoryIdNode = contextNode.get("memoryId");

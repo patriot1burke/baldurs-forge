@@ -8,21 +8,21 @@ import jakarta.inject.Inject;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import io.quarkiverse.langchain4j.chat.frames.ChatContext;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 import io.quarkus.logging.Log;
 
 @ApplicationScoped
-public class ChatFrameService implements ChatFrameController {
+public class ChatFrameControllerService implements ChatFrameController {
     public static final String CHAT_FRAME = "chatFrame";
 
     @Inject
     ClientMemoryStore memoryStore;
 
     @Inject
-    ChatContext context;
+    ChatFrameContext context;
 
     @Override
     public void register(String name, ChatFrameExecution chatFrame) {

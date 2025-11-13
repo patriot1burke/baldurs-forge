@@ -34,8 +34,8 @@ import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.service.Result;
 import dev.langchain4j.service.tool.ToolExecution;
-import io.quarkiverse.langchain4j.chat.frames.ChatContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 import io.quarkus.logging.Log;
 
@@ -45,7 +45,7 @@ public class ModPackager {
     public static final String PACKAGE_MODE_CHAT_COMMAND = "Package mod";
 
     @Inject
-    ChatContext context;
+    ChatFrameContext context;
 
     @Inject
     ModPackagePrompt agent;

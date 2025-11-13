@@ -3,15 +3,15 @@ package io.quarkiverse.langchain4j.chat.frames.test;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import io.quarkiverse.langchain4j.chat.frames.ChatContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.DefaultChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.TextMessage;
 
 @ApplicationScoped
 public class MyChatService {
     @Inject
-    ChatContext context;
+    ChatFrameContext context;
 
     @ChatFrame
     @DefaultChatFrame

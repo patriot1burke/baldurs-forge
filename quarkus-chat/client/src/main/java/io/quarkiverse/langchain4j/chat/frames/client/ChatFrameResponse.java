@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, isGetterVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ChatFrameResponse {
-    ClientChatContext context;
+    ClientChatFrameContext context;
     List<ClientChatFrameMessage> response;
 
     /**

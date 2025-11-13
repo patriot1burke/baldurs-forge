@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.langchain4j.service.Result;
 import dev.langchain4j.service.tool.ToolExecution;
-import io.quarkiverse.langchain4j.chat.frames.ChatContext;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 import io.quarkus.logging.Log;
 
@@ -33,7 +33,7 @@ public abstract class EquipmentBuilder {
     public static final String CURRENT_EQUIPMENT = "currentEquipment";
 
     @Inject
-    ChatContext context;
+    ChatFrameContext context;
 
     ObjectMapper mapper;
 

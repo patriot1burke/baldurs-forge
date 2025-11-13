@@ -32,7 +32,7 @@ import com.fasterxml.jackson.databind.JsonNode;
  * }
  * }
  */
-public interface ChatContext {
+public interface ChatFrameContext {
     String userMessage();
 
     String memoryId();

@@ -14,14 +14,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.quarkiverse.langchain4j.chat.frames.ChatContext;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameMessage;
 
 @RequestScoped
 @Default
-public class ChatContextImpl implements ChatContext {
+public class ChatFrameContextImpl implements ChatFrameContext {
 
     Map<String, Object> data = new HashMap<>();
 

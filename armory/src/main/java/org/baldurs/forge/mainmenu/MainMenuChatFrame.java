@@ -26,8 +26,8 @@ import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.service.Result;
 import dev.langchain4j.service.tool.ToolExecution;
-import io.quarkiverse.langchain4j.chat.frames.ChatContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.DefaultChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 import io.quarkus.logging.Log;
@@ -35,7 +35,7 @@ import io.quarkus.logging.Log;
 @ApplicationScoped
 public class MainMenuChatFrame {
     @Inject
-    ChatContext context;
+    ChatFrameContext context;
 
     @Inject
     EquipmentDB equipmentDB;

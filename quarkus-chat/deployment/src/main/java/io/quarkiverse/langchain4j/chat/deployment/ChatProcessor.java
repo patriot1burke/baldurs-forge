@@ -18,10 +18,10 @@ import org.jboss.jandex.Type;
 
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.DefaultChatFrame;
-import io.quarkiverse.langchain4j.chat.frames.internal.ChatContextImpl;
+import io.quarkiverse.langchain4j.chat.frames.internal.ChatFrameContextImpl;
+import io.quarkiverse.langchain4j.chat.frames.internal.ChatFrameControllerService;
 import io.quarkiverse.langchain4j.chat.frames.internal.ChatFrameEndpoint;
 import io.quarkiverse.langchain4j.chat.frames.internal.ChatFrameRecorder;
-import io.quarkiverse.langchain4j.chat.frames.internal.ChatFrameService;
 import io.quarkiverse.langchain4j.chat.frames.internal.ClientMemoryStoreBean;
 import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import io.quarkus.arc.deployment.BeanContainerBuildItem;
@@ -40,8 +40,8 @@ public class ChatProcessor {
     @BuildStep
     public void registerBeans(BuildProducer<AdditionalBeanBuildItem> additionalBeanProducer) {
         AdditionalBeanBuildItem.builder()
-                .addBeanClasses(ChatFrameService.class, ChatFrameEndpoint.class, ClientMemoryStoreBean.class,
-                        ChatContextImpl.class)
+                .addBeanClasses(ChatFrameControllerService.class, ChatFrameEndpoint.class, ClientMemoryStoreBean.class,
+                        ChatFrameContextImpl.class)
                 .setUnremovable().build();
 
     }
