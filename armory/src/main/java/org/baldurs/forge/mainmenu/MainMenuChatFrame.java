@@ -30,6 +30,7 @@ import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.DefaultChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
+import io.quarkiverse.langchain4j.chat.frames.StringMessage;
 import io.quarkus.logging.Log;
 
 @ApplicationScoped
@@ -83,7 +84,7 @@ public class MainMenuChatFrame {
         Log.info("MainMenu with user message: " + context.userMessage());
         Result<String> result = chat.chat(context.memoryId(), context.userMessage());
         if (result.content() != null) {
-            context.response().add(new ObjectMessage(renderer.markdownToHtml(result.content())));
+            context.response().add(new StringMessage(renderer.markdownToHtml(result.content())));
             return;
         }
         if (result.toolExecutions().isEmpty()) {
@@ -113,9 +114,9 @@ public class MainMenuChatFrame {
         Log.info("Searching equipment database with user message: " + context.userMessage());
         List<EquipmentModel> models = equipmentDB.ragSearch(context.userMessage());
         if (models.isEmpty()) {
-            context.response().add(new ObjectMessage("Could not find any equipment that matched your query."));
+            context.response().add(new StringMessage("Could not find any equipment that matched your query."));
         } else {
-            context.response().add(new ObjectMessage("I found some possible matches for your query."));
+            context.response().add(new StringMessage("I found some possible matches for your query."));
             ListEquipmentMessage.addResponse(context, models);
         }
         context.scheduleWipe();
@@ -130,14 +131,14 @@ public class MainMenuChatFrame {
             List<EquipmentModel> models = equipmentDB.ragSearch(context.userMessage());
             if (models.isEmpty()) {
                 context.response()
-                        .add(new ObjectMessage("I could not find any equipment with that name or any similar names."));
+                        .add(new StringMessage("I could not find any equipment with that name or any similar names."));
             } else {
-                context.response().add(new ObjectMessage(
+                context.response().add(new StringMessage(
                         "I could not find an exact match for your query, but I found some possible matches."));
                 ListEquipmentMessage.addResponse(context, models);
             }
         } else {
-            context.response().add(new ObjectMessage(
+            context.response().add(new StringMessage(
                     "I found what you were looking for."));
             ShowEquipmentMessage.addResponse(context, model);
         }
@@ -200,7 +201,7 @@ public class MainMenuChatFrame {
         Log.info("Finding data attribute values for: " + attributeName);
         List<String> values = library.getStatAttributeValues(attributeName);
         if (values.isEmpty()) {
-            context.response().add(new ObjectMessage("I could not find any values for attribute: " + attributeName));
+            context.response().add(new StringMessage("I could not find any values for attribute: " + attributeName));
         } else {
             context.response().add(new ObjectMessage(values));
         }
@@ -213,11 +214,11 @@ public class MainMenuChatFrame {
         Log.info("showNewEquipment");
         List<EquipmentModel> equipment = modPackager.listBuiltEquipment();
         if (equipment.isEmpty()) {
-            context.response().add(new ObjectMessage("You have not created any new equipment yet."));
+            context.response().add(new StringMessage("You have not created any new equipment yet."));
         } else {
-            context.response().add(new ObjectMessage("This is the equipment you have created so far:"));
+            context.response().add(new StringMessage("This is the equipment you have created so far:"));
             ListEquipmentMessage.addResponse(context, equipment);
-            context.response().add(new ObjectMessage("Ask me to <i>Package Mod</i> to package up your new equipment."));
+            context.response().add(new StringMessage("Ask me to <i>Package Mod</i> to package up your new equipment."));
         }
         context.scheduleWipe();
         return null;
@@ -251,7 +252,7 @@ public class MainMenuChatFrame {
     public String importMod() {
         Log.info("importMod");
         ImportModMessage.addResponse(context);
-        context.response().add(new ObjectMessage("Please select a file to import."));
+        context.response().add(new StringMessage("Please select a file to import."));
         context.scheduleWipe();
         return null;
     }

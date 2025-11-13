@@ -1290,6 +1290,9 @@
                             } else if (action.type === 'Message') {
                                 console.log('Message');
                                 addJsonMessage(action.message);
+                            } else if (action.type === 'String') {
+                                console.log('String');
+                                addJsonMessage(action.string);
                             } else if (action.type === 'UpdateNewEquipment') {
                                 console.log('UpdateNewEquipment');
                                 updateNewEquipmentEvent(action.message);

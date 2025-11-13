@@ -9,7 +9,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import io.quarkiverse.langchain4j.chat.frames.client.ChatFrameClient;
 import io.quarkiverse.langchain4j.chat.frames.client.ChatFrameRequest;
 import io.quarkiverse.langchain4j.chat.frames.client.ChatFrameResponse;
-import io.quarkiverse.langchain4j.chat.frames.client.ClientTextMessage;
+import io.quarkiverse.langchain4j.chat.frames.client.ClientStringMessage;
 import io.quarkus.test.QuarkusUnitTest;
 
 public class ChatTest {
@@ -25,8 +25,8 @@ public class ChatTest {
         ChatFrameRequest request = new ChatFrameRequest();
         request.setUserMessage("Hello, world!");
         ChatFrameResponse response = client.chat(request);
-        ClientTextMessage text = (ClientTextMessage) response.response().get(0);
-        Assertions.assertEquals("defaultChat:Hello, world!", text.getText());
+        ClientStringMessage text = (ClientStringMessage) response.response().get(0);
+        Assertions.assertEquals("defaultChat:Hello, world!", text.getString());
     }
 
 }

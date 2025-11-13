@@ -11,7 +11,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
-import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
+import io.quarkiverse.langchain4j.chat.frames.StringMessage;
 import io.quarkus.logging.Log;
 
 @ApplicationScoped
@@ -167,7 +167,7 @@ public class ChatFrameControllerService implements ChatFrameController {
             if (ChatFrameRecorder.defaultChatFrame == null) {
                 Log.error("Current frame not set and no default chat frame found");
                 context.response()
-                        .add(new ObjectMessage("I'm having issues at the moment. Can you retry or rephrase your request?"));
+                        .add(new StringMessage("I'm having issues at the moment. Can you retry or rephrase your request?"));
                 return;
             }
             Log.info("Executing default chat");
@@ -180,7 +180,7 @@ public class ChatFrameControllerService implements ChatFrameController {
             Log.error("Unknown chat frame: " + chatFrame);
             popFrame();
             context.response()
-                    .add(new ObjectMessage("I'm having issues at the moment. Can you retry or rephrase your request?"));
+                    .add(new StringMessage("I'm having issues at the moment. Can you retry or rephrase your request?"));
         }
 
     }

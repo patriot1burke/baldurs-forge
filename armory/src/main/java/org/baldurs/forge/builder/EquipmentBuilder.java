@@ -26,7 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.service.Result;
 import dev.langchain4j.service.tool.ToolExecution;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
-import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
+import io.quarkiverse.langchain4j.chat.frames.StringMessage;
 import io.quarkus.logging.Log;
 
 public abstract class EquipmentBuilder {
@@ -97,7 +97,7 @@ public abstract class EquipmentBuilder {
         if (result.content() != null) {
             Log.info("EquipmentBuilder with content: " + result.content());
             String html = renderer.markdownToHtml(result.content());
-            context.response().add(new ObjectMessage(html));
+            context.response().add(new StringMessage(html));
             return;
         }
         String msg = null;
@@ -121,7 +121,7 @@ public abstract class EquipmentBuilder {
 
         }
         if (msg != null) {
-            context.response().add(new ObjectMessage(renderer.markdownToHtml(msg)));
+            context.response().add(new StringMessage(renderer.markdownToHtml(msg)));
         }
     }
 
@@ -150,11 +150,12 @@ public abstract class EquipmentBuilder {
         }
         newEquipment.addEquipment(current);
         context.setData(NewModModel.NEW_EQUIPMENT, newEquipment);
-        context.response().add(new ObjectMessage("Finished building item!"));
+        context.response().add(new StringMessage("Finished building item!"));
         context.response()
                 .add(new UpdateNewEquipmentMessage("To create a mod containing your newly built equipment, tell me to '"
                         + ModPackager.PACKAGE_MODE_CHAT_COMMAND + "'"));
         Log.info("Finished equipment");
+        context.scheduleWipe();
     }
 
     protected String logJson(BaseModel equipment) {
@@ -204,8 +205,8 @@ public abstract class EquipmentBuilder {
         String enchantment = boostBuilder.createBoostMacro(context.userMessage());
         Log.info("Enchantment: " + enchantment);
         if (enchantment.indexOf('(') < 0) {
-            context.response().add(new ObjectMessage(enchantment));
-            context.response().add(new ObjectMessage("Could not create a boost macro from your description."));
+            context.response().add(new StringMessage(enchantment));
+            context.response().add(new StringMessage("Could not create a boost macro from your description."));
             return;
         }
         BaseModel current = context.getData(CURRENT_EQUIPMENT, baseModelClass());
@@ -229,8 +230,8 @@ public abstract class EquipmentBuilder {
         String enchantment = boostBuilder.createBoostMacro(context.userMessage());
         Log.info("Enchantment: " + enchantment);
         if (enchantment.indexOf('(') < 0) {
-            context.response().add(new ObjectMessage(enchantment));
-            context.response().add(new ObjectMessage("Could not create a boost macro from your description."));
+            context.response().add(new StringMessage(enchantment));
+            context.response().add(new StringMessage("Could not create a boost macro from your description."));
             return;
         }
         set(current -> current.boosts = enchantment);
@@ -242,7 +243,7 @@ public abstract class EquipmentBuilder {
     public String showVisualModels() {
         Predicate<? super Stat> visualModelPredicate = visualModelPredicate();
         if (visualModelPredicate == null) {
-            context.response().add(new ObjectMessage("Item not finished yet.  Cannot search for visual models."));
+            context.response().add(new StringMessage("Item not finished yet.  Cannot search for visual models."));
             return null;
         }
         List<RootTemplate> rootTemplates = library.findRootIconsFrom(visualModelPredicate);
@@ -261,7 +262,7 @@ public abstract class EquipmentBuilder {
         context.response().add(action);
         String message = "There are " + rootTemplates.size()
                 + " visual models available. Choose one of the parent ids from the list above if you want a different look for your weapon.";
-        context.response().add(new ObjectMessage(message));
+        context.response().add(new StringMessage(message));
 
         return null;
     }

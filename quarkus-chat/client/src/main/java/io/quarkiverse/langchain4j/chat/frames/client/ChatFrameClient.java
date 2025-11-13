@@ -18,7 +18,7 @@ public class ChatFrameClient {
 
     public ChatFrameClient(Client chatClient, String endpoint) {
         this.mapper = new ObjectMapper();
-        mapper.registerSubtypes(new NamedType(ClientTextMessage.class, "Text"));
+        mapper.registerSubtypes(new NamedType(ClientStringMessage.class, "String"));
         this.chatClient = chatClient;
         this.endpoint = endpoint;
         this.target = chatClient.target(endpoint);
