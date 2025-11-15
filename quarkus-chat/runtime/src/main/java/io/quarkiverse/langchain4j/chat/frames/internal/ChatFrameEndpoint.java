@@ -3,6 +3,7 @@ package io.quarkiverse.langchain4j.chat.frames.internal;
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -72,7 +73,9 @@ public class ChatFrameEndpoint {
                     return null;
                 }
                 try {
-                    chatFrameService.chat();
+                    List<String> fallbackParam = ctx.queryParam("fallbackFrame");
+                    String fallbackFrame = fallbackParam.isEmpty() ? null : fallbackParam.get(0);
+                    chatFrameService.chat(fallbackFrame);
                 } finally {
                     if (context.wipeScheduled()) {
                         context.clearMemory();

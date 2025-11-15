@@ -14,7 +14,6 @@ import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
-import org.jboss.jandex.Type;
 
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.DefaultChatFrame;
@@ -53,23 +52,23 @@ public class ChatProcessor {
             BuildProducer<AdditionalBeanBuildItem> additionalBeanProducer) {
         IndexView index = combinedIndexBuildItem.getIndex();
         Collection<AnnotationInstance> funqs = index.getAnnotations(CHAT_FRAME);
-        Set<String> classNames = new HashSet<>();
+        Set<String> beans = new HashSet<>();
         boolean defaultFrameFound = false;
         for (AnnotationInstance funqMethod : funqs) {
             MethodInfo method = funqMethod.target().asMethod();
             ClassInfo declaringClass = method.declaringClass();
             String className = declaringClass.name().toString();
             String methodName = method.name();
-            if (Modifier.isAbstract(method.flags())) {
+            if (Modifier.isAbstract(method.flags()) && !Modifier.isInterface(declaringClass.flags())) {
                 throw new RuntimeException(
                         String.format("Method '%s' annotated with '@ChatFrame' declared in the class '%s' is abstract.",
                                 methodName, className));
             }
 
-            if (Modifier.isAbstract(declaringClass.flags()) || Modifier.isInterface(declaringClass.flags())) {
+            if (Modifier.isAbstract(declaringClass.flags()) && !Modifier.isInterface(declaringClass.flags())) {
                 throw new RuntimeException(
                         String.format(
-                                "@ChatFrame is not allowed within abstract classes or interfaces. Method '%s' annotated with '@ChatFrame' is declared within the class '%s'.",
+                                "@ChatFrame is not allowed within abstract classes. Method '%s' annotated with '@ChatFrame' is declared within the class '%s'.",
                                 methodName, className));
             }
 
@@ -78,20 +77,26 @@ public class ChatProcessor {
                         String.format("Method '%s' annotated with '@ChatFrame' declared in the class '%s' is not public.",
                                 methodName, className));
             }
+            reflectiveClass.produce(ReflectiveClassBuildItem.builder(className).methods().build());
+            if (!Modifier.isInterface(declaringClass.flags())) {
+                beans.add(className);
+            } else {
+                ClassInfo beanClass = null;
+                for (ClassInfo classInfo : index.getAllKnownImplementations(declaringClass.name())) {
+                    if (Modifier.isAbstract(classInfo.flags())) {
+                        continue;
+                    }
+                    if (beanClass != null) {
+                        throw new RuntimeException(
+                                String.format(
+                                        "Multiple bean classes implementing interface &s that has a @ChatFrame. Only one bean class is allowed per interface.",
+                                        declaringClass.name().toString()));
+                    }
+                    beanClass = classInfo;
 
-            if (method.returnType().kind() != Type.Kind.VOID) {
-                throw new RuntimeException(
-                        String.format("Method '%s' annotated with '@ChatFrame' declared in the class '%s' must return void.",
-                                methodName, className));
+                }
+                beans.add(beanClass.name().toString());
             }
-
-            if (method.parametersCount() != 0) {
-                throw new RuntimeException(
-                        String.format(
-                                "Method '%s' annotated with '@ChatFrame' declared in the class '%s' must not have any parameters.",
-                                methodName, className));
-            }
-            classNames.add(className);
 
             String frameName = className + "::" + methodName;
             if (funqMethod.value() != null) {
@@ -110,11 +115,8 @@ public class ChatProcessor {
             }
             chatFrameProducer.produce(new ChatFrameBuildItem(frameName, className, methodName, defaultFrame));
         }
-        if (!classNames.isEmpty()) {
-            for (String className : classNames) {
-                reflectiveClass.produce(ReflectiveClassBuildItem.builder(className).methods().build());
-            }
-            additionalBeanProducer.produce(AdditionalBeanBuildItem.builder().addBeanClasses(classNames)
+        if (!beans.isEmpty()) {
+            additionalBeanProducer.produce(AdditionalBeanBuildItem.builder().addBeanClasses(beans)
                     .setDefaultScope(DotNames.APPLICATION_SCOPED).setUnremovable().build());
         }
     }

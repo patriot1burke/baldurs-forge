@@ -1,5 +1,6 @@
 package io.quarkiverse.langchain4j.chat.frames.internal;
 
+import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
@@ -25,15 +26,20 @@ public class ChatFrameRecorder {
     }
 
     public void registerChatFrame(String frameName, Class<?> targetClass, String methodName, boolean isDefault) {
-        try {
-            ChatFrameExecution chatFrameExecution = new ReflectiveChatFrameExecution(targetClass,
-                    targetClass.getMethod(methodName));
-            chatFrames.put(frameName, chatFrameExecution);
-            if (isDefault) {
-                defaultChatFrame = frameName;
-            }
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
+        ChatFrameExecution chatFrameExecution = new ReflectiveChatFrameExecution(targetClass,
+                resolveMethod(targetClass, methodName));
+        chatFrames.put(frameName, chatFrameExecution);
+        if (isDefault) {
+            defaultChatFrame = frameName;
         }
+    }
+
+    protected Method resolveMethod(Class<?> targetClass, String methodName) {
+        for (Method method : targetClass.getMethods()) {
+            if (method.getName().equals(methodName)) {
+                return method;
+            }
+        }
+        return null;
     }
 }

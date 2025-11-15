@@ -23,6 +23,20 @@ public class ChatFrameContextSerialization {
         if (userMessageNode != null && !userMessageNode.isNull()) {
             context.setUserMessage(userMessageNode.asText());
         }
+        JsonNode systemMessageNode = node.get("systemMessage");
+        if (systemMessageNode != null && !systemMessageNode.isNull()) {
+            context.setSystemMessage(systemMessageNode.asText());
+        }
+        JsonNode parametersNode = node.get("parameters");
+        if (parametersNode != null && !parametersNode.isNull()) {
+            parametersNode.fields().forEachRemaining(field -> {
+                JsonNode value = field.getValue();
+                if (value != null && !value.isNull()) {
+                    context.parameters().put(field.getKey(), value);
+                }
+            });
+        }
+
         JsonNode contextNode = node.get("context");
         if (contextNode == null || contextNode.isNull()) {
             return context;

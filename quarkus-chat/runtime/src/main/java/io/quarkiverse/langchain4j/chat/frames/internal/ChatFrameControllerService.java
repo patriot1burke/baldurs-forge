@@ -162,7 +162,12 @@ public class ChatFrameControllerService implements ChatFrameController {
 
     @Override
     public void chat() {
-        String chatFrame = currentFrameId();
+        chat(null);
+    }
+
+    @Override
+    public void chat(String fallbackFrame) {
+        String chatFrame = fallbackFrame != null ? fallbackFrame : currentFrameId();
         if (chatFrame == null) {
             if (ChatFrameRecorder.defaultChatFrame == null) {
                 Log.error("Current frame not set and no default chat frame found");

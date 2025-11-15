@@ -3,6 +3,10 @@ package io.quarkiverse.langchain4j.chat.frames.test;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import org.junit.jupiter.api.Assertions;
+
+import dev.langchain4j.service.MemoryId;
+import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.DefaultChatFrame;
@@ -25,7 +29,10 @@ public class MyChatService {
     }
 
     @ChatFrame("two")
-    public void chatTwo() {
-        context.response().add(new StringMessage("two:" + context.userMessage()));
+    public void chatTwo(@MemoryId String memoryId, @UserMessage String userMessage, ChatFrameContext ctx) {
+        Assertions.assertNotNull(memoryId);
+        Assertions.assertNotNull(userMessage);
+        Assertions.assertNotNull(ctx);
+        ctx.response().add(new StringMessage("two:" + userMessage));
     }
 }

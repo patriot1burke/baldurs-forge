@@ -64,6 +64,18 @@ public interface ChatFrameController {
      */
     void clearMemory();
 
+    /**
+     * Executes the current chat frame for the given context. If the current chat frame is not found, executes the default chat
+     * frame.
+     */
     void chat();
+
+    /**
+     * Executes the current chat frame for the given context. If the current chat frame is not found, executes the fallback
+     * frame.
+     *
+     * @param fallbackFrame
+     */
+    void chat(String fallbackFrame);
 
 }

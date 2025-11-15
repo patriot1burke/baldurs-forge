@@ -2,32 +2,92 @@ package io.quarkiverse.langchain4j.chat.frames.internal;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.List;
 
+import dev.langchain4j.service.MemoryId;
+import dev.langchain4j.service.Result;
+import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.UserMessage;
+import dev.langchain4j.service.tool.ToolExecution;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
+import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
+import io.quarkiverse.langchain4j.chat.frames.StringMessage;
+import io.quarkus.arc.Arc;
 import io.quarkus.arc.runtime.BeanContainer;
 
 public class ReflectiveChatFrameExecution implements ChatFrameExecution {
     private final Class<?> beanClass;
     private final Method method;
     protected volatile BeanContainer.Factory<?> factory;
+    protected List<ParameterResolver> parameterResolvers = new ArrayList<>();
+
+    interface ParameterResolver {
+        Object resolve(ChatFrameContext context);
+    }
 
     public ReflectiveChatFrameExecution(Class<?> beanClass, Method method) {
         this.beanClass = beanClass;
         this.method = method;
+
+        for (Parameter parameter : method.getParameters()) {
+            if (parameter.isAnnotationPresent(UserMessage.class)) {
+                parameterResolvers.add((ctx) -> ctx.userMessage());
+            } else if (parameter.isAnnotationPresent(SystemMessage.class)) {
+                parameterResolvers.add((ctx) -> ctx.systemMessage());
+            } else if (parameter.isAnnotationPresent(MemoryId.class)) {
+                parameterResolvers.add((ctx) -> ctx.memoryId());
+            } else if (parameter.getType().isAssignableFrom(ChatFrameContext.class)) {
+                parameterResolvers.add((ctx) -> ctx);
+            } else {
+                parameterResolvers.add((ctx) -> ctx.parameter(parameter.getName(), parameter.getParameterizedType()));
+            }
+        }
     }
 
     @Override
     public void chat() {
-        if (factory == null) {
-            factory = ChatFrameRecorder.CONTAINER.beanInstanceFactory(beanClass);
-        }
-        Object instance = factory.create().get();
+        Object instance = Arc.container().instance(beanClass).get();
         try {
-            method.invoke(instance);
+            Object returnValue = null;
+            ChatFrameContext context = ChatFrameRecorder.CONTAINER.beanInstance(ChatFrameContext.class);
+            if (method.getParameterCount() == 0) {
+                returnValue = method.invoke(instance);
+            } else {
+                Object[] parameters = new Object[method.getParameters().length];
+                for (int i = 0; i < method.getParameters().length; i++) {
+                    parameters[i] = parameterResolvers.get(i).resolve(context);
+                }
+                returnValue = method.invoke(instance, parameters);
+            }
+            if (returnValue != null) {
+                if (returnValue instanceof Result) {
+                    Result<?> result = (Result<?>) returnValue;
+                    if (result.content() != null) {
+                        handleResponse(context, result.content());
+                    } else {
+                        for (ToolExecution execution : result.toolExecutions()) {
+                            handleResponse(context, execution.resultObject());
+                        }
+                    }
+                } else {
+                    handleResponse(context, returnValue);
+                }
+            }
         } catch (InvocationTargetException e) {
             throw new RuntimeException(e.getCause());
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void handleResponse(ChatFrameContext context, Object returnValue) {
+        if (returnValue instanceof String) {
+            context.response().add(new StringMessage((String) returnValue));
+        } else {
+            context.response().add(new ObjectMessage(returnValue));
         }
     }
 

@@ -1,5 +1,6 @@
 package io.quarkiverse.langchain4j.chat.frames;
 
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
@@ -35,14 +36,36 @@ import com.fasterxml.jackson.databind.JsonNode;
 public interface ChatFrameContext {
     String userMessage();
 
+    String systemMessage();
+
+    void setUserMessage(String userMessage);
+
+    void setSystemMessage(String systemMessage);
+
+    /**
+     * Request parameters passed by client. Value can be raw JsonNode objects.
+     * Use getParameter() to get the value as a specific type.
+     *
+     * @return
+     */
+    Map<String, Object> parameters();
+
+    <T> T parameter(String key, Class<T> type);
+
+    <T> T parameter(String key, TypeReference<T> type);
+
+    <T> T parameter(String key, Type type);
+
+    public void setParameters(Map<String, Object> parameters);
+
+    void setParameter(String key, Object value);
+
     String memoryId();
 
     void setMemoryId(String memoryId);
 
-    void setUserMessage(String userMessage);
-
     /**
-     * Data serialized and shared with client.
+     * Session Data serialized and shared with client.
      *
      * This is raw data and could contain JsonNode objects.
      * Preferably use the {@link #getData(String, Class)} method to get the data
@@ -53,7 +76,7 @@ public interface ChatFrameContext {
     Map<String, Object> data();
 
     /**
-     * Data serialized and shared with client.
+     * Session Data serialized and shared with client.
      *
      * Tools should only add data to the shared context if they need to pass data
      * back to the client.
@@ -63,7 +86,7 @@ public interface ChatFrameContext {
     <T> T getData(String key, Class<T> type);
 
     /**
-     * Data serialized and shared with client.
+     * Session Data serialized and shared with client.
      *
      * Tools should only add data to the shared context if they need to pass data
      * back to the client.
@@ -73,7 +96,7 @@ public interface ChatFrameContext {
     <T> T getData(String key, TypeReference<T> type);
 
     /**
-     * Data serialized and shared with client.
+     * Session Data serialized and shared with client.
      *
      * Tools should only add data to the shared context if they need to pass data
      * back to the client.
