@@ -1,5 +1,7 @@
 package io.quarkiverse.langchain4j.chat.frames.test;
 
+import java.util.List;
+
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.jupiter.api.Assertions;
@@ -8,6 +10,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.quarkiverse.langchain4j.chat.frames.client.ChatFrameClient;
 import io.quarkiverse.langchain4j.chat.frames.client.ChatFrameClientSession;
+import io.quarkiverse.langchain4j.chat.frames.client.ClientChatFrameMessage;
 import io.quarkiverse.langchain4j.chat.frames.client.ClientStringMessage;
 import io.quarkus.test.QuarkusUnitTest;
 
@@ -16,7 +19,8 @@ public class ChatTest {
     @RegisterExtension
     public static QuarkusUnitTest test = new QuarkusUnitTest()
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
-                    .addClasses(MyChatService.class, AnotherChatService.class, AnotherChat.class));
+                    .addClasses(MyChatService.class, AnotherChatService.class, AnotherChat.class, MockResult.class,
+                            ResponseChatService.class, TestTextMessage.class, TestIntegerMessage.class));
 
     @Test
     public void testChat() {
@@ -35,6 +39,39 @@ public class ChatTest {
     }
 
     @Test
+    public void testStringResult() {
+        ChatFrameClient client = new ChatFrameClient("http://localhost:8081/chat");
+        ChatFrameClientSession session = client.session("string-result");
+        ClientStringMessage text = (ClientStringMessage) session.chat("Hello, world!").get(0);
+        Assertions.assertEquals("string-result", text.getString());
+
+        session = client.session("null-string");
+        Assertions.assertTrue(session.chat("Hello, world!").isEmpty());
+    }
+
+    @Test
+    public void testResult() {
+        ChatFrameClient client = new ChatFrameClient("http://localhost:8081/chat");
+        ChatFrameClientSession session = client.session("result");
+        ClientStringMessage text = (ClientStringMessage) session.chat("Hello, world!").get(0);
+        Assertions.assertEquals("result", text.getString());
+
+        session = client.session("null-result");
+        Assertions.assertTrue(session.chat("Hello, world!").isEmpty());
+
+        session = client.session("null-execution");
+        Assertions.assertTrue(session.chat("Hello, world!").isEmpty());
+    }
+
+    @Test
+    public void testResultToolExecution() {
+        ChatFrameClient client = new ChatFrameClient("http://localhost:8081/chat");
+        ChatFrameClientSession session = client.session("execution");
+        ClientStringMessage text = (ClientStringMessage) session.chat("Hello, world!").get(0);
+        Assertions.assertEquals("result-with-execution", text.getString());
+    }
+
+    @Test
     public void testInterface() {
         ChatFrameClient client = new ChatFrameClient("http://localhost:8081/chat");
         ChatFrameClientSession session = client.session("another-chat");
@@ -42,4 +79,31 @@ public class ChatTest {
         Assertions.assertEquals("hello:Hello, world!", text.getString());
     }
 
+    @Test
+    public void testStringResponseMessage() {
+        ChatFrameClient client = new ChatFrameClient("http://localhost:8081/chat");
+        ChatFrameClientSession session = client.session("text");
+        ClientStringMessage text = (ClientStringMessage) session.chat("Hello, world!").get(0);
+        Assertions.assertEquals("TestText:stringResponse", text.getString());
+    }
+
+    @Test
+    public void testIntegerResponseMessage() {
+        ChatFrameClient client = new ChatFrameClient("http://localhost:8081/chat");
+        ChatFrameClientSession session = client.session("int");
+        ClientStringMessage text = (ClientStringMessage) session.chat("Hello, world!").get(0);
+        Assertions.assertEquals("TestInteger:123", text.getString());
+    }
+
+    @Test
+    public void testMultiResult() {
+        ChatFrameClient client = new ChatFrameClient("http://localhost:8081/chat");
+        ChatFrameClientSession session = client.session("multi-result");
+        List<ClientChatFrameMessage> messages = session.chat("Hello, world!");
+        Assertions.assertEquals(2, messages.size());
+        ClientStringMessage text1 = (ClientStringMessage) messages.get(0);
+        Assertions.assertEquals("TestText:textResult", text1.getString());
+        ClientStringMessage text2 = (ClientStringMessage) messages.get(1);
+        Assertions.assertEquals("TestInteger:123", text2.getString());
+    }
 }

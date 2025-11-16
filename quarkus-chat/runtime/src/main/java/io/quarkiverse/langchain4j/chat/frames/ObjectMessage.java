@@ -16,4 +16,8 @@ public class ObjectMessage extends ChatFrameMessage {
     public Object getMessage() {
         return message;
     }
+
+    public static ObjectMessage from(Object message) {
+        return new ObjectMessage(message);
+    }
 }

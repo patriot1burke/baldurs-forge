@@ -16,4 +16,8 @@ public class StringMessage extends ChatFrameMessage {
     public String getString() {
         return string;
     }
+
+    public static StringMessage from(String string) {
+        return new StringMessage(string);
+    }
 }
