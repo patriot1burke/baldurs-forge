@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 @Target({ ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface ResponseMessage {
+public @interface ChatFrameMessageTypes {
 
     Class<? extends ChatFrameMessage>[] value();
 

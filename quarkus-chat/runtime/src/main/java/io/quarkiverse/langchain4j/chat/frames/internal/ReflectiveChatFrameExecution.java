@@ -17,8 +17,8 @@ import dev.langchain4j.service.tool.ToolExecution;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameMessage;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameMessageTypes;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
-import io.quarkiverse.langchain4j.chat.frames.ResponseMessage;
 import io.quarkiverse.langchain4j.chat.frames.StringMessage;
 import io.quarkus.arc.Arc;
 import io.quarkus.arc.runtime.BeanContainer;
@@ -52,7 +52,7 @@ public class ReflectiveChatFrameExecution implements ChatFrameExecution {
                 parameterResolvers.add((ctx) -> ctx.parameter(parameter.getName(), parameter.getParameterizedType()));
             }
         }
-        ResponseMessage responseMessage = method.getAnnotation(ResponseMessage.class);
+        ChatFrameMessageTypes responseMessage = method.getAnnotation(ChatFrameMessageTypes.class);
         if (responseMessage != null) {
             for (Class<? extends ChatFrameMessage> messageClass : responseMessage.value()) {
                 for (Method cfm : messageClass.getDeclaredMethods()) {
