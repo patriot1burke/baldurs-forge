@@ -93,7 +93,7 @@ public interface ChatFrameContext {
      *
      * @return
      */
-    <T> T getData(String key, TypeReference<T> type);
+    <T> T getData(String key, Type type);
 
     /**
      * Session Data serialized and shared with client.

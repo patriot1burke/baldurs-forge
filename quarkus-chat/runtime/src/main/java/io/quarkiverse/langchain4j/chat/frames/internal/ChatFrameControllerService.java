@@ -45,7 +45,7 @@ public class ChatFrameControllerService implements ChatFrameController {
 
     protected List<String> getFrameStack() {
         return context.getData(CHAT_FRAME, new TypeReference<List<String>>() {
-        });
+        }.getType());
     }
 
     @Override

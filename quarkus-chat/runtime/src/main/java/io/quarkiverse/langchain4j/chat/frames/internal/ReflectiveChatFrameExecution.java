@@ -17,8 +17,9 @@ import dev.langchain4j.service.tool.ToolExecution;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameMessage;
-import io.quarkiverse.langchain4j.chat.frames.ResultMessageTypes;
+import io.quarkiverse.langchain4j.chat.frames.FrameData;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
+import io.quarkiverse.langchain4j.chat.frames.ResultMessageTypes;
 import io.quarkiverse.langchain4j.chat.frames.StringMessage;
 import io.quarkus.arc.Arc;
 import io.quarkus.arc.runtime.BeanContainer;
@@ -48,6 +49,10 @@ public class ReflectiveChatFrameExecution implements ChatFrameExecution {
                 parameterResolvers.add((ctx) -> ctx.memoryId());
             } else if (parameter.getType().isAssignableFrom(ChatFrameContext.class)) {
                 parameterResolvers.add((ctx) -> ctx);
+            } else if (parameter.isAnnotationPresent(FrameData.class)) {
+                String key = parameter.getAnnotation(FrameData.class).value();
+                String finalKey = key.isEmpty() ? parameter.getName() : key;
+                parameterResolvers.add((ctx) -> ctx.getData(finalKey, parameter.getParameterizedType()));
             } else {
                 parameterResolvers.add((ctx) -> ctx.parameter(parameter.getName(), parameter.getParameterizedType()));
             }
@@ -93,8 +98,8 @@ public class ReflectiveChatFrameExecution implements ChatFrameExecution {
 
     private void handleResponse(ChatFrameContext context, Type generic, Object returnValue) {
         for (Method from : responseConstructors) {
-            Log.info("handleResponse: from " + method.toString());
-            Log.info("handleResponse: generic " + generic.getTypeName());
+            Log.debugf("handleResponse: from %s", method.toString());
+            Log.debugf("handleResponse: generic %s",generic.getTypeName());
             if (from.getGenericParameterTypes()[0].equals(generic)) {
                 try {
                     context.response().add((ChatFrameMessage) from.invoke(null, returnValue));

@@ -163,14 +163,14 @@ public class ChatFrameContextImpl implements ChatFrameContext {
     }
 
     @Override
-    public <T> T getData(String key, TypeReference<T> type) {
+    public <T> T getData(String key, Type type) {
         Object value = data.get(key);
         if (value == null) {
             return null;
         }
         if (value instanceof JsonNode) {
             try {
-                value = mapper.treeToValue((JsonNode) value, type);
+                value = mapper.treeToValue((JsonNode) value, mapper.constructType(type));
                 data.put(key, value);
             } catch (Exception e) {
                 throw new RuntimeException(e);
