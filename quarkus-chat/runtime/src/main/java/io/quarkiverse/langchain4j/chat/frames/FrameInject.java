@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 @Target({ ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface FrameData {
+public @interface FrameInject {
     String value() default "";
 
 }

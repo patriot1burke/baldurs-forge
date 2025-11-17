@@ -17,7 +17,7 @@ import dev.langchain4j.service.tool.ToolExecution;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameMessage;
-import io.quarkiverse.langchain4j.chat.frames.FrameData;
+import io.quarkiverse.langchain4j.chat.frames.FrameInject;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 import io.quarkiverse.langchain4j.chat.frames.ResultMessageTypes;
 import io.quarkiverse.langchain4j.chat.frames.StringMessage;
@@ -49,8 +49,8 @@ public class ReflectiveChatFrameExecution implements ChatFrameExecution {
                 parameterResolvers.add((ctx) -> ctx.memoryId());
             } else if (parameter.getType().isAssignableFrom(ChatFrameContext.class)) {
                 parameterResolvers.add((ctx) -> ctx);
-            } else if (parameter.isAnnotationPresent(FrameData.class)) {
-                String key = parameter.getAnnotation(FrameData.class).value();
+            } else if (parameter.isAnnotationPresent(FrameInject.class)) {
+                String key = parameter.getAnnotation(FrameInject.class).value();
                 String finalKey = key.isEmpty() ? parameter.getName() : key;
                 parameterResolvers.add((ctx) -> ctx.getData(finalKey, parameter.getParameterizedType()));
             } else {
@@ -99,7 +99,7 @@ public class ReflectiveChatFrameExecution implements ChatFrameExecution {
     private void handleResponse(ChatFrameContext context, Type generic, Object returnValue) {
         for (Method from : responseConstructors) {
             Log.debugf("handleResponse: from %s", method.toString());
-            Log.debugf("handleResponse: generic %s",generic.getTypeName());
+            Log.debugf("handleResponse: generic %s", generic.getTypeName());
             if (from.getGenericParameterTypes()[0].equals(generic)) {
                 try {
                     context.response().add((ChatFrameMessage) from.invoke(null, returnValue));
