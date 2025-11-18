@@ -6,12 +6,15 @@ import java.util.function.Supplier;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import org.baldurs.forge.messages.MarkdownStringMessage;
 import org.baldurs.forge.model.Rarity;
 import org.baldurs.forge.scanner.StatsArchive;
 
 import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
+import dev.langchain4j.service.Result;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
+import io.quarkiverse.langchain4j.chat.frames.ResultMessageTypes;
 import io.quarkus.logging.Log;
 
 @ApplicationScoped
@@ -26,21 +29,6 @@ public class GlovesBuilder extends EquipmentBuilder {
     }
 
     @Override
-    protected Class<? extends BaseModel> baseModelClass() {
-        return GlovesModel.class;
-    }
-
-    @Override
-    protected String schema() {
-        return GlovesModel.schema;
-    }
-
-    @Override
-    public String type() {
-        return GlovesModel.TYPE;
-    }
-
-    @Override
     protected Supplier<BaseModel> supplier() {
         return () -> {
             GlovesModel bootsModel = new GlovesModel();
@@ -49,53 +37,56 @@ public class GlovesBuilder extends EquipmentBuilder {
     }
 
     @ChatFrame(GlovesModel.TYPE)
-    public void build() {
-        super.build();
+    @ResultMessageTypes(MarkdownStringMessage.class)
+    public Result<String> buildGloves(GlovesModel current) {
+        return build(current);
     }
 
     @Tool("Set the name for the current gloves.")
     public void setName(String name) {
         Log.info("Setting name: " + name);
-        set(current -> current.name = name);
+        GlovesModel current = context.getData(CURRENT_EQUIPMENT, GlovesModel.class);
+        current.name = name;
+        addShowEquipmentAction(current);
     }
 
     @Tool("Set the description for the current gloves.")
     public void setDescription(String description) {
         Log.info("Setting description: " + description);
-        set(current -> current.description = description);
+        GlovesModel current = context.getData(CURRENT_EQUIPMENT, GlovesModel.class);
+        current.description = description;
+        addShowEquipmentAction(current);
     }
 
     @Tool("Set the rarity for the current gloves.")
     public void setRarity(Rarity rarity) {
         Log.info("Setting rarity: " + rarity);
-        set(current -> current.rarity = rarity);
-    }
-
-    @Tool("Set the visual model for the current gloves.")
-    public void setVisualModel(String visualModel) {
-        Log.info("Setting visual model: " + visualModel);
-        super.setVisualModel(visualModel);
+        GlovesModel current = context.getData(CURRENT_EQUIPMENT, GlovesModel.class);
+        current.rarity = rarity;
+        addShowEquipmentAction(current);
     }
 
     @Tool("Set the armor category for the current gloves.")
     public void setArmorCategory(ArmorCategory armorCategory) {
         Log.info("Setting armorCategory: " + armorCategory);
-        set(current -> ((BootsModel) current).armorCategory = armorCategory);
+        GlovesModel current = context.getData(CURRENT_EQUIPMENT, GlovesModel.class);
+        current.armorCategory = armorCategory;
+        addShowEquipmentAction(current);
     }
 
     @Tool("Add boost to the current gloves.")
     public void addBoost(String boostDescription) throws Exception {
-        super.addBoost(boostDescription);
+        GlovesModel current = context.getData(CURRENT_EQUIPMENT, GlovesModel.class);
+        super.addBoost(current, boostDescription);
     }
 
     @Tool("Set boost macro for the current gloves.")
     public void setBoost(String boostDescription) throws Exception {
-        super.setBoost(boostDescription);
+        GlovesModel current = context.getData(CURRENT_EQUIPMENT, GlovesModel.class);
+        super.setBoost(current, boostDescription);
     }
 
-    @Override
-    protected Predicate<? super StatsArchive.Stat> visualModelPredicate() {
-        GlovesModel gloves = context.getData(CURRENT_EQUIPMENT, GlovesModel.class);
+    private Predicate<? super StatsArchive.Stat> visualModelPredicate(GlovesModel gloves) {
         return stat -> {
             String slot = stat.getField("Slot");
             if (slot == null || (slot != null && !slot.equals("Gloves"))) {
@@ -111,14 +102,23 @@ public class GlovesBuilder extends EquipmentBuilder {
         };
     }
 
+    @Tool("Set the visual model for the current gloves.")
+    public void setVisualModel(String visualModel) {
+        Log.info("Setting visual model: " + visualModel);
+        GlovesModel current = context.getData(CURRENT_EQUIPMENT, GlovesModel.class);
+        setVisualModel(current, visualModel, visualModelPredicate(current));
+    }
+
     @Tool(value = "Summarizes available visual models for the current gloves.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String showVisualModels() {
-        return super.showVisualModels();
+        GlovesModel gloves = context.getData(CURRENT_EQUIPMENT, GlovesModel.class);
+        return showVisualModels(visualModelPredicate(gloves));
     }
 
     @Tool(value = "When finished building gloves, call this tool to finish the gloves.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void finishEquipment() throws Exception {
-        super.finishEquipment();
+        GlovesModel current = context.getData(CURRENT_EQUIPMENT, GlovesModel.class);
+        finishEquipment(current);
     }
 
 }

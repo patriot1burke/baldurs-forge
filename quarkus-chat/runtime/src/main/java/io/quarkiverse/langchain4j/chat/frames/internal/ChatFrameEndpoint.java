@@ -3,7 +3,6 @@ package io.quarkiverse.langchain4j.chat.frames.internal;
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -13,7 +12,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
 import io.quarkus.arc.Arc;
 import io.quarkus.arc.ManagedContext;
@@ -34,7 +32,7 @@ public class ChatFrameEndpoint {
     ClientMemoryStore memoryStore;
 
     @Inject
-    ChatFrameContext context;
+    ChatFrameContextImpl context;
 
     @Inject
     ObjectMapper mapper;
@@ -73,9 +71,7 @@ public class ChatFrameEndpoint {
                     return null;
                 }
                 try {
-                    List<String> fallbackParam = ctx.queryParam("fallbackFrame");
-                    String fallbackFrame = fallbackParam.isEmpty() ? null : fallbackParam.get(0);
-                    chatFrameService.chat(fallbackFrame);
+                    chatFrameService.chat(context);
                 } finally {
                     if (context.wipeScheduled()) {
                         context.clearMemory();

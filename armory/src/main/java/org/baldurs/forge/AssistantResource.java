@@ -90,7 +90,7 @@ public class AssistantResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response packageMod(NewModModel newMod) throws Exception {
         LOG.info("Packaging mod");
-        File file = modPackager.packageMod(newMod);
+        File file = modPackager.createPackageFile(newMod);
         return Response.ok(file)
                 .header("Content-Disposition", "attachment; filename=" + file.getName())
                 .build();

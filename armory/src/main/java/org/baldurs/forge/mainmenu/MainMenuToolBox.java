@@ -20,21 +20,16 @@ import org.baldurs.forge.messages.ShowEquipmentMessage;
 import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.services.EquipmentDB;
 import org.baldurs.forge.services.LibraryService;
-import org.baldurs.forge.services.MarkdownToHtmlService;
 
 import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
-import dev.langchain4j.service.Result;
-import dev.langchain4j.service.tool.ToolExecution;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
-import io.quarkiverse.langchain4j.chat.frames.DefaultChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
 import io.quarkiverse.langchain4j.chat.frames.StringMessage;
 import io.quarkus.logging.Log;
 
 @ApplicationScoped
-public class MainMenuChatFrame {
+public class MainMenuToolBox {
     @Inject
     ChatFrameContext context;
 
@@ -72,39 +67,6 @@ public class MainMenuChatFrame {
 
     @Inject
     MainMenuPrompt chat;
-
-    @Inject
-    MarkdownToHtmlService renderer;
-
-    public static final String CLEAR_MEMORY_ON_EXIT = "clearMemoryOnExit";
-
-    @ChatFrame("mainMenu")
-    @DefaultChatFrame
-    public void chat() {
-        Log.info("MainMenu with user message: " + context.userMessage());
-        Result<String> result = chat.chat(context.memoryId(), context.userMessage());
-        if (result.content() != null) {
-            context.response().add(new StringMessage(renderer.markdownToHtml(result.content())));
-            return;
-        }
-        if (result.toolExecutions().isEmpty()) {
-            Log.info("MainMenu with no tool executions");
-            context.clearMemory();
-            return;
-        } else {
-            for (ToolExecution execution : result.toolExecutions()) {
-                Log.info("MainMenu with tool " + execution.request().name() + " execution: " + execution.result());
-                // exeuctionIds.add(execution.request().id());
-                if (execution.resultObject() == null) {
-                    Log.info("MainMenu with null tool execution result");
-                    continue;
-                } else {
-                    throw new RuntimeException("This should be unreachable resultObject: " + execution.resultObject());
-                }
-            }
-        }
-        return;
-    }
 
     @Tool(value = "Search for armor or weapons or rings or amulets or boots or gloves or helmets or shields in the equipment database based on a natural language query", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String searchEquipmentDatabase(String query) {

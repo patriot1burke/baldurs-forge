@@ -2,7 +2,6 @@ package io.quarkiverse.langchain4j.chat.frames.internal;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -11,10 +10,9 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
@@ -24,16 +22,11 @@ import io.quarkiverse.langchain4j.chat.frames.ChatFrameMessage;
 @Default
 public class ChatFrameContextImpl implements ChatFrameContext {
 
-    Map<String, Object> data = new HashMap<>();
-    Map<String, Object> parameters = new HashMap<>();
-
+    volatile ChatFrameData current;
     List<ChatFrameMessage> response = new ArrayList<>();
 
     String userMessage = null;
     String systemMessage = null;
-    String memoryId = UUID.randomUUID().toString();
-
-    boolean ignoreAIResponse = false;
 
     boolean wipeScheduled = false;
     boolean wipeAborted = false;
@@ -43,6 +36,17 @@ public class ChatFrameContextImpl implements ChatFrameContext {
 
     @Inject
     ChatFrameController chatFrameController;
+
+    @Inject
+    ChatMemoryStore chatMemoryStore;
+
+    public void setCurrent(ChatFrameData current) {
+        this.current = current;
+    }
+
+    public ChatFrameData getCurrent() {
+        return current;
+    }
 
     @Override
     public String userMessage() {
@@ -66,122 +70,27 @@ public class ChatFrameContextImpl implements ChatFrameContext {
 
     @Override
     public String memoryId() {
-        return memoryId;
-    }
-
-    @Override
-    public void setMemoryId(String memoryId) {
-        this.memoryId = memoryId;
-    }
-
-    @Override
-    public Map<String, Object> parameters() {
-        return parameters;
-    }
-
-    @Override
-    public <T> T parameter(String key, Class<T> type) {
-        Object value = parameters.get(key);
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof JsonNode) {
-            try {
-                value = mapper.treeToValue((JsonNode) value, type);
-                parameters.put(key, value);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return type.cast(value);
-    }
-
-    @Override
-    public void setParameters(Map<String, Object> parameters) {
-        this.parameters = parameters;
-    }
-
-    @Override
-    public void setParameter(String key, Object value) {
-        parameters.put(key, value);
-    }
-
-    @Override
-    public <T> T parameter(String key, TypeReference<T> type) {
-        Object value = parameters.get(key);
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof JsonNode) {
-            try {
-                value = mapper.treeToValue((JsonNode) value, type);
-                parameters.put(key, value);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return (T) value;
-    }
-
-    @Override
-    public <T> T parameter(String key, Type type) {
-        Object value = parameters.get(key);
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof JsonNode) {
-            try {
-                value = mapper.treeToValue((JsonNode) value, mapper.constructType(type));
-                parameters.put(key, value);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return (T) value;
+        return current.memoryId();
     }
 
     @Override
     public Map<String, Object> data() {
-        return data;
-    }
-
-    @Override
-    public <T> T getData(String key, Class<T> type) {
-        Object value = data.get(key);
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof JsonNode) {
-            try {
-                value = mapper.treeToValue((JsonNode) value, type);
-                data.put(key, value);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return type.cast(value);
+        return current.data();
     }
 
     @Override
     public <T> T getData(String key, Type type) {
-        Object value = data.get(key);
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof JsonNode) {
-            try {
-                value = mapper.treeToValue((JsonNode) value, mapper.constructType(type));
-                data.put(key, value);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return (T) value;
+        return current.getData(key, type);
     }
 
     @Override
     public void setData(String key, Object value) {
-        data.put(key, value);
+        current.setData(key, value);
+    }
+
+    @Override
+    public void removeData(String key) {
+        current.data().remove(key);
     }
 
     /**
@@ -198,52 +107,61 @@ public class ChatFrameContextImpl implements ChatFrameContext {
 
     @Override
     public String currentFrameId() {
-        return chatFrameController.currentFrameId();
+        return current != null ? current.name() : null;
     }
 
     @Override
     public ChatFrameExecution currentFrame() {
-        return chatFrameController.currentFrame();
-    }
-
-    @Override
-    public ChatFrameExecution getFrame(String name) {
-        return chatFrameController.getFrame(name);
+        if (current == null) {
+            return null;
+        }
+        return chatFrameController.getFrame(currentFrameId());
     }
 
     @Override
     public void setFrame(String chatFrame) {
-        chatFrameController.setFrame(chatFrame);
+        if (!chatFrameController.hasFrame(chatFrame)) {
+            throw new IllegalArgumentException("Unknown chat frame: " + chatFrame);
+        }
+        current = new ChatFrameData(mapper);
+        current.setName(chatFrame);
+        current.setMemoryId(UUID.randomUUID().toString());
     }
 
     @Override
     public void pushFrame(String chatFrame) {
-        chatFrameController.pushFrame(chatFrame);
+        pushFrame(chatFrame, false);
     }
 
     @Override
     public void popFrame() {
-        chatFrameController.popFrame();
+        if (current != null) {
+            chatMemoryStore.deleteMessages(current.memoryId());
+            current = current.parent();
+        }
     }
 
     @Override
-    public void popFrame(boolean deleteMessages) {
-        chatFrameController.popFrame(deleteMessages);
-    }
-
-    @Override
-    public void pushFrame(String chatFrame, boolean deleteMessages) {
-        chatFrameController.pushFrame(chatFrame, deleteMessages);
-    }
-
-    @Override
-    public void setFrame(String chatFrame, boolean deleteMessages) {
-        chatFrameController.setFrame(chatFrame, deleteMessages);
+    public void pushFrame(String chatFrame, boolean deleteMemory) {
+        if (!chatFrameController.hasFrame(chatFrame)) {
+            throw new IllegalArgumentException("Unknown chat frame: " + chatFrame);
+        }
+        ChatFrameData parent = current;
+        ChatFrameData next = new ChatFrameData(mapper);
+        next.setName(chatFrame);
+        next.setMemoryId(UUID.randomUUID().toString());
+        next.setParent(parent);
+        if (parent != null && deleteMemory) {
+            chatMemoryStore.deleteMessages(parent.memoryId());
+        }
+        current = next;
     }
 
     @Override
     public void clearMemory() {
-        chatFrameController.clearMemory();
+        if (current != null) {
+            chatMemoryStore.deleteMessages(current.memoryId());
+        }
     }
 
     @Override
@@ -258,6 +176,7 @@ public class ChatFrameContextImpl implements ChatFrameContext {
 
     @Override
     public void abortWipe() {
+        wipeScheduled = false;
         wipeAborted = true;
     }
 }

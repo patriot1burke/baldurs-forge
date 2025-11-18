@@ -6,12 +6,15 @@ import java.util.function.Supplier;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import org.baldurs.forge.messages.MarkdownStringMessage;
 import org.baldurs.forge.model.Rarity;
 import org.baldurs.forge.scanner.StatsArchive;
 
 import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
+import dev.langchain4j.service.Result;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
+import io.quarkiverse.langchain4j.chat.frames.ResultMessageTypes;
 import io.quarkus.logging.Log;
 
 @ApplicationScoped
@@ -26,21 +29,6 @@ public class WeaponBuilder extends EquipmentBuilder {
     }
 
     @Override
-    protected Class<? extends BaseModel> baseModelClass() {
-        return WeaponModel.class;
-    }
-
-    @Override
-    protected String schema() {
-        return WeaponModel.schema;
-    }
-
-    @Override
-    public String type() {
-        return WeaponModel.TYPE;
-    }
-
-    @Override
     protected Supplier<BaseModel> supplier() {
         return () -> {
             WeaponModel weapon = new WeaponModel();
@@ -50,59 +38,71 @@ public class WeaponBuilder extends EquipmentBuilder {
     }
 
     @ChatFrame(WeaponModel.TYPE)
-    public void build() {
-        super.build();
+    @ResultMessageTypes(MarkdownStringMessage.class)
+    public Result<String> buildWeapon(WeaponModel current) {
+        return build(current);
     }
 
     @Tool("Set the name for the current weapon.")
     public void setName(String name) {
         Log.info("Setting name: " + name);
-        set(current -> current.name = name);
+        WeaponModel current = context.getData(CURRENT_EQUIPMENT, WeaponModel.class);
+        current.name = name;
+        addShowEquipmentAction(current);
     }
 
     @Tool("Set the description for the current weapon.")
     public void setDescription(String description) {
         Log.info("Setting description: " + description);
-        set(current -> current.description = description);
+        WeaponModel current = context.getData(CURRENT_EQUIPMENT, WeaponModel.class);
+        current.description = description;
+        addShowEquipmentAction(current);
     }
 
     @Tool("Set the rarity for the current weapon.")
     public void setRarity(Rarity rarity) {
         Log.info("Setting rarity: " + rarity);
-        set(current -> current.rarity = rarity);
+        WeaponModel current = context.getData(CURRENT_EQUIPMENT, WeaponModel.class);
+        current.rarity = rarity;
+        addShowEquipmentAction(current);
     }
 
     @Tool("Set the visual model for the current weapon.")
     public void setVisualModel(String visualModel) {
         Log.info("Setting visual model: " + visualModel);
-        super.setVisualModel(visualModel);
+        WeaponModel current = context.getData(CURRENT_EQUIPMENT, WeaponModel.class);
+        setVisualModel(current, visualModel, visualModelPredicate(current));
     }
 
     @Tool("Set the type for the current weapon.")
     public void setType(WeaponType type) {
         Log.info("Setting type: " + type);
-        set(current -> ((WeaponModel) current).type = type);
+        WeaponModel current = context.getData(CURRENT_EQUIPMENT, WeaponModel.class);
+        current.type = type;
+        addShowEquipmentAction(current);
     }
 
     @Tool("Set magical for the current weapon.")
     public void setMagical(Boolean magical) {
         Log.info("Setting magical: " + magical);
-        set(current -> ((WeaponModel) current).magical = magical);
+        WeaponModel current = context.getData(CURRENT_EQUIPMENT, WeaponModel.class);
+        current.magical = magical;
+        addShowEquipmentAction(current);
     }
 
     @Tool("Add boost to the current weapon.")
     public void addBoost(String boostDescription) throws Exception {
-        super.addBoost(boostDescription);
+        WeaponModel current = context.getData(CURRENT_EQUIPMENT, WeaponModel.class);
+        super.addBoost(current, boostDescription);
     }
 
     @Tool("Set boost macro for the current weapon.")
     public void setBoost(String boostDescription) throws Exception {
-        super.setBoost(boostDescription);
+        WeaponModel current = context.getData(CURRENT_EQUIPMENT, WeaponModel.class);
+        super.setBoost(current, boostDescription);
     }
 
-    @Override
-    protected Predicate<? super StatsArchive.Stat> visualModelPredicate() {
-        WeaponModel weapon = context.getData(CURRENT_EQUIPMENT, WeaponModel.class);
+    private Predicate<? super StatsArchive.Stat> visualModelPredicate(WeaponModel weapon) {
         if (weapon == null || weapon.type == null) {
             return null;
         }
@@ -119,12 +119,13 @@ public class WeaponBuilder extends EquipmentBuilder {
         if (weapon == null || weapon.type == null) {
             throw new RuntimeException("Cannot determine vailable visual models because weapon type is not set");
         }
-        return super.showVisualModels();
+        return showVisualModels(visualModelPredicate(weapon));
     }
 
     @Tool(value = "When finished building weapon, call this tool to finish the weapon.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void finishEquipment() throws Exception {
-        super.finishEquipment();
+        WeaponModel current = context.getData(CURRENT_EQUIPMENT, WeaponModel.class);
+        finishEquipment(current);
     }
 
 }

@@ -2,6 +2,8 @@ package io.quarkiverse.langchain4j.chat.frames.test;
 
 import java.util.List;
 
+import jakarta.ws.rs.WebApplicationException;
+
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.jupiter.api.Assertions;
@@ -116,5 +118,34 @@ public class ChatTest {
 
         text = (ClientStringMessage) session.chat("Hello, world!").get(0);
         Assertions.assertEquals("test", text.getString());
+    }
+
+    @Test
+    public void testScopedFrameData() {
+        ChatFrameClientSession session = client.session("call-nested");
+        ClientStringMessage text = (ClientStringMessage) session.chat("dummy").get(0);
+        Assertions.assertEquals("first", text.getString());
+
+        text = (ClientStringMessage) session.chat("dummy").get(0);
+        Assertions.assertEquals("nested", text.getString());
+
+        text = (ClientStringMessage) session.chat("dummy").get(0);
+        Assertions.assertEquals("second", text.getString());
+
+        session = client.session("sent-data");
+        session.context().frame().setData("sentData", "sentData");
+        text = (ClientStringMessage) session.chat("dummy").get(0);
+        Assertions.assertEquals("sentData", text.getString());
+    }
+
+    @Test
+    public void testException() {
+        ChatFrameClientSession session = client.session("exception");
+        try {
+            session.chat("dummy");
+            Assertions.fail("Expected WebApplicationException");
+        } catch (WebApplicationException e) {
+            Assertions.assertEquals(500, e.getResponse().getStatus());
+        }
     }
 }

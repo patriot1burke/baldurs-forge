@@ -29,6 +29,11 @@ public class MyChatService {
         context.response().add(new StringMessage("one:" + context.userMessage()));
     }
 
+    @ChatFrame("exception")
+    public void exception() {
+        throw new RuntimeException("test exception");
+    }
+
     @ChatFrame("two")
     public void chatTwo(@MemoryId String memoryId, @UserMessage String userMessage, ChatFrameContext ctx) {
         Assertions.assertNotNull(memoryId);

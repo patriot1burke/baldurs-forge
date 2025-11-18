@@ -34,12 +34,8 @@ public class ChatFrameClient {
         mapper.registerSubtypes(new NamedType(messageType, name));
     }
 
-    public ChatFrameClientSession session(String fallbackFrame) {
-        WebTarget tmp = target;
-        if (fallbackFrame != null) {
-            tmp = tmp.queryParam("fallbackFrame", fallbackFrame);
-        }
-        return new ChatFrameClientSession(mapper, tmp);
+    public ChatFrameClientSession session(String frame) {
+        return new ChatFrameClientSession(mapper, target, frame);
     }
 
     public ChatFrameClientSession session() {

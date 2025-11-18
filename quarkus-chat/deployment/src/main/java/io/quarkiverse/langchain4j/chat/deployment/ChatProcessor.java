@@ -15,10 +15,11 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
 
+import io.quarkiverse.langchain4j.RegisterAiService;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.DefaultChatFrame;
-import io.quarkiverse.langchain4j.chat.frames.internal.ChatFrameContextImpl;
 import io.quarkiverse.langchain4j.chat.frames.internal.ChatFrameControllerService;
+import io.quarkiverse.langchain4j.chat.frames.internal.ChatFrameData;
 import io.quarkiverse.langchain4j.chat.frames.internal.ChatFrameEndpoint;
 import io.quarkiverse.langchain4j.chat.frames.internal.ChatFrameRecorder;
 import io.quarkiverse.langchain4j.chat.frames.internal.ClientMemoryStoreBean;
@@ -40,7 +41,7 @@ public class ChatProcessor {
     public void registerBeans(BuildProducer<AdditionalBeanBuildItem> additionalBeanProducer) {
         AdditionalBeanBuildItem.builder()
                 .addBeanClasses(ChatFrameControllerService.class, ChatFrameEndpoint.class, ClientMemoryStoreBean.class,
-                        ChatFrameContextImpl.class)
+                        ChatFrameData.class)
                 .setUnremovable().build();
 
     }
@@ -80,7 +81,7 @@ public class ChatProcessor {
             reflectiveClass.produce(ReflectiveClassBuildItem.builder(className).methods().build());
             if (!Modifier.isInterface(declaringClass.flags())) {
                 beans.add(className);
-            } else {
+            } else if (!declaringClass.hasAnnotation(RegisterAiService.class)) {
                 ClassInfo beanClass = null;
                 for (ClassInfo classInfo : index.getAllKnownImplementations(declaringClass.name())) {
                     if (Modifier.isAbstract(classInfo.flags())) {
@@ -95,7 +96,9 @@ public class ChatProcessor {
                     beanClass = classInfo;
 
                 }
-                beans.add(beanClass.name().toString());
+                if (beanClass != null) {
+                    beans.add(beanClass.name().toString());
+                }
             }
 
             String frameName = className + "::" + methodName;

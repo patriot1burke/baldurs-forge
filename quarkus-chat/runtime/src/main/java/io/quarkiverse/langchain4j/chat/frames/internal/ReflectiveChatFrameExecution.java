@@ -54,7 +54,9 @@ public class ReflectiveChatFrameExecution implements ChatFrameExecution {
                 String finalKey = key.isEmpty() ? parameter.getName() : key;
                 parameterResolvers.add((ctx) -> ctx.getData(finalKey, parameter.getParameterizedType()));
             } else {
-                parameterResolvers.add((ctx) -> ctx.parameter(parameter.getName(), parameter.getParameterizedType()));
+                // default to a @FrameInject
+                String finalKey = parameter.getName();
+                parameterResolvers.add((ctx) -> ctx.getData(finalKey, parameter.getParameterizedType()));
             }
         }
         ResultMessageTypes responseMessage = method.getAnnotation(ResultMessageTypes.class);

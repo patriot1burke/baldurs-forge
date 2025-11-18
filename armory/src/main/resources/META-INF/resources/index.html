@@ -756,7 +756,7 @@
                 document.body.removeChild(a);
             }
 
-            async function downloadFile(filename) {
+            async function downloadFile(action) {
                 try {
                     const response = await fetch("/assistant/package-mod", {
                         method: "POST",
@@ -764,41 +764,36 @@
                             "Accept": "application/octet-stream",
                             "Content-Type": "application/json"
                         },
-                        body: JSON.stringify(chatContext.data.newEquipment)
+                        body: JSON.stringify(action.newEquipment)
                     });
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     const blob = await response.blob();
                     const blobUrl = URL.createObjectURL(blob);
-                    saveFile(blobUrl, filename);
+                    saveFile(blobUrl, action.filename);
                     URL.revokeObjectURL(blobUrl);
-                    addMessage("Mod packaged and downloaded to " + filename, false);
-                    chatContext = null;
-                    updateSaveIndicator();
+                    addMessage("Mod packaged and downloaded to " + action.filename, false);
+                    updateSaveIndicator(0);
                 } catch (err) {
                     console.error("Error in fetching and downloading file:", err);
                 }
             }
 
-            function packageModEvent(filename) {
+            function packageModEvent(action) {
                 console.log('PackageMod');
-                downloadFile(filename);
+                downloadFile(action);
             }
 
-            function updateNewEquipmentEvent(message) {
-                if (message) {
-                    addJsonMessage(message);
+            function updateNewEquipmentEvent(action) {
+                if (action.message) {
+                    addJsonMessage(action.message);
                 }
-                updateSaveIndicator();
+                updateSaveIndicator(action.saveCount);
             }
 
             // Function to update save indicator visibility
-            function updateSaveIndicator() {
-                let saveCount = 0;
-                if (chatContext && chatContext.data && chatContext.data.newEquipment) {
-                    saveCount = chatContext.data.newEquipment.count;
-                }
+            function updateSaveIndicator(saveCount) {
                 let canSaveFile = saveCount > 0;
                 const $saveIndicator = $('#save-indicator');
                 if (canSaveFile) {
@@ -810,7 +805,7 @@
                 }
             }
             // Initialize save indicator
-            updateSaveIndicator();
+            updateSaveIndicator(0);
 
             // Add mouse over event to save indicator
             $('#save-indicator').on('mouseenter', function() {
@@ -1295,10 +1290,10 @@
                                 addJsonMessage(action.string);
                             } else if (action.type === 'UpdateNewEquipment') {
                                 console.log('UpdateNewEquipment');
-                                updateNewEquipmentEvent(action.message);
+                                updateNewEquipmentEvent(action);
                             } else if (action.type === 'PackageMod') {
                                 console.log('PackageMod');
-                                packageModEvent(action.filename);
+                                packageModEvent(action);
                             } else if (action.type === 'ImportMod') {
                                 console.log('ImportMod');
                                 importModEvent();

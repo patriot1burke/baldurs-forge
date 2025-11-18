@@ -17,6 +17,7 @@ import org.baldurs.archivist.LS.Converter;
 import org.baldurs.archivist.LS.PackedVersion;
 import org.baldurs.archivist.PackageWriter;
 import org.baldurs.forge.messages.ListEquipmentMessage;
+import org.baldurs.forge.messages.MarkdownStringMessage;
 import org.baldurs.forge.messages.PackageModMessage;
 import org.baldurs.forge.messages.ShowEquipmentMessage;
 import org.baldurs.forge.messages.UpdateNewEquipmentMessage;
@@ -25,17 +26,17 @@ import org.baldurs.forge.scanner.RootTemplate;
 import org.baldurs.forge.scanner.StatsArchive;
 import org.baldurs.forge.services.BoostService;
 import org.baldurs.forge.services.LibraryService;
-import org.baldurs.forge.services.MarkdownToHtmlService;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.service.Result;
-import dev.langchain4j.service.tool.ToolExecution;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
+import io.quarkiverse.langchain4j.chat.frames.ResultMessageTypes;
 import io.quarkiverse.langchain4j.chat.frames.StringMessage;
 import io.quarkus.logging.Log;
 
@@ -59,9 +60,6 @@ public class ModPackager {
     @Inject
     BoostService boostService;
 
-    @Inject
-    MarkdownToHtmlService renderer;
-
     ObjectMapper mapper;
 
     @PostConstruct
@@ -82,53 +80,21 @@ public class ModPackager {
             return;
         }
         context.pushFrame("packageMod");
-        packageMod();
+        context.setData(CURRENT_PACKAGE, new PackageModel());
+        context.currentFrame().chat();
     }
 
     @ChatFrame("packageMod")
-    public void packageMod() {
-        NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
-        if (newEquipment == null) {
-            context.response().add(new StringMessage("You have not created any new equipment to package."));
-            return;
+    @ResultMessageTypes(MarkdownStringMessage.class)
+    public Result<String> packageMod(PackageModel currentPackage) {
+        String currentJson = null;
+        try {
+            currentJson = mapper.writeValueAsString(currentPackage);
+        } catch (JsonProcessingException e) {
+            Log.error("Error serializing newEquipment", e);
+            throw new RuntimeException("Error serializing newEquipment", e);
         }
-        String currentJson = "{}";
-        PackageModel current = null;
-        if ((current = context.getData(CURRENT_PACKAGE, PackageModel.class)) != null) {
-            try {
-                currentJson = mapper.writeValueAsString(current);
-            } catch (Exception e) {
-                Log.warn("Error serializing package", e);
-            }
-        }
-        Result<String> result = agent.packageMod(context.memoryId(), context.userMessage(), PackageModel.schema, currentJson);
-        if (result.content() != null) {
-            Log.info("ModPackager with content: " + result.content());
-            context.response().add(new StringMessage(renderer.markdownToHtml(result.content())));
-        }
-        String msg = null;
-        if (result.toolExecutions().isEmpty()) {
-            Log.info("ModPackager with no tool executions");
-            return;
-        } else {
-            Log.info("ModPackager with multiple tool executions");
-            for (ToolExecution execution : result.toolExecutions()) {
-                Log.info("ModPackager with tool " + execution.request().name() + " execution: " + execution.result());
-                if (execution.result() == null || execution.result().equals("\"null\"")
-                        || execution.result().equals("Success")) {
-                    continue;
-                } else {
-                    if (msg == null || msg.isEmpty()) {
-                        msg = execution.result();
-                    } else {
-                        msg += execution.result() + "\n";
-                    }
-                }
-            }
-        }
-        if (msg != null) {
-            context.response().add(new StringMessage(renderer.markdownToHtml(msg)));
-        }
+        return agent.packageMod(context.memoryId(), context.userMessage(), PackageModel.schema, currentJson);
     }
 
     private static final String CURRENT_PACKAGE = "currentPackage";
@@ -158,11 +124,11 @@ public class ModPackager {
         newEquipment.name = packageModel.name;
         newEquipment.author = packageModel.author;
         newEquipment.description = packageModel.description;
-        context.setData(NewModModel.NEW_EQUIPMENT, newEquipment);
         context.popFrame();
         String baseFileName = toAlphaNumericUnderscore(newEquipment.name);
+        context.removeData(NewModModel.NEW_EQUIPMENT);
 
-        PackageModMessage.addResponse(context, baseFileName + ".pak");
+        PackageModMessage.addResponse(context, baseFileName + ".pak", newEquipment);
     }
 
     public List<EquipmentModel> listBuiltEquipment() {
@@ -183,8 +149,8 @@ public class ModPackager {
     }
 
     public void deleteAllNewEquipment() {
-        context.setData(NewModModel.NEW_EQUIPMENT, null);
-        context.response().add(new UpdateNewEquipmentMessage(null));
+        context.removeData(NewModModel.NEW_EQUIPMENT);
+        context.response().add(new UpdateNewEquipmentMessage(null, 0));
         context.clearMemory();
     }
 
@@ -204,13 +170,13 @@ public class ModPackager {
         newEquipment.removeEquipment(equipment);
 
         if (newEquipment.count == 0) {
-            context.setData(NewModModel.NEW_EQUIPMENT, null);
+            context.removeData(NewModModel.NEW_EQUIPMENT);
         } else {
             context.setData(NewModModel.NEW_EQUIPMENT, newEquipment);
             showNewEquipment();
         }
         context.clearMemory();
-        context.response().add(new UpdateNewEquipmentMessage(null));
+        context.response().add(new UpdateNewEquipmentMessage(null, newEquipment.count));
 
         context.response().add(new StringMessage("Equipment deleted."));
     }
@@ -230,7 +196,7 @@ public class ModPackager {
         context.setData(EquipmentBuilder.CURRENT_EQUIPMENT, equipment);
         ShowEquipmentMessage.addResponse(context, equipment.toEquipmentModel(boostService, library));
         context.pushFrame(equipment.type());
-        context.getFrame(equipment.type()).chat();
+        context.currentFrame().chat();
     }
 
     public void addGameObject(StringBuilder localizations, StringBuilder gameObjects, String name, String description,
@@ -296,7 +262,7 @@ public class ModPackager {
 
     }
 
-    public File packageMod(NewModModel newEquipment) throws Exception {
+    public File createPackageFile(NewModModel newEquipment) throws Exception {
         Path tempDir = Files.createTempDirectory("mod");
         Log.info("Packaging mod in temp directory: " + tempDir.toString());
         String modUUID = IdMaker.uuid();

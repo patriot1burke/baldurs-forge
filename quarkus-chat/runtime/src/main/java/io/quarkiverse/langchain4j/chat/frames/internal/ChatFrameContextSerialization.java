@@ -3,21 +3,20 @@ package io.quarkiverse.langchain4j.chat.frames.internal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
+import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
-
 public class ChatFrameContextSerialization {
 
-    public static ChatFrameContext deserialize(ObjectMapper mapper, ChatFrameContext context, ClientMemoryStore memory,
+    static void deserialize(ObjectMapper mapper, ChatFrameContextImpl context, ClientMemoryStore memory,
             InputStream entityStream) throws IOException, JsonProcessingException {
         // we have a static method for unit testing unmarshalling
         JsonNode node = mapper.readTree(entityStream);
         if (node == null || !node.isObject()) {
-            return context;
+            return;
         }
         JsonNode userMessageNode = node.get("userMessage");
         if (userMessageNode != null && !userMessageNode.isNull()) {
@@ -27,42 +26,61 @@ public class ChatFrameContextSerialization {
         if (systemMessageNode != null && !systemMessageNode.isNull()) {
             context.setSystemMessage(systemMessageNode.asText());
         }
-        JsonNode parametersNode = node.get("parameters");
-        if (parametersNode != null && !parametersNode.isNull()) {
-            parametersNode.fields().forEachRemaining(field -> {
-                JsonNode value = field.getValue();
-                if (value != null && !value.isNull()) {
-                    context.parameters().put(field.getKey(), value);
-                }
-            });
-        }
 
         JsonNode contextNode = node.get("context");
         if (contextNode == null || contextNode.isNull()) {
-            return context;
+            return;
         }
-        JsonNode memoryIdNode = contextNode.get("memoryId");
-        if (memoryIdNode != null && !memoryIdNode.isNull()) {
-            context.setMemoryId(memoryIdNode.asText());
+
+        JsonNode currentFrameNode = contextNode.get("frame");
+        if (currentFrameNode == null || currentFrameNode.isNull()) {
+            context.setFrame(ChatFrameRecorder.defaultChatFrame);
+            return;
         }
+        // allow frame name to be null so client can just set context data and post
+        ChatFrameData currentFrame = deserializeFrame(currentFrameNode, mapper, true);
+        context.setCurrent(currentFrame);
+
         JsonNode memoryNode = contextNode.get("memory");
         if (memoryNode != null && !memoryNode.isNull()) {
             memory.readJson(memoryNode);
         }
+    }
 
-        JsonNode sharedNode = contextNode.get("data");
-        if (sharedNode != null && !sharedNode.isNull()) {
-            sharedNode.fields().forEachRemaining(field -> {
+    static ChatFrameData deserializeFrame(JsonNode frameNode, ObjectMapper mapper, boolean first) {
+        ChatFrameData frame = new ChatFrameData(mapper);
+
+        JsonNode nameNode = frameNode.get("name");
+        if (nameNode != null && !nameNode.isNull()) {
+            frame.setName(nameNode.asText());
+        } else if (first) {
+            throw new IllegalArgumentException("Parent frame name not set");
+        } else {
+            frame.setName(ChatFrameRecorder.defaultChatFrame);
+        }
+        JsonNode memoryIdNode = frameNode.get("memoryId");
+        if (memoryIdNode != null && !memoryIdNode.isNull()) {
+            frame.setMemoryId(memoryIdNode.asText());
+        } else {
+            frame.setMemoryId(UUID.randomUUID().toString());
+        }
+        JsonNode parentNode = frameNode.get("parent");
+        if (parentNode != null && !parentNode.isNull()) {
+            frame.setParent(deserializeFrame(parentNode, mapper, false));
+        }
+        JsonNode dataNode = frameNode.get("data");
+        if (dataNode != null && !dataNode.isNull()) {
+            dataNode.fields().forEachRemaining(field -> {
                 JsonNode value = field.getValue();
                 if (value != null && !value.isNull()) {
-                    context.data().put(field.getKey(), value);
+                    frame.data().put(field.getKey(), value);
                 }
             });
         }
-        return context;
+        return frame;
     }
 
-    public static void serialize(ChatFrameContext t, ClientMemoryStore memory, ObjectMapper mapper, Writer writer)
+    static void serialize(ChatFrameContextImpl t, ClientMemoryStore memory, ObjectMapper mapper, Writer writer)
             throws IOException {
         writer.write("{");
         writer.write("\"response\":");
@@ -74,11 +92,9 @@ public class ChatFrameContextSerialization {
         writer.write(",");
         writer.write("\"context\":");
         writer.write("{");
-        writer.write("\"memoryId\":");
-        writer.write("\"" + t.memoryId() + "\"");
-        writer.write(",");
-        writer.write("\"data\":");
-        mapper.writeValue(writer, t.data());
+        ChatFrameData currentFrame = t.getCurrent();
+        writer.write("\"frame\":");
+        serializeFrame(currentFrame, mapper, writer);
         writer.write(",");
         writer.write("\"memory\":");
         memory.writeJson(writer);
@@ -87,4 +103,21 @@ public class ChatFrameContextSerialization {
         writer.write("}");
     }
 
+    private static void serializeFrame(ChatFrameData frame, ObjectMapper mapper, Writer writer) throws IOException {
+        writer.write("{");
+        writer.write("\"name\":");
+        mapper.writeValue(writer, frame.name());
+        writer.write(",");
+        writer.write("\"memoryId\":");
+        mapper.writeValue(writer, frame.memoryId());
+        writer.write(",");
+        writer.write("\"data\":");
+        mapper.writeValue(writer, frame.data());
+        if (frame.parent() != null) {
+            writer.write(",");
+            writer.write("\"parent\":");
+            serializeFrame(frame.parent(), mapper, writer);
+        }
+        writer.write("}");
+    }
 }

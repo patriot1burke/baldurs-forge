@@ -1,7 +1,6 @@
 package org.baldurs.forge.builder;
 
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -14,23 +13,21 @@ import org.baldurs.forge.messages.UpdateNewEquipmentMessage;
 import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.model.Rarity;
 import org.baldurs.forge.scanner.RootTemplate;
-import org.baldurs.forge.scanner.StatsArchive;
 import org.baldurs.forge.scanner.StatsArchive.Stat;
 import org.baldurs.forge.services.BoostService;
 import org.baldurs.forge.services.LibraryService;
-import org.baldurs.forge.services.MarkdownToHtmlService;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.langchain4j.service.Result;
-import dev.langchain4j.service.tool.ToolExecution;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.StringMessage;
 import io.quarkus.logging.Log;
 
 public abstract class EquipmentBuilder {
-    public static final String CURRENT_EQUIPMENT = "currentEquipment";
+    public static final String CURRENT_EQUIPMENT = "current";
 
     @Inject
     ChatFrameContext context;
@@ -46,9 +43,6 @@ public abstract class EquipmentBuilder {
     @Inject
     BoostBuilderPrompt boostBuilder;
 
-    @Inject
-    MarkdownToHtmlService renderer;
-
     @PostConstruct
     public void init() {
         mapper = new ObjectMapper();
@@ -56,12 +50,6 @@ public abstract class EquipmentBuilder {
     }
 
     protected abstract BuilderPrompt agent();
-
-    protected abstract Class<? extends BaseModel> baseModelClass();
-
-    protected abstract String schema();
-
-    public abstract String type();
 
     protected abstract Supplier<BaseModel> supplier();
 
@@ -74,55 +62,25 @@ public abstract class EquipmentBuilder {
 
     public void startBuild() {
         // clear chat history and start conversation with this builder
-        context.pushFrame(type());
-        build();
+        BaseModel current = create();
+        context.pushFrame(current.type());
+        context.setData(CURRENT_EQUIPMENT, current);
+        context.currentFrame().chat();
     }
 
-    public void build() {
+    public Result<String> build(BaseModel current) {
         Log.info("chat: " + context.memoryId() + " " + context.userMessage());
-        String currentJson = "{}";
-        BaseModel current = null;
-        if ((current = context.getData(CURRENT_EQUIPMENT, baseModelClass())) != null) {
-            try {
-                currentJson = mapper.writeValueAsString(current);
-            } catch (Exception e) {
-                Log.warn("Error serializing equipment", e);
-            }
-        } else {
-            current = create();
-            context.setData(CURRENT_EQUIPMENT, current);
+        String currentJson = null;
+        try {
+            currentJson = mapper.writeValueAsString(current);
+        } catch (JsonProcessingException e) {
+            Log.error("Error serializing current", e);
+            throw new RuntimeException("Error serializing current", e);
         }
         Log.info("Current JSON: " + currentJson);
-        Result<String> result = agent().build(context.memoryId(), type(), schema(), currentJson, context.userMessage());
-        if (result.content() != null) {
-            Log.info("EquipmentBuilder with content: " + result.content());
-            String html = renderer.markdownToHtml(result.content());
-            context.response().add(new StringMessage(html));
-            return;
-        }
-        String msg = null;
-        if (result.toolExecutions().isEmpty()) {
-            Log.info("EquipmentBuilder with no tool executions");
-            return;
-        } else {
-            for (ToolExecution execution : result.toolExecutions()) {
-                Log.info("EquipmentBuilder with tool " + execution.request().name() + " execution: " + execution.result());
-                if (execution.resultObject() == null) {
-                    Log.info("EquipmentBuilder with null/void tool execution result");
-                    continue;
-                } else {
-                    if (msg == null || msg.isEmpty()) {
-                        msg = execution.result();
-                    } else {
-                        msg += execution.result() + "\n";
-                    }
-                }
-            }
-
-        }
-        if (msg != null) {
-            context.response().add(new StringMessage(renderer.markdownToHtml(msg)));
-        }
+        Result<String> result = agent().build(context.memoryId(), current.type(), current.schema(), currentJson,
+                context.userMessage());
+        return result;
     }
 
     public void addShowEquipmentAction(BaseModel baseModel) {
@@ -133,57 +91,27 @@ public abstract class EquipmentBuilder {
         ShowEquipmentMessage.addResponse(context, equipment);
     }
 
-    public void finishEquipment() throws Exception {
-        BaseModel current = null;
-        if ((current = context.getData(CURRENT_EQUIPMENT, baseModelClass())) == null) {
-            throw new RuntimeException("No equipment to finish");
-        }
+    public void finishEquipment(BaseModel current) throws Exception {
         addShowEquipmentAction(current);
         context.popFrame();
-        context.setData(CURRENT_EQUIPMENT, null);
         if (current.rarity == null) {
             current.rarity = Rarity.Common;
         }
         NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
         if (newEquipment == null) {
             newEquipment = new NewModModel();
+            context.setData(NewModModel.NEW_EQUIPMENT, newEquipment);
         }
         newEquipment.addEquipment(current);
-        context.setData(NewModModel.NEW_EQUIPMENT, newEquipment);
         context.response().add(new StringMessage("Finished building item!"));
         context.response()
                 .add(new UpdateNewEquipmentMessage("To create a mod containing your newly built equipment, tell me to '"
-                        + ModPackager.PACKAGE_MODE_CHAT_COMMAND + "'"));
+                        + ModPackager.PACKAGE_MODE_CHAT_COMMAND + "'", newEquipment.count));
         Log.info("Finished equipment");
         context.scheduleWipe();
     }
 
-    protected String logJson(BaseModel equipment) {
-        try {
-            String equipmentJson = mapper.writeValueAsString(equipment);
-            Log.info("Equipment JSON: " + equipmentJson);
-            return equipmentJson;
-        } catch (Exception e) {
-            throw new RuntimeException("Error logging weapon json", e);
-        }
-    }
-
-    protected void set(Consumer<BaseModel> consumer) {
-        BaseModel current = context.getData(CURRENT_EQUIPMENT, baseModelClass());
-        if (current == null) {
-            current = create();
-        }
-        consumer.accept(current);
-        context.setData(CURRENT_EQUIPMENT, current);
-        logJson(current);
-        addShowEquipmentAction(current);
-    }
-
-    public void setVisualModel(String visualModel) {
-        Predicate<? super Stat> visualModelPredicate = visualModelPredicate();
-        if (visualModelPredicate == null) {
-            throw new RuntimeException("Item is not finished.  Cannot set visual model yet." + visualModel);
-        }
+    public void setVisualModel(BaseModel current, String visualModel, Predicate<? super Stat> visualModelPredicate) {
         List<RootTemplate> rootTemplates = library.findRootIconsFrom(visualModelPredicate);
         boolean found = false;
         for (RootTemplate rootTemplate : rootTemplates) {
@@ -195,10 +123,11 @@ public abstract class EquipmentBuilder {
         if (!found) {
             throw new RuntimeException("Could not find visual model.");
         }
-        set(current -> current.visualModel = visualModel);
+        current.visualModel = visualModel;
+        addShowEquipmentAction(current);
     }
 
-    public void addBoost(String boostDescription) throws Exception {
+    public void addBoost(BaseModel current, String boostDescription) throws Exception {
         // keep the boostMacro parameter as tool invocation is flaky otherwise
         // AI gets confused
         Log.info("addBoost: " + boostDescription);
@@ -209,10 +138,6 @@ public abstract class EquipmentBuilder {
             context.response().add(new StringMessage("Could not create a boost macro from your description."));
             return;
         }
-        BaseModel current = context.getData(CURRENT_EQUIPMENT, baseModelClass());
-        if (current == null) {
-            current = create();
-        }
         if (current.boosts == null || current.boosts.isEmpty()) {
             current.boosts = enchantment;
         } else {
@@ -220,10 +145,9 @@ public abstract class EquipmentBuilder {
         }
         context.setData(CURRENT_EQUIPMENT, current);
         addShowEquipmentAction(current);
-        logJson(current);
     }
 
-    public void setBoost(String boostDescription) throws Exception {
+    public void setBoost(BaseModel current, String boostDescription) throws Exception {
         // keep the boostMacro parameter as tool invocation is flaky otherwise
         // AI gets confused
         Log.info("setBoost: " + boostDescription);
@@ -234,14 +158,12 @@ public abstract class EquipmentBuilder {
             context.response().add(new StringMessage("Could not create a boost macro from your description."));
             return;
         }
-        set(current -> current.boosts = enchantment);
+        current.boosts = enchantment;
+        addShowEquipmentAction(current);
     }
 
-    protected abstract Predicate<? super StatsArchive.Stat> visualModelPredicate();
-
     // todo, may be able to have a void return type.  Nervous that AI gets confused if it does not get a return value for this tool.
-    public String showVisualModels() {
-        Predicate<? super Stat> visualModelPredicate = visualModelPredicate();
+    public String showVisualModels(Predicate<? super Stat> visualModelPredicate) {
         if (visualModelPredicate == null) {
             context.response().add(new StringMessage("Item not finished yet.  Cannot search for visual models."));
             return null;
