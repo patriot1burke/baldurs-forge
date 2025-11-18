@@ -16,7 +16,7 @@ public class ChatFrameClient {
 
     public ChatFrameClient(ObjectMapper mapper, Client chatClient, String endpoint) {
         this.mapper = mapper;
-        mapper.registerSubtypes(new NamedType(ClientStringMessage.class, "String"));
+        mapper.registerSubtypes(new NamedType(ClientStringMessage.class, "StringMessage"));
         this.chatClient = chatClient;
         this.endpoint = endpoint;
         this.target = chatClient.target(endpoint);
@@ -30,7 +30,7 @@ public class ChatFrameClient {
         this(new ObjectMapper(), ClientBuilder.newClient(), endpoint);
     }
 
-    public void registerMessageType(Class<? extends ClientChatFrameMessage> messageType, String name) {
+    public void registerMessageType(Class<? extends ClientChatEvent> messageType, String name) {
         mapper.registerSubtypes(new NamedType(messageType, name));
     }
 

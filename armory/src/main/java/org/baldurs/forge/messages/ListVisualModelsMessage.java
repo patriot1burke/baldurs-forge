@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameMessage;
+import io.quarkiverse.langchain4j.chat.frames.ChatEvent;
 
-public class ListVisualModelsMessage extends ChatFrameMessage {
+public class ListVisualModelsMessage extends ChatEvent {
     protected List<Map<String, String>> visualModels = new ArrayList<>();
 
     public ListVisualModelsMessage() {

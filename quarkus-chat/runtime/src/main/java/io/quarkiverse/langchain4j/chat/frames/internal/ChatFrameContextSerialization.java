@@ -83,9 +83,9 @@ public class ChatFrameContextSerialization {
     static void serialize(ChatFrameContextImpl t, ClientMemoryStore memory, ObjectMapper mapper, Writer writer)
             throws IOException {
         writer.write("{");
-        writer.write("\"response\":");
-        if (t.response() != null) {
-            mapper.writeValue(writer, t.response());
+        writer.write("\"events\":");
+        if (t.events() != null) {
+            mapper.writeValue(writer, t.events());
         } else {
             writer.write("null");
         }

@@ -13,17 +13,17 @@ import jakarta.inject.Inject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
+import io.quarkiverse.langchain4j.chat.frames.ChatEvent;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameMessage;
 
 @RequestScoped
 @Default
 public class ChatFrameContextImpl implements ChatFrameContext {
 
     volatile ChatFrameData current;
-    List<ChatFrameMessage> response = new ArrayList<>();
+    List<ChatEvent> response = new ArrayList<>();
 
     String userMessage = null;
     String systemMessage = null;
@@ -99,7 +99,7 @@ public class ChatFrameContextImpl implements ChatFrameContext {
      * @return
      */
     @Override
-    public List<ChatFrameMessage> response() {
+    public List<ChatEvent> events() {
         return response;
     }
 

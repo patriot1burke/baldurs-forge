@@ -1,9 +1,9 @@
 package org.baldurs.forge.messages;
 
+import io.quarkiverse.langchain4j.chat.frames.ChatEvent;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameMessage;
 
-public class ImportModMessage extends ChatFrameMessage {
+public class ImportModMessage extends ChatEvent {
 
     private ImportModMessage() {
         super("ImportMod");
@@ -16,8 +16,8 @@ public class ImportModMessage extends ChatFrameMessage {
      * @param context
      */
     public static void addResponse(ChatFrameContext context) {
-        context.response().removeIf(action -> action instanceof ImportModMessage);
-        context.response().add(new ImportModMessage());
+        context.events().removeIf(action -> action instanceof ImportModMessage);
+        context.events().add(new ImportModMessage());
     }
 
 }

@@ -4,10 +4,10 @@ import java.util.List;
 
 import org.baldurs.forge.model.EquipmentModel;
 
+import io.quarkiverse.langchain4j.chat.frames.ChatEvent;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameMessage;
 
-public class ListEquipmentMessage extends ChatFrameMessage {
+public class ListEquipmentMessage extends ChatEvent {
     protected List<EquipmentModel> equipment;
 
     private ListEquipmentMessage(List<EquipmentModel> equipment) {
@@ -31,8 +31,8 @@ public class ListEquipmentMessage extends ChatFrameMessage {
      * @param equipment
      */
     public static void addResponse(ChatFrameContext context, List<EquipmentModel> equipment) {
-        context.response().removeIf(action -> action instanceof ListEquipmentMessage);
-        context.response().add(new ListEquipmentMessage(equipment));
+        context.events().removeIf(action -> action instanceof ListEquipmentMessage);
+        context.events().add(new ListEquipmentMessage(equipment));
     }
 
 }

@@ -2,10 +2,10 @@ package org.baldurs.forge.messages;
 
 import org.baldurs.forge.model.EquipmentModel;
 
+import io.quarkiverse.langchain4j.chat.frames.ChatEvent;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameMessage;
 
-public class ShowEquipmentMessage extends ChatFrameMessage {
+public class ShowEquipmentMessage extends ChatEvent {
     protected EquipmentModel equipment;
 
     private ShowEquipmentMessage(EquipmentModel equipment) {
@@ -29,8 +29,8 @@ public class ShowEquipmentMessage extends ChatFrameMessage {
      * @param equipment
      */
     public static void addResponse(ChatFrameContext context, EquipmentModel equipment) {
-        context.response().removeIf(action -> action instanceof ShowEquipmentMessage);
-        context.response().add(new ShowEquipmentMessage(equipment));
+        context.events().removeIf(action -> action instanceof ShowEquipmentMessage);
+        context.events().add(new ShowEquipmentMessage(equipment));
     }
 
 }

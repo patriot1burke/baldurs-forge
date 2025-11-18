@@ -21,12 +21,12 @@ public class MyChatService {
     @ChatFrame
     @DefaultChatFrame
     public void defaultChat() {
-        context.response().add(new StringMessage("defaultChat:" + context.userMessage()));
+        context.events().add(new StringMessage("defaultChat:" + context.userMessage()));
     }
 
     @ChatFrame
     public void chatone() {
-        context.response().add(new StringMessage("one:" + context.userMessage()));
+        context.events().add(new StringMessage("one:" + context.userMessage()));
     }
 
     @ChatFrame("exception")
@@ -39,7 +39,7 @@ public class MyChatService {
         Assertions.assertNotNull(memoryId);
         Assertions.assertNotNull(userMessage);
         Assertions.assertNotNull(ctx);
-        ctx.response().add(new StringMessage("two:" + userMessage));
+        ctx.events().add(new StringMessage("two:" + userMessage));
     }
 
     @ChatFrame("string-result")

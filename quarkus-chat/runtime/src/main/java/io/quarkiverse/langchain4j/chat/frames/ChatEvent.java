@@ -1,13 +1,13 @@
 package io.quarkiverse.langchain4j.chat.frames;
 
-public class ChatFrameMessage {
+public class ChatEvent {
     protected String type;
 
-    protected ChatFrameMessage(String name) {
+    protected ChatEvent(String name) {
         this.type = name;
     }
 
-    public ChatFrameMessage() {
+    public ChatEvent() {
     }
 
     public String getType() {

@@ -1,6 +1,6 @@
 package io.quarkiverse.langchain4j.chat.frames.client;
 
-public class ClientStringMessage extends ClientChatFrameMessage {
+public class ClientStringMessage extends ClientChatEvent {
 
     protected String string;
 

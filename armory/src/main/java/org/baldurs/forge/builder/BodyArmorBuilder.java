@@ -15,7 +15,7 @@ import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.service.Result;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
-import io.quarkiverse.langchain4j.chat.frames.ResultMessageTypes;
+import io.quarkiverse.langchain4j.chat.frames.ResultEventTypes;
 import io.quarkus.logging.Log;
 
 @ApplicationScoped
@@ -35,7 +35,7 @@ public class BodyArmorBuilder extends EquipmentBuilder {
     }
 
     @ChatFrame(BodyArmorModel.TYPE)
-    @ResultMessageTypes(MarkdownStringMessage.class)
+    @ResultEventTypes(MarkdownStringMessage.class)
     public Result<String> buildBodyArmor(BodyArmorModel current) {
         return build(current);
     }

@@ -14,7 +14,7 @@ import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.service.Result;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
-import io.quarkiverse.langchain4j.chat.frames.ResultMessageTypes;
+import io.quarkiverse.langchain4j.chat.frames.ResultEventTypes;
 import io.quarkus.logging.Log;
 
 @ApplicationScoped
@@ -38,7 +38,7 @@ public class WeaponBuilder extends EquipmentBuilder {
     }
 
     @ChatFrame(WeaponModel.TYPE)
-    @ResultMessageTypes(MarkdownStringMessage.class)
+    @ResultEventTypes(MarkdownStringMessage.class)
     public Result<String> buildWeapon(WeaponModel current) {
         return build(current);
     }

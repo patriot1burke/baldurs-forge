@@ -76,9 +76,9 @@ public class MainMenuToolBox {
         Log.info("Searching equipment database with user message: " + context.userMessage());
         List<EquipmentModel> models = equipmentDB.ragSearch(context.userMessage());
         if (models.isEmpty()) {
-            context.response().add(new StringMessage("Could not find any equipment that matched your query."));
+            context.events().add(new StringMessage("Could not find any equipment that matched your query."));
         } else {
-            context.response().add(new StringMessage("I found some possible matches for your query."));
+            context.events().add(new StringMessage("I found some possible matches for your query."));
             ListEquipmentMessage.addResponse(context, models);
         }
         context.scheduleWipe();
@@ -92,15 +92,15 @@ public class MainMenuToolBox {
         if (model == null) {
             List<EquipmentModel> models = equipmentDB.ragSearch(context.userMessage());
             if (models.isEmpty()) {
-                context.response()
+                context.events()
                         .add(new StringMessage("I could not find any equipment with that name or any similar names."));
             } else {
-                context.response().add(new StringMessage(
+                context.events().add(new StringMessage(
                         "I could not find an exact match for your query, but I found some possible matches."));
                 ListEquipmentMessage.addResponse(context, models);
             }
         } else {
-            context.response().add(new StringMessage(
+            context.events().add(new StringMessage(
                     "I found what you were looking for."));
             ShowEquipmentMessage.addResponse(context, model);
         }
@@ -163,9 +163,9 @@ public class MainMenuToolBox {
         Log.info("Finding data attribute values for: " + attributeName);
         List<String> values = library.getStatAttributeValues(attributeName);
         if (values.isEmpty()) {
-            context.response().add(new StringMessage("I could not find any values for attribute: " + attributeName));
+            context.events().add(new StringMessage("I could not find any values for attribute: " + attributeName));
         } else {
-            context.response().add(new ObjectMessage(values));
+            context.events().add(new ObjectMessage(values));
         }
         context.scheduleWipe();
         return null;
@@ -176,11 +176,11 @@ public class MainMenuToolBox {
         Log.info("showNewEquipment");
         List<EquipmentModel> equipment = modPackager.listBuiltEquipment();
         if (equipment.isEmpty()) {
-            context.response().add(new StringMessage("You have not created any new equipment yet."));
+            context.events().add(new StringMessage("You have not created any new equipment yet."));
         } else {
-            context.response().add(new StringMessage("This is the equipment you have created so far:"));
+            context.events().add(new StringMessage("This is the equipment you have created so far:"));
             ListEquipmentMessage.addResponse(context, equipment);
-            context.response().add(new StringMessage("Ask me to <i>Package Mod</i> to package up your new equipment."));
+            context.events().add(new StringMessage("Ask me to <i>Package Mod</i> to package up your new equipment."));
         }
         context.scheduleWipe();
         return null;
@@ -214,7 +214,7 @@ public class MainMenuToolBox {
     public String importMod() {
         Log.info("importMod");
         ImportModMessage.addResponse(context);
-        context.response().add(new StringMessage("Please select a file to import."));
+        context.events().add(new StringMessage("Please select a file to import."));
         context.scheduleWipe();
         return null;
     }

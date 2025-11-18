@@ -1,8 +1,8 @@
 package org.baldurs.forge.messages;
 
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameMessage;
+import io.quarkiverse.langchain4j.chat.frames.ChatEvent;
 
-public class UpdateNewEquipmentMessage extends ChatFrameMessage {
+public class UpdateNewEquipmentMessage extends ChatEvent {
     protected String message;
     protected int saveCount;
 

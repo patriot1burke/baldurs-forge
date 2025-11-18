@@ -9,8 +9,8 @@ import java.lang.annotation.Target;
 @Target({ ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface ResultMessageTypes {
+public @interface ResultEventTypes {
 
-    Class<? extends ChatFrameMessage>[] value();
+    Class<? extends ChatEvent>[] value();
 
 }

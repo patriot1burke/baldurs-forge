@@ -14,12 +14,12 @@ import dev.langchain4j.service.Result;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.tool.ToolExecution;
+import io.quarkiverse.langchain4j.chat.frames.ChatEvent;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameMessage;
 import io.quarkiverse.langchain4j.chat.frames.FrameInject;
 import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
-import io.quarkiverse.langchain4j.chat.frames.ResultMessageTypes;
+import io.quarkiverse.langchain4j.chat.frames.ResultEventTypes;
 import io.quarkiverse.langchain4j.chat.frames.StringMessage;
 import io.quarkus.arc.Arc;
 import io.quarkus.arc.runtime.BeanContainer;
@@ -59,13 +59,13 @@ public class ReflectiveChatFrameExecution implements ChatFrameExecution {
                 parameterResolvers.add((ctx) -> ctx.getData(finalKey, parameter.getParameterizedType()));
             }
         }
-        ResultMessageTypes responseMessage = method.getAnnotation(ResultMessageTypes.class);
+        ResultEventTypes responseMessage = method.getAnnotation(ResultEventTypes.class);
         if (responseMessage != null) {
-            for (Class<? extends ChatFrameMessage> messageClass : responseMessage.value()) {
+            for (Class<? extends ChatEvent> messageClass : responseMessage.value()) {
                 for (Method cfm : messageClass.getDeclaredMethods()) {
                     if (Modifier.isPublic(cfm.getModifiers()) && Modifier.isStatic(cfm.getModifiers())
                             && cfm.getName().equals("from") && cfm.getParameterCount() == 1
-                            && ChatFrameMessage.class.isAssignableFrom(cfm.getReturnType())) {
+                            && ChatEvent.class.isAssignableFrom(cfm.getReturnType())) {
                         responseConstructors.add(cfm);
                     }
                 }
@@ -104,7 +104,7 @@ public class ReflectiveChatFrameExecution implements ChatFrameExecution {
             Log.debugf("handleResponse: generic %s", generic.getTypeName());
             if (from.getGenericParameterTypes()[0].equals(generic)) {
                 try {
-                    context.response().add((ChatFrameMessage) from.invoke(null, returnValue));
+                    context.events().add((ChatEvent) from.invoke(null, returnValue));
                     return;
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     throw new RuntimeException(e);
@@ -126,9 +126,9 @@ public class ReflectiveChatFrameExecution implements ChatFrameExecution {
             }
             return;
         } else if (returnValue instanceof String) {
-            context.response().add(new StringMessage((String) returnValue));
+            context.events().add(new StringMessage((String) returnValue));
         } else {
-            context.response().add(new ObjectMessage(returnValue));
+            context.events().add(new ObjectMessage(returnValue));
         }
     }
 

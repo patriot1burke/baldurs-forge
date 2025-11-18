@@ -44,7 +44,7 @@ public class ChatFrameControllerService implements ChatFrameController {
         }
         if (chatFrame == null) {
             Log.error("Current frame not set and no default chat frame found");
-            context.response()
+            context.events()
                     .add(new StringMessage("I'm having issues at the moment. Can you retry or rephrase your request?"));
             return;
         } else if (ChatFrameRecorder.chatFrames.containsKey(chatFrame)) {

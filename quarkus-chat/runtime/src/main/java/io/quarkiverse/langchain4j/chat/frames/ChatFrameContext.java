@@ -94,7 +94,7 @@ public interface ChatFrameContext {
      *
      * @return
      */
-    List<ChatFrameMessage> response();
+    List<ChatEvent> events();
 
     String currentFrameId();
 

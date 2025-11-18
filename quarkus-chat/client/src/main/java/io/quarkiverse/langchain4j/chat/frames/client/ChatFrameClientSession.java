@@ -31,7 +31,7 @@ public class ChatFrameClientSession {
         }
     }
 
-    public List<ClientChatFrameMessage> chat(String userMessage) {
+    public List<ClientChatEvent> chat(String userMessage) {
         this.userMessage = userMessage;
         String json = null;
         try {
@@ -47,7 +47,7 @@ public class ChatFrameClientSession {
             if (context.frame != null) {
                 context.frame.setMapper(mapper);
             }
-            return response.response != null ? response.response : Collections.EMPTY_LIST;
+            return response.events != null ? response.events : Collections.EMPTY_LIST;
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

@@ -4,12 +4,12 @@ package io.quarkiverse.langchain4j.chat.frames;
  * A message that contains a text string.
  * It will be serialized to JSON and sent back to the client.
  */
-public class StringMessage extends ChatFrameMessage {
+public class StringMessage extends ChatEvent {
 
     protected String string;
 
     public StringMessage(String string) {
-        super("String");
+        super("StringMessage");
         this.string = string;
     }
 

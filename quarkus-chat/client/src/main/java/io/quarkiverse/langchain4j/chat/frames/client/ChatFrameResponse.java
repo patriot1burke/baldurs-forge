@@ -7,5 +7,5 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, isGetterVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ChatFrameResponse {
     ClientChatFrameContext context;
-    List<ClientChatFrameMessage> response;
+    List<ClientChatEvent> events;
 }

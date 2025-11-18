@@ -13,7 +13,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.quarkiverse.langchain4j.chat.frames.client.ChatFrameClient;
 import io.quarkiverse.langchain4j.chat.frames.client.ChatFrameClientSession;
-import io.quarkiverse.langchain4j.chat.frames.client.ClientChatFrameMessage;
+import io.quarkiverse.langchain4j.chat.frames.client.ClientChatEvent;
 import io.quarkiverse.langchain4j.chat.frames.client.ClientStringMessage;
 import io.quarkus.test.QuarkusUnitTest;
 
@@ -102,7 +102,7 @@ public class ChatTest {
     @Test
     public void testMultiResult() {
         ChatFrameClientSession session = client.session("multi-result");
-        List<ClientChatFrameMessage> messages = session.chat("Hello, world!");
+        List<ClientChatEvent> messages = session.chat("Hello, world!");
         Assertions.assertEquals(2, messages.size());
         ClientStringMessage text1 = (ClientStringMessage) messages.get(0);
         Assertions.assertEquals("TestText:textResult", text1.getString());
