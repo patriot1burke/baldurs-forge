@@ -5,10 +5,7 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
-
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -16,11 +13,8 @@ import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
 import io.quarkus.arc.Arc;
 import io.quarkus.arc.ManagedContext;
 import io.quarkus.logging.Log;
-import io.quarkus.runtime.StartupEvent;
 import io.vertx.core.Vertx;
-import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.BodyHandler;
 
 @ApplicationScoped
 public class ChatFrameEndpoint {
@@ -40,20 +34,8 @@ public class ChatFrameEndpoint {
     @Inject
     Vertx vertx;
 
-    @ConfigProperty(name = "io.quarkiverse.langchain4j.chat.web.path", defaultValue = "/chat")
-    String webPath;
-
-    public void start(@Observes StartupEvent start, Router proxyRouter) {
-        Log.info("Starting chat frame endpoint on path: " + webPath);
-        proxyRouter.route(webPath)
-                .handler(BodyHandler.create())
-                .blockingHandler(this::handleChat);
-
-    }
-
-    public void handleChat(RoutingContext ctx) {
+    public void handleChat(RoutingContext ctx, String body) {
         Log.debug("Handling chat");
-        String body = ctx.body().asString();
         Log.debugv("Body: {0}", body);
         vertx.executeBlocking(() -> {
             ManagedContext requestContext = Arc.container().requestContext();

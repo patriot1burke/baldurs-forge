@@ -1,9 +1,12 @@
 package io.quarkiverse.langchain4j.chat.frames.client;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
 import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.client.WebTarget;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -22,6 +25,10 @@ public class ChatFrameClientSession {
     @JsonIgnore
     WebTarget target;
 
+    String username;
+    String password;
+    String bearerToken;
+
     protected ChatFrameClientSession(ObjectMapper mapper, WebTarget target, String frame) {
         this.mapper = mapper;
         this.target = target;
@@ -29,6 +36,28 @@ public class ChatFrameClientSession {
             context().frame().name(frame);
             context.frame.setMapper(mapper);
         }
+    }
+
+    private void setAuthentication(Builder requestBuilder) {
+        if (username != null && password != null) {
+            requestBuilder.header("Authorization", "Basic "
+                    + Base64.getEncoder().encodeToString((username + ":" + password).getBytes(StandardCharsets.UTF_8)));
+        } else if (bearerToken != null) {
+            requestBuilder.header("Authorization", "Bearer " + bearerToken);
+        }
+    }
+
+    public ChatFrameClientSession basicAuth(String username, String password) {
+        this.username = username;
+        this.password = password;
+        bearerToken = null;
+        return this;
+    }
+
+    public ChatFrameClientSession bearerToken(String bearerToken) {
+        this.bearerToken = bearerToken;
+        username = password = null;
+        return this;
     }
 
     public List<ClientChatEvent> chat(String userMessage) {
@@ -40,7 +69,9 @@ public class ChatFrameClientSession {
             throw new RuntimeException(e);
         }
 
-        json = target.request().post(Entity.json(json), String.class);
+        Builder requestBuilder = target.request();
+        setAuthentication(requestBuilder);
+        json = requestBuilder.post(Entity.json(json), String.class);
         try {
             ChatFrameResponse response = mapper.readValue(json, ChatFrameResponse.class);
             context = response.context;

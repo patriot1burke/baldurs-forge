@@ -99,6 +99,16 @@
                 <version>${quarkus-langchain4j.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-security-deployment</artifactId>
+                <version>${quarkus.platform.version}</version>
+            </dependency>
+           <dependency>
+                <groupId>io.quarkus</groupId>
+               <artifactId>quarkus-security-test-utils</artifactId>
+                <version>${quarkus.platform.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>33.4.8-jre</version>

@@ -30,7 +30,7 @@ public class ChatTest {
 
     @BeforeAll
     public static void beforeAll() {
-        client = new ChatFrameClient("http://localhost:8081/chat");
+        client = new ChatFrameClient("http://localhost:8081/q/chat-frames");
     }
 
     @Test

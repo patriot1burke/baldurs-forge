@@ -13,6 +13,22 @@ public class ChatFrameClient {
     String endpoint;
     ObjectMapper mapper;
     WebTarget target;
+    String username;
+    String password;
+    String bearerToken;
+
+    public ChatFrameClient basicAuth(String username, String password) {
+        this.username = username;
+        this.password = password;
+        bearerToken = null;
+        return this;
+    }
+
+    public ChatFrameClient bearerToken(String bearerToken) {
+        this.bearerToken = bearerToken;
+        username = password = null;
+        return this;
+    }
 
     public ChatFrameClient(ObjectMapper mapper, Client chatClient, String endpoint) {
         this.mapper = mapper;
@@ -35,7 +51,11 @@ public class ChatFrameClient {
     }
 
     public ChatFrameClientSession session(String frame) {
-        return new ChatFrameClientSession(mapper, target, frame);
+        ChatFrameClientSession session = new ChatFrameClientSession(mapper, target, frame);
+        session.username = username;
+        session.password = password;
+        session.bearerToken = bearerToken;
+        return session;
     }
 
     public ChatFrameClientSession session() {
