@@ -744,8 +744,11 @@
             const $chatContainer = $('#chat-container');
             const $messageInput = $('#message-input');
 
-            // Save indicator functionality
-            let chatContext = null;
+            let chatContext = {
+                frame: {
+                    name: 'mainMenu'
+                }
+            };
 
             function saveFile(url, filename) {
                 const a = document.createElement("a");
@@ -1272,33 +1275,24 @@
                     });
 
                     console.log(response);
-                    const responseData = JSON.parse(response);
-                    chatContext = responseData.context;
-                    if (responseData.events) {
-                        for (const action of responseData.events) {
+                    chatContext = response.context;
+                    if (response.events) {
+                        for (const action of response.events) {
                             if (action.type === 'ListEquipment') {
-                                console.log('ListEquipment');
                                 listEquipmentEvent(action.equipment);
                             } else if (action.type === 'ShowEquipment') {
-                                console.log('ShowEquipment');
                                 showEquipmentEvent(action.equipment);
                             } else if (action.type === 'ObjectMessage') {
-                                console.log('Message');
                                 addJsonMessage(action.message);
                             } else if (action.type === 'StringMessage') {
-                                console.log('String');
                                 addJsonMessage(action.string);
                             } else if (action.type === 'UpdateNewEquipment') {
-                                console.log('UpdateNewEquipment');
                                 updateNewEquipmentEvent(action);
                             } else if (action.type === 'PackageMod') {
-                                console.log('PackageMod');
                                 packageModEvent(action);
                             } else if (action.type === 'ImportMod') {
-                                console.log('ImportMod');
                                 importModEvent();
                             } else if (action.type === 'ListVisualModels') {
-                                console.log('ListVisualModels');
                                 listVisualModelsEvent(action.visualModels);
                             }
                         }

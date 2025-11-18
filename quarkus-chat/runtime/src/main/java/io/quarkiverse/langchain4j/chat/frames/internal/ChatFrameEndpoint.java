@@ -85,7 +85,7 @@ public class ChatFrameEndpoint {
                     ctx.response().setStatusCode(500).end("Failed to serialize chat context");
                     return null;
                 }
-                ctx.response().setStatusCode(200).putHeader("Content-Type", "text/plain").end(writer.toString());
+                ctx.response().setStatusCode(200).putHeader("Content-Type", "application/json").end(writer.toString());
             } catch (Exception e) {
                 Log.error("Failed to execute chat", e);
                 ctx.response().setStatusCode(500).end("Failed to execute chat");
