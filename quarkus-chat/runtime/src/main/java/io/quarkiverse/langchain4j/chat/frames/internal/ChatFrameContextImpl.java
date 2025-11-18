@@ -23,7 +23,7 @@ import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
 public class ChatFrameContextImpl implements ChatFrameContext {
 
     volatile ChatFrameData current;
-    List<ChatEvent> response = new ArrayList<>();
+    List<ChatEvent> events = new ArrayList<>();
 
     String userMessage = null;
     String systemMessage = null;
@@ -100,7 +100,7 @@ public class ChatFrameContextImpl implements ChatFrameContext {
      */
     @Override
     public List<ChatEvent> events() {
-        return response;
+        return events;
     }
 
     // ChatFrameController methods
