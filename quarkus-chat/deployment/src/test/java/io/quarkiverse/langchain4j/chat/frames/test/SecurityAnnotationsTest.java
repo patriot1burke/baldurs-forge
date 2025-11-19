@@ -16,20 +16,18 @@ import io.quarkiverse.langchain4j.chat.frames.client.ClientStringMessage;
 import io.quarkus.security.test.utils.TestIdentityController;
 import io.quarkus.security.test.utils.TestIdentityProvider;
 import io.quarkus.test.QuarkusUnitTest;
-import io.restassured.RestAssured;
 
-public class SecurityTest {
+public class SecurityAnnotationsTest {
     private static final String APP_PROPS = "" +
-            "quarkus.http.auth.basic=true\n" +
-            "quarkus.http.auth.policy.r1.roles-allowed=allowed\n" +
-            "quarkus.http.auth.permission.roles1.paths=/q/chat-frames,/message\n" +
-            "quarkus.http.auth.permission.roles1.policy=r1\n";
+            "quarkus.http.auth.basic=true\n"
+            + "quarkus.http.auth.permission.roles1.paths=/q/chat-frames\n" +
+            "quarkus.http.auth.permission.roles1.policy=authenticated\n";;
 
     @RegisterExtension
     public static QuarkusUnitTest test = new QuarkusUnitTest()
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
-                    .addClasses(MyChatService.class, MockResult.class, TestIdentityController.class,
-                            TestIdentityProvider.class, PathHandler.class)
+                    .addClasses(SecurityAnnotationsService.class, TestIdentityController.class,
+                            TestIdentityProvider.class)
                     .addAsResource(new StringAsset(APP_PROPS), "application.properties"));
 
     static ChatFrameClient client;
@@ -43,46 +41,52 @@ public class SecurityTest {
     }
 
     @Test
-    public void testPath() {
-        // just to see if security is working
-        RestAssured.given()
-                .auth().basic("user1", "password1")
-                .when().get("/message")
-                .then().statusCode(200);
-        RestAssured.given()
-                .auth().basic("user2", "password2")
-                .when().get("/message")
-                .then().statusCode(403);
+    public void testAuthenticated() {
+        ChatFrameClientSession session = client.session("authenticated");
+        session.basicAuth("user2", "password2");
+        ClientStringMessage text = (ClientStringMessage) session.chat("Hello, world!").get(0);
+        Assertions.assertEquals("authenticated", text.getString());
     }
 
     @Test
-    public void testAuthorized() {
-        ChatFrameClientSession session = client.session();
+    public void testRole() {
+        ChatFrameClientSession session = client.session("roles");
         session.basicAuth("user1", "password1");
         ClientStringMessage text = (ClientStringMessage) session.chat("Hello, world!").get(0);
-        Assertions.assertEquals("defaultChat:Hello, world!", text.getString());
+        Assertions.assertEquals("roles-allowed", text.getString());
     }
 
     @Test
-    public void testForbidden() {
-        ChatFrameClientSession session = client.session();
-        session.basicAuth("user2", "password2");
+    public void testAuthenticated401() {
+        ChatFrameClientSession session = client.session("authenticated");
         try {
-            ClientStringMessage text = (ClientStringMessage) session.chat("Hello, world!").get(0);
+            session.chat("Hello, world!").get(0);
             Assertions.fail("Expected WebApplicationException");
         } catch (WebApplicationException e) {
-            Assertions.assertEquals(403, e.getResponse().getStatus());
+            Assertions.assertEquals(401, e.getResponse().getStatus());
         }
     }
 
     @Test
-    public void testUnauthenticated() {
-        ChatFrameClientSession session = client.session();
+    public void testRole401() {
+        ChatFrameClientSession session = client.session("roles");
         try {
-            ClientStringMessage text = (ClientStringMessage) session.chat("Hello, world!").get(0);
+            session.chat("Hello, world!").get(0);
             Assertions.fail("Expected WebApplicationException");
         } catch (WebApplicationException e) {
             Assertions.assertEquals(401, e.getResponse().getStatus());
+        }
+    }
+
+    @Test
+    public void testRole403() {
+        ChatFrameClientSession session = client.session("roles");
+        try {
+            session.basicAuth("user2", "password2");
+            session.chat("Hello, world!").get(0);
+            Assertions.fail("Expected WebApplicationException");
+        } catch (WebApplicationException e) {
+            Assertions.assertEquals(403, e.getResponse().getStatus());
         }
     }
 }

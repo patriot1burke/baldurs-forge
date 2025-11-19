@@ -92,7 +92,11 @@ public class ReflectiveChatFrameExecution implements ChatFrameExecution {
                 handleResponse(context, method.getGenericReturnType(), returnValue);
             }
         } catch (InvocationTargetException e) {
-            throw new RuntimeException(e.getCause());
+            if (e.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) e.getCause();
+            } else {
+                throw new RuntimeException(e.getCause());
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

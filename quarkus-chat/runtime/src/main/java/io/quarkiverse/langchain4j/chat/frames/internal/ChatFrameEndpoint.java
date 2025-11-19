@@ -4,7 +4,10 @@ import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,6 +16,11 @@ import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
 import io.quarkus.arc.Arc;
 import io.quarkus.arc.ManagedContext;
 import io.quarkus.logging.Log;
+import io.quarkus.security.ForbiddenException;
+import io.quarkus.security.UnauthorizedException;
+import io.quarkus.security.identity.CurrentIdentityAssociation;
+import io.quarkus.security.identity.SecurityIdentity;
+import io.quarkus.vertx.http.runtime.security.QuarkusHttpUser;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 
@@ -28,11 +36,19 @@ public class ChatFrameEndpoint {
     @Inject
     ChatFrameContextImpl context;
 
+    CurrentIdentityAssociation association;
+
     @Inject
     ObjectMapper mapper;
 
     @Inject
     Vertx vertx;
+
+    @PostConstruct
+    public void init() {
+        Instance<CurrentIdentityAssociation> association = CDI.current().select(CurrentIdentityAssociation.class);
+        this.association = association.isResolvable() ? association.get() : null;
+    }
 
     public void handleChat(RoutingContext ctx, String body) {
         Log.debug("Handling chat");
@@ -52,8 +68,17 @@ public class ChatFrameEndpoint {
                     ctx.response().setStatusCode(400).end("Failed to deserialize chat context");
                     return null;
                 }
+                setCurrentIdentityAssociation(ctx);
                 try {
                     chatFrameService.chat(context);
+                } catch (UnauthorizedException e) {
+                    Log.error("Unauthorized", e);
+                    ctx.response().setStatusCode(401).end("Unauthorized");
+                    return null;
+                } catch (ForbiddenException e) {
+                    Log.error("Forbidden", e);
+                    ctx.response().setStatusCode(403).end("Forbidden");
+                    return null;
                 } finally {
                     if (context.wipeScheduled()) {
                         context.clearMemory();
@@ -79,5 +104,17 @@ public class ChatFrameEndpoint {
 
             return null;
         });
+    }
+
+    protected void setCurrentIdentityAssociation(RoutingContext routingContext) {
+        if (association != null) {
+            QuarkusHttpUser existing = (QuarkusHttpUser) routingContext.user();
+            if (existing != null) {
+                SecurityIdentity identity = existing.getSecurityIdentity();
+                association.setIdentity(identity);
+            } else {
+                association.setIdentity(QuarkusHttpUser.getSecurityIdentity(routingContext, null));
+            }
+        }
     }
 }
