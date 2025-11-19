@@ -4,17 +4,13 @@
         <groupId>org.baldurs.forge</groupId>
         <artifactId>baldurs-forge-parent</artifactId>
         <version>999-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>    </parent>
-    <artifactId>quarkus-langchain4j-chat-parent</artifactId>
-    <name>Quarkus LangChain4j - Chat - Parent</name>
+        <relativePath>../../pom.xml</relativePath>    </parent>
+    <artifactId>quarkus-langchain4j-chat-frames-samples-parent</artifactId>
+    <name>Samples - Parent</name>
     <packaging>pom</packaging>
 
     <modules>
-        <module>client</module>
-        <module>runtime</module>
-        <module>deployment</module>
-        <module>samples</module>
-        
+        <module>minimal-web-chat</module>
     </modules>
     
 </project>
