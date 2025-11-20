@@ -29,15 +29,16 @@ import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingSearchResult;
-import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
 import dev.langchain4j.store.embedding.filter.Filter;
 import dev.langchain4j.store.embedding.filter.MetadataFilterBuilder;
 import io.quarkus.logging.Log;
+import io.quarkus.runtime.Startup;
 import io.quarkus.runtime.StartupEvent;
 
 @ApplicationScoped
 public class EquipmentDB {
+    public static final int PRIORITY = 10;
     @Inject
     LibraryService libraryService;
 
@@ -45,7 +46,7 @@ public class EquipmentDB {
     BoostService boostService;
 
     @Inject
-    EmbeddingStore<TextSegment> embeddingStore;
+    InMemoryEmbeddingStoreProducer embeddingStoreProducer;
 
     @Inject
     EmbeddingModel embeddingModel;
@@ -55,6 +56,7 @@ public class EquipmentDB {
 
     Map<String, Equipment> equipmentDB = new HashMap<>();
 
+    @Startup(PRIORITY)
     public void start(@Observes StartupEvent event) throws Exception {
         buildEquipment();
         load();
@@ -163,22 +165,21 @@ public class EquipmentDB {
     }
 
     private void load() throws Exception {
-
-        Log.info("Loading items...");
-
+        if (embeddingStoreProducer.isCached()) {
+            Log.info("Using cached embedding store");
+            return;
+        }
         Log.info("**************************************************");
-        Log.info("Removing all items from vector db for clean ingestion...");
+        Log.info("Ingesting equipment DB...");
         Log.info("**************************************************");
 
-        Filter filter = new MetadataFilterBuilder("type").isNotEqualTo("Spell");
-        embeddingStore.removeAll(filter);
         ingest(equipmentDB.values());
     }
 
     private void ingest(Collection<Equipment> equipment) {
         EmbeddingStoreIngestor ingester = EmbeddingStoreIngestor.builder()
                 .embeddingModel(embeddingModel)
-                .embeddingStore(embeddingStore)
+                .embeddingStore(embeddingStoreProducer.getStore())
                 .build();
 
         List<Document> docs = new ArrayList<>();
@@ -217,7 +218,7 @@ public class EquipmentDB {
             docs.add(document);
         }
         ingester.ingest(docs);
-
+        embeddingStoreProducer.save();
         Log.info("Ingested " + equipment.size() + " items");
     }
 
@@ -293,7 +294,7 @@ public class EquipmentDB {
                 .maxResults(5)
                 .build();
 
-        EmbeddingSearchResult<TextSegment> search = embeddingStore.search(request);
+        EmbeddingSearchResult<TextSegment> search = embeddingStoreProducer.getStore().search(request);
         Log.info("Search results: " + search.matches().size());
         List<Equipment> result = search.matches().stream().map(m -> {
             String id = m.embedded().metadata().getString("id");

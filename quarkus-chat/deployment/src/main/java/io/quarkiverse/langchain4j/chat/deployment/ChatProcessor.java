@@ -59,7 +59,8 @@ public class ChatProcessor {
     public void collectChatFrames(BuildProducer<ChatFrameBuildItem> chatFrameProducer,
             CombinedIndexBuildItem combinedIndexBuildItem,
             BuildProducer<ReflectiveClassBuildItem> reflectiveClass,
-            BuildProducer<AdditionalBeanBuildItem> additionalBeanProducer) {
+            BuildProducer<AdditionalBeanBuildItem> additionalBeanProducer,
+            BuildProducer<UnremovableBeanBuildItem> unremovableBeanBuildItemBuildProducer) {
         IndexView index = combinedIndexBuildItem.getIndex();
         Collection<AnnotationInstance> funqs = index.getAnnotations(CHAT_FRAME);
         Set<String> beans = new HashSet<>();
@@ -108,6 +109,8 @@ public class ChatProcessor {
                 if (beanClass != null) {
                     beans.add(beanClass.name().toString());
                 }
+            } else {
+                unremovableBeanBuildItemBuildProducer.produce(UnremovableBeanBuildItem.beanTypes(declaringClass.name()));
             }
 
             String frameName = className + "::" + methodName;

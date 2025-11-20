@@ -57,6 +57,17 @@ public class LibraryService {
 
     private Map<String, String> icons = new HashMap<>();
     private BaldursArchive archive;
+    private long lastCacheUpdate = 0;
+
+    public long lastCacheUpdate() {
+        return lastCacheUpdate;
+    }
+
+    private void lastUpdate(long time) {
+        if (time > lastCacheUpdate) {
+            lastCacheUpdate = time;
+        }
+    }
 
     private void mergeArchives() {
         archive = new BaldursArchive();
@@ -91,6 +102,7 @@ public class LibraryService {
             if (Files.isDirectory(modPath)) {
                 Path archivePath = modPath.resolve("archive.json");
                 if (Files.exists(archivePath)) {
+                    lastUpdate(archivePath.toFile().lastModified());
                     ArchiveSource source = ArchiveSource.load(archivePath);
                     Log.info("Loaded mod " + source.name);
                     archives.put(source.name, source);
@@ -102,6 +114,7 @@ public class LibraryService {
     private void loadCoreGameData() throws IOException, Exception {
         Path root = Path.of(cachePath);
         if (!Files.exists(root)) {
+            lastCacheUpdate = Long.MAX_VALUE;
             Files.createDirectories(root);
         }
         BaldursArchive library = new BaldursArchive();
@@ -112,7 +125,9 @@ public class LibraryService {
         Path statsPath = root.resolve("stats.json");
         if (Files.exists(statsPath)) {
             library.getStats().load(source, statsPath);
+            lastUpdate(statsPath.toFile().lastModified());
         } else {
+            lastCacheUpdate = Long.MAX_VALUE;
             library.getStats()
                     .scan(source, Path.of("/mnt/c/Users/patri/mods/shared/Public/Shared/Stats/Generated/Data"))
                     .scan(source, Path.of("/mnt/c/Users/patri/mods/shared/Public/SharedDev/Stats/Generated/Data"))
@@ -124,7 +139,9 @@ public class LibraryService {
         Path rootTemplatesPath = root.resolve("root-templates.json");
         if (Files.exists(rootTemplatesPath)) {
             library.getRootTemplates().load(source, rootTemplatesPath);
+            lastUpdate(rootTemplatesPath.toFile().lastModified());
         } else {
+            lastCacheUpdate = Long.MAX_VALUE;
             library.getRootTemplates()
                     .scan(source, Path.of("/mnt/c/Users/patri/mods/shared/Public/Shared/RootTemplates/_merged.lsx"))
                     .scan(source, Path.of("/mnt/c/Users/patri/mods/shared/Public/SharedDev/RootTemplates/_merged.lsx"))
@@ -135,8 +152,10 @@ public class LibraryService {
 
         Path localizationPath = root.resolve("localization.json");
         if (Files.exists(localizationPath)) {
+            lastUpdate(localizationPath.toFile().lastModified());
             library.getLocalizations().load(localizationPath);
         } else {
+            lastCacheUpdate = Long.MAX_VALUE;
             library.getLocalizations()
                     .scan(Path.of("/mnt/c/Users/patri/mods/bg3-localization/Localization/English/english.xml"))
                     .save(localizationPath);

@@ -34,17 +34,17 @@ public class ClientMemoryStore {
     Map<String, List<ChatMessage>> messages = new ConcurrentHashMap<>();
 
     public void deleteMessages(Object memoryId) {
-        Log.info("Deleting messages for memoryId: " + memoryId);
+        Log.debugv("Deleting messages for memoryId: {0}", memoryId);
         messages.remove(memoryId);
     }
 
     public List<ChatMessage> getMessages(Object memoryId) {
-        Log.info("Getting messages for memoryId: " + memoryId);
+        Log.debugv("Getting messages for memoryId: {0}", memoryId);
         return messages.computeIfAbsent(memoryId.toString(), ignored -> new ArrayList<>());
     }
 
     public void updateMessages(Object memoryId, List<ChatMessage> messages) {
-        Log.info("Updating messages for memoryId: " + memoryId);
+        Log.debugv("Updating messages for memoryId: {0}", memoryId);
         this.messages.put(memoryId.toString(), messages);
     }
 

@@ -20,7 +20,6 @@ import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingSearchResult;
-import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
 import dev.langchain4j.store.embedding.filter.Filter;
 import dev.langchain4j.store.embedding.filter.MetadataFilterBuilder;
@@ -32,7 +31,7 @@ public class SpellService {
     LibraryService libraryService;
 
     @Inject
-    EmbeddingStore<TextSegment> embeddingStore;
+    InMemoryEmbeddingStoreProducer embeddingStoreProducer;
 
     @Inject
     EmbeddingModel embeddingModel;
@@ -72,15 +71,14 @@ public class SpellService {
     }
 
     private void load() throws Exception {
-
-        Log.info("Loading items...");
-
+        if (embeddingStoreProducer.isCached()) {
+            Log.info("Using cached embedding store for spells");
+            return;
+        }
         Log.info("**************************************************");
-        Log.info("Removing all spells from vector db for clean ingestion...");
+        Log.info("Ingesting Spells...");
         Log.info("**************************************************");
 
-        Filter filter = new MetadataFilterBuilder("type").isEqualTo("Spell");
-        embeddingStore.removeAll(filter);
         Collection<Spell> spells = spellDB.values();
 
         ingest(spells);
@@ -89,7 +87,7 @@ public class SpellService {
     private void ingest(Collection<Spell> spells) {
         EmbeddingStoreIngestor ingester = EmbeddingStoreIngestor.builder()
                 .embeddingModel(embeddingModel)
-                .embeddingStore(embeddingStore)
+                .embeddingStore(embeddingStoreProducer.getStore())
                 .build();
 
         List<Document> docs = new ArrayList<>();
@@ -108,7 +106,7 @@ public class SpellService {
             docs.add(document);
         }
         ingester.ingest(docs);
-
+        embeddingStoreProducer.save();
         Log.info("Ingested " + spells.size() + " items");
     }
 
@@ -124,7 +122,7 @@ public class SpellService {
                 .maxResults(5)
                 .build();
 
-        EmbeddingSearchResult<TextSegment> search = embeddingStore.search(request);
+        EmbeddingSearchResult<TextSegment> search = embeddingStoreProducer.getStore().search(request);
         Log.info("Search results: " + search.matches().size());
         List<Spell> result = search.matches().stream().map(m -> {
             String id = m.embedded().metadata().getString("id");
