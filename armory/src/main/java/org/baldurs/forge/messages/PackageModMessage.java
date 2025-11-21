@@ -2,15 +2,13 @@ package org.baldurs.forge.messages;
 
 import org.baldurs.forge.builder.NewModModel;
 
-import io.quarkiverse.langchain4j.chat.frames.ChatEvent;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 
-public class PackageModMessage extends ChatEvent {
+public class PackageModMessage {
     protected String filename;
     protected NewModModel newEquipment;
 
     private PackageModMessage(String filename, NewModModel newEquipment) {
-        super("PackageMod");
         this.newEquipment = newEquipment;
         this.filename = filename;
     }
@@ -31,7 +29,6 @@ public class PackageModMessage extends ChatEvent {
      * @param filename
      */
     public static void addResponse(ChatFrameContext context, String filename, NewModModel newEquipment) {
-        context.events().removeIf(action -> action instanceof PackageModMessage);
-        context.events().add(new PackageModMessage(filename, newEquipment));
+        context.addEvent("PackageMod", new PackageModMessage(filename, newEquipment), true);
     }
 }

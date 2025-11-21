@@ -13,9 +13,9 @@ import jakarta.inject.Inject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
-import io.quarkiverse.langchain4j.chat.frames.ChatEvent;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameEvent;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
 
 @RequestScoped
@@ -23,10 +23,9 @@ import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
 public class ChatFrameContextImpl implements ChatFrameContext {
 
     volatile ChatFrameData current;
-    List<ChatEvent> events = new ArrayList<>();
+    List<ChatFrameEvent> events = new ArrayList<>();
 
     String userMessage = null;
-    String systemMessage = null;
 
     boolean wipeScheduled = false;
     boolean wipeAborted = false;
@@ -59,16 +58,6 @@ public class ChatFrameContextImpl implements ChatFrameContext {
     }
 
     @Override
-    public String systemMessage() {
-        return systemMessage;
-    }
-
-    @Override
-    public void setSystemMessage(String systemMessage) {
-        this.systemMessage = systemMessage;
-    }
-
-    @Override
     public String memoryId() {
         return current.memoryId();
     }
@@ -84,23 +73,46 @@ public class ChatFrameContextImpl implements ChatFrameContext {
     }
 
     @Override
-    public void setData(String key, Object value) {
+    public ChatFrameContext setData(String key, Object value) {
         current.setData(key, value);
+        return this;
     }
 
     @Override
-    public void removeData(String key) {
+    public ChatFrameContext removeData(String key) {
         current.data().remove(key);
+        return this;
     }
 
-    /**
-     * Arbitrary list of response objects serialized to JSON and sent back to client.
-     *
-     * @return
-     */
     @Override
-    public List<ChatEvent> events() {
+    public List<ChatFrameEvent> events() {
         return events;
+    }
+
+    @Override
+    public ChatFrameContext addEvent(String type, Object value) {
+        return addEvent(type, value, false);
+    }
+
+    @Override
+    public ChatFrameContext addEvent(String type, Object value, boolean replace) {
+        if (replace) {
+            events.removeIf(event -> event.getType().equals(type));
+        }
+        events.add(new ChatFrameEvent(type, value));
+        return this;
+    }
+
+    @Override
+    public ChatFrameContext addEvent(String stringMessage) {
+        events.add(ChatFrameEvent.stringMessage(stringMessage));
+        return this;
+    }
+
+    @Override
+    public ChatFrameContext addEvent(Object objectMessage) {
+        events.add(ChatFrameEvent.objectMessage(objectMessage));
+        return this;
     }
 
     // ChatFrameController methods
@@ -119,30 +131,32 @@ public class ChatFrameContextImpl implements ChatFrameContext {
     }
 
     @Override
-    public void setFrame(String chatFrame) {
+    public ChatFrameContext setFrame(String chatFrame) {
         if (!chatFrameController.hasFrame(chatFrame)) {
             throw new IllegalArgumentException("Unknown chat frame: " + chatFrame);
         }
         current = new ChatFrameData(mapper);
         current.setName(chatFrame);
         current.setMemoryId(UUID.randomUUID().toString());
+        return this;
     }
 
     @Override
-    public void pushFrame(String chatFrame) {
-        pushFrame(chatFrame, false);
+    public ChatFrameContext pushFrame(String chatFrame) {
+        return pushFrame(chatFrame, false);
     }
 
     @Override
-    public void popFrame() {
+    public ChatFrameContext popFrame() {
         if (current != null) {
             chatMemoryStore.deleteMessages(current.memoryId());
             current = current.parent();
         }
+        return this;
     }
 
     @Override
-    public void pushFrame(String chatFrame, boolean deleteMemory) {
+    public ChatFrameContext pushFrame(String chatFrame, boolean deleteMemory) {
         if (!chatFrameController.hasFrame(chatFrame)) {
             throw new IllegalArgumentException("Unknown chat frame: " + chatFrame);
         }
@@ -155,18 +169,21 @@ public class ChatFrameContextImpl implements ChatFrameContext {
             chatMemoryStore.deleteMessages(parent.memoryId());
         }
         current = next;
+        return this;
     }
 
     @Override
-    public void clearMemory() {
+    public ChatFrameContext clearMemory() {
         if (current != null) {
             chatMemoryStore.deleteMessages(current.memoryId());
         }
+        return this;
     }
 
     @Override
-    public void scheduleWipe() {
+    public ChatFrameContext scheduleWipe() {
         wipeScheduled = true;
+        return this;
     }
 
     @Override
@@ -175,8 +192,9 @@ public class ChatFrameContextImpl implements ChatFrameContext {
     }
 
     @Override
-    public void abortWipe() {
+    public ChatFrameContext abortWipe() {
         wipeScheduled = false;
         wipeAborted = true;
+        return this;
     }
 }

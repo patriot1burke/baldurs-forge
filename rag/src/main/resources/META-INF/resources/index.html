@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimal Web Chat</title>
+    <title>Price of Salt and Pearls</title>
     <link rel="stylesheet" href="/webjars/font-awesome/css/all.min.css">
     <script src="/webjars/jquery/jquery.min.js"></script>
     <style>
@@ -741,6 +741,7 @@
 
             // Clear chat history
             async function clearChat() {
+                console.log('Clearing chat');
                 try {
                     chatContext = null;
                     // Keep only the initial greeting

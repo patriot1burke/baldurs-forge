@@ -35,11 +35,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 public interface ChatFrameContext {
     String userMessage();
 
-    String systemMessage();
-
     void setUserMessage(String userMessage);
-
-    void setSystemMessage(String systemMessage);
 
     /**
      * The memoryId for the current frame.
@@ -79,22 +75,57 @@ public interface ChatFrameContext {
      *
      * @return
      */
-    void setData(String key, Object value);
+    ChatFrameContext setData(String key, Object value);
 
     /**
      * Removes the data for the given key.
      *
      * @param key
      */
-    void removeData(String key);
+    ChatFrameContext removeData(String key);
 
     /**
      * Arbitrary list of response objects serialized to JSON and sent back to
-     * client.
+     * client. This is mutable
      *
      * @return
      */
-    List<ChatEvent> events();
+    List<ChatFrameEvent> events();
+
+    /**
+     * Add an event to the response list.
+     *
+     * @param type
+     * @param value
+     * @return
+     */
+    ChatFrameContext addEvent(String type, Object value);
+
+    /**
+     * Add an event to the response list. If replace is true, the event will replace the existing event with the same type.
+     *
+     * @param type
+     * @param value
+     * @param replace
+     * @return
+     */
+    ChatFrameContext addEvent(String type, Object value, boolean replace);
+
+    /**
+     * Add a StringMessage event to the response list.
+     *
+     * @param stringMessage
+     * @return
+     */
+    ChatFrameContext addEvent(String stringMessage);
+
+    /**
+     * Add an ObjectMessage evente to the response list.
+     *
+     * @param objectMessage
+     * @return
+     */
+    ChatFrameContext addEvent(Object objectMessage);
 
     String currentFrameId();
 
@@ -106,7 +137,7 @@ public interface ChatFrameContext {
      *
      * @param chatFrame
      */
-    void setFrame(String chatFrame);
+    ChatFrameContext setFrame(String chatFrame);
 
     /**
      * Pushes the given chat frame onto the frame stack.
@@ -115,7 +146,7 @@ public interface ChatFrameContext {
      *
      * @param chatFrame
      */
-    void pushFrame(String chatFrame);
+    ChatFrameContext pushFrame(String chatFrame);
 
     /**
      * Pushes the given chat frame onto the frame stack.
@@ -123,28 +154,28 @@ public interface ChatFrameContext {
      * @param chatFrame
      * @param deleteMessages if true, deletes the chat memory for the current frame before pushing the new frame
      */
-    void pushFrame(String chatFrame, boolean deleteMemory);
+    ChatFrameContext pushFrame(String chatFrame, boolean deleteMemory);
 
     /**
      * Pops current frame off of the frame stack and also deletes chat data and memory for that frame.
      */
-    void popFrame();
+    ChatFrameContext popFrame();
 
     /**
      * Clears chat memory for current frame
      */
-    void clearMemory();
+    ChatFrameContext clearMemory();
 
     /**
      * Schedule a wipe of chat memory for current frame.
      */
-    void scheduleWipe();
+    ChatFrameContext scheduleWipe();
 
     /**
      * Abort a scheduled wipe of chat memory for current frame.
      * An abort cannot be canceled or overridden.
      */
-    void abortWipe();
+    ChatFrameContext abortWipe();
 
     /**
      * Checks if a wipe of chat memory is scheduled for current frame.

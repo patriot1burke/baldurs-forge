@@ -1,12 +1,12 @@
 package org.baldurs.forge.messages;
 
-import io.quarkiverse.langchain4j.chat.frames.ChatEvent;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 
-public class ImportModMessage extends ChatEvent {
+public class ImportModMessage {
+
+    protected String message;
 
     private ImportModMessage() {
-        super("ImportMod");
     }
 
     /**
@@ -16,8 +16,7 @@ public class ImportModMessage extends ChatEvent {
      * @param context
      */
     public static void addResponse(ChatFrameContext context) {
-        context.events().removeIf(action -> action instanceof ImportModMessage);
-        context.events().add(new ImportModMessage());
+        context.addEvent("ImportMod", "ImportMod", true);
     }
 
 }

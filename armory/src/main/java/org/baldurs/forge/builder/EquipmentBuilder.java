@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.langchain4j.service.Result;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
-import io.quarkiverse.langchain4j.chat.frames.StringMessage;
 import io.quarkus.logging.Log;
 
 public abstract class EquipmentBuilder {
@@ -103,10 +102,9 @@ public abstract class EquipmentBuilder {
             context.setData(NewModModel.NEW_EQUIPMENT, newEquipment);
         }
         newEquipment.addEquipment(current);
-        context.events().add(new StringMessage("Finished building item!"));
-        context.events()
-                .add(new UpdateNewEquipmentMessage("To create a mod containing your newly built equipment, tell me to '"
-                        + ModPackager.PACKAGE_MODE_CHAT_COMMAND + "'", newEquipment.count));
+        context.addEvent("Finished building item!");
+        UpdateNewEquipmentMessage.addResponse(context, "To create a mod containing your newly built equipment, tell me to '"
+                + ModPackager.PACKAGE_MODE_CHAT_COMMAND + "'", newEquipment.count);
         Log.info("Finished equipment");
         context.scheduleWipe();
     }
@@ -134,8 +132,8 @@ public abstract class EquipmentBuilder {
         String enchantment = boostBuilder.createBoostMacro(context.userMessage());
         Log.info("Enchantment: " + enchantment);
         if (enchantment.indexOf('(') < 0) {
-            context.events().add(new StringMessage(enchantment));
-            context.events().add(new StringMessage("Could not create a boost macro from your description."));
+            context.addEvent(enchantment);
+            context.addEvent("Could not create a boost macro from your description.");
             return;
         }
         if (current.boosts == null || current.boosts.isEmpty()) {
@@ -154,8 +152,8 @@ public abstract class EquipmentBuilder {
         String enchantment = boostBuilder.createBoostMacro(context.userMessage());
         Log.info("Enchantment: " + enchantment);
         if (enchantment.indexOf('(') < 0) {
-            context.events().add(new StringMessage(enchantment));
-            context.events().add(new StringMessage("Could not create a boost macro from your description."));
+            context.addEvent(enchantment);
+            context.addEvent("Could not create a boost macro from your description.");
             return;
         }
         current.boosts = enchantment;
@@ -165,7 +163,7 @@ public abstract class EquipmentBuilder {
     // todo, may be able to have a void return type.  Nervous that AI gets confused if it does not get a return value for this tool.
     public String showVisualModels(Predicate<? super Stat> visualModelPredicate) {
         if (visualModelPredicate == null) {
-            context.events().add(new StringMessage("Item not finished yet.  Cannot search for visual models."));
+            context.addEvent("Item not finished yet.  Cannot search for visual models.");
             return null;
         }
         List<RootTemplate> rootTemplates = library.findRootIconsFrom(visualModelPredicate);
@@ -181,10 +179,10 @@ public abstract class EquipmentBuilder {
             }
             action.add(iconPath, rootTemplate.MapKey);
         }
-        context.events().add(action);
+        action.addResponse(context);
         String message = "There are " + rootTemplates.size()
                 + " visual models available. Choose one of the parent ids from the list above if you want a different look for your weapon.";
-        context.events().add(new StringMessage(message));
+        context.addEvent(message);
 
         return null;
     }

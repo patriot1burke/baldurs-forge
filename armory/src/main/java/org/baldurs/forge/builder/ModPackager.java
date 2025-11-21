@@ -36,8 +36,7 @@ import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.service.Result;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
-import io.quarkiverse.langchain4j.chat.frames.ResultEventTypes;
-import io.quarkiverse.langchain4j.chat.frames.StringMessage;
+import io.quarkiverse.langchain4j.chat.frames.EventMapper;
 import io.quarkus.logging.Log;
 
 @ApplicationScoped
@@ -76,7 +75,7 @@ public class ModPackager {
     public void startPackageMod() {
         NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
         if (newEquipment == null) {
-            context.events().add(new StringMessage("Nothing to package.  You have not created any new equipment."));
+            context.addEvent("Nothing to package.  You have not created any new equipment.");
             return;
         }
         context.pushFrame("packageMod");
@@ -85,7 +84,7 @@ public class ModPackager {
     }
 
     @ChatFrame("packageMod")
-    @ResultEventTypes(MarkdownStringMessage.class)
+    @EventMapper(MarkdownStringMessage.class)
     public Result<String> packageMod(PackageModel currentPackage) {
         String currentJson = null;
         try {
@@ -144,27 +143,27 @@ public class ModPackager {
         if (!equipment.isEmpty()) {
             ListEquipmentMessage.addResponse(context, equipment);
         } else {
-            context.events().add(new StringMessage("No new equipment."));
+            context.addEvent("No new equipment.");
         }
     }
 
     public void deleteAllNewEquipment() {
         context.removeData(NewModModel.NEW_EQUIPMENT);
-        context.events().add(new UpdateNewEquipmentMessage(null, 0));
+        UpdateNewEquipmentMessage.addResponse(context, null, 0);
         context.clearMemory();
     }
 
     public void deleteNewEquipment(String name) {
         NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
         if (newEquipment == null || newEquipment.isEmpty()) {
-            context.events().add(new StringMessage("No equipment to delete."));
+            context.addEvent("No equipment to delete.");
             return;
         }
 
         BaseModel equipment = newEquipment.findEquipmentByName(name);
         if (equipment == null) {
             showNewEquipment();
-            context.events().add(new StringMessage("Equipment with name not found."));
+            context.addEvent("Equipment with name not found.");
             return;
         }
         newEquipment.removeEquipment(equipment);
@@ -176,21 +175,21 @@ public class ModPackager {
             showNewEquipment();
         }
         context.clearMemory();
-        context.events().add(new UpdateNewEquipmentMessage(null, newEquipment.count));
+        UpdateNewEquipmentMessage.addResponse(context, null, newEquipment.count);
 
-        context.events().add(new StringMessage("Equipment deleted."));
+        context.addEvent("Equipment deleted.");
     }
 
     public void updateNewEquipment(String name) {
         NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
         if (newEquipment == null || newEquipment.isEmpty()) {
-            context.events().add(new StringMessage("No equipment to update."));
+            context.addEvent("No equipment to update.");
             return;
         }
         BaseModel equipment = newEquipment.findEquipmentByName(name);
         if (equipment == null) {
             showNewEquipment();
-            context.events().add(new StringMessage("Equipment with name not found."));
+            context.addEvent("Equipment with name not found.");
             return;
         }
         context.setData(EquipmentBuilder.CURRENT_EQUIPMENT, equipment);

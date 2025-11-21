@@ -22,10 +22,6 @@ public class ChatFrameContextSerialization {
         if (userMessageNode != null && !userMessageNode.isNull()) {
             context.setUserMessage(userMessageNode.asText());
         }
-        JsonNode systemMessageNode = node.get("systemMessage");
-        if (systemMessageNode != null && !systemMessageNode.isNull()) {
-            context.setSystemMessage(systemMessageNode.asText());
-        }
 
         JsonNode contextNode = node.get("context");
         if (contextNode == null || contextNode.isNull()) {

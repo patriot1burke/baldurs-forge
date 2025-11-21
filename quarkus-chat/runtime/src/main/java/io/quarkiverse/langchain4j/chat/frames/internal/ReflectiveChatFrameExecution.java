@@ -7,44 +7,45 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.Result;
-import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.tool.ToolExecution;
-import io.quarkiverse.langchain4j.chat.frames.ChatEvent;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameEvent;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
+import io.quarkiverse.langchain4j.chat.frames.EventMapper;
 import io.quarkiverse.langchain4j.chat.frames.FrameInject;
-import io.quarkiverse.langchain4j.chat.frames.ObjectMessage;
-import io.quarkiverse.langchain4j.chat.frames.ResultEventTypes;
-import io.quarkiverse.langchain4j.chat.frames.StringMessage;
 import io.quarkus.arc.Arc;
 import io.quarkus.arc.runtime.BeanContainer;
-import io.quarkus.logging.Log;
 
 public class ReflectiveChatFrameExecution implements ChatFrameExecution {
     private final Class<?> beanClass;
     private final Method method;
     protected volatile BeanContainer.Factory<?> factory;
     protected List<ParameterResolver> parameterResolvers = new ArrayList<>();
-    protected List<Method> responseConstructors = new ArrayList<>();
+    protected List<Method> resultMappers = new ArrayList<>();
+    EventResolver mapper;
+    Class<?> resultMapperClass;
 
     interface ParameterResolver {
         Object resolve(ChatFrameContext context);
     }
 
-    public ReflectiveChatFrameExecution(Class<?> beanClass, Method method) {
+    interface EventResolver {
+        void resolve(ChatFrameContext context, Object value);
+    }
+
+    public ReflectiveChatFrameExecution(Class<?> beanClass, Method method, Class<?> defaultResultMapper) {
         this.beanClass = beanClass;
         this.method = method;
 
         for (Parameter parameter : method.getParameters()) {
             if (parameter.isAnnotationPresent(UserMessage.class)) {
                 parameterResolvers.add((ctx) -> ctx.userMessage());
-            } else if (parameter.isAnnotationPresent(SystemMessage.class)) {
-                parameterResolvers.add((ctx) -> ctx.systemMessage());
             } else if (parameter.isAnnotationPresent(MemoryId.class)) {
                 parameterResolvers.add((ctx) -> ctx.memoryId());
             } else if (parameter.getType().isAssignableFrom(ChatFrameContext.class)) {
@@ -59,17 +60,111 @@ public class ReflectiveChatFrameExecution implements ChatFrameExecution {
                 parameterResolvers.add((ctx) -> ctx.getData(finalKey, parameter.getParameterizedType()));
             }
         }
-        ResultEventTypes responseMessage = method.getAnnotation(ResultEventTypes.class);
-        if (responseMessage != null) {
-            for (Class<? extends ChatEvent> messageClass : responseMessage.value()) {
-                for (Method cfm : messageClass.getDeclaredMethods()) {
-                    if (Modifier.isPublic(cfm.getModifiers()) && Modifier.isStatic(cfm.getModifiers())
-                            && cfm.getName().equals("from") && cfm.getParameterCount() == 1
-                            && ChatEvent.class.isAssignableFrom(cfm.getReturnType())) {
-                        responseConstructors.add(cfm);
-                    }
+        EventMapper resultMapperAnnotation = method.getAnnotation(EventMapper.class);
+        if (resultMapperAnnotation == null) {
+            resultMapperAnnotation = beanClass.getAnnotation(EventMapper.class);
+        }
+        resultMapperClass = resultMapperAnnotation != null ? resultMapperAnnotation.value() : defaultResultMapper;
+        resultMappers = resolveResultMappers(resultMapperClass);
+        mapper = resolveResultMapper(method.getGenericReturnType(), method.getReturnType());
+    }
+
+    private static List<Method> resolveResultMappers(Class<?> resultMapperClass) {
+        if (resultMapperClass == null) {
+            return Collections.EMPTY_LIST;
+        }
+        List<Method> result = new ArrayList<>();
+        for (Method cfm : resultMapperClass.getDeclaredMethods()) {
+            if (Modifier.isPublic(cfm.getModifiers())
+                    && cfm.getReturnType().equals(ChatFrameEvent.class)
+                    && cfm.getName().equals("from") && cfm.getParameterCount() == 1) {
+                result.add(cfm);
+            }
+        }
+        return result;
+    }
+
+    static Class<?> resolveClass(Type type) {
+        if (type instanceof Class<?>) {
+            return (Class<?>) type;
+        } else if (type instanceof ParameterizedType) {
+            return (Class<?>) ((ParameterizedType) type).getRawType();
+        }
+        return null;
+    }
+
+    private EventResolver resolveResultMapper(Type type, Class<?> clazz) {
+        for (Method cfm : resultMappers) {
+            if (type.equals(cfm.getGenericParameterTypes()[0])) {
+                if (Modifier.isStatic(cfm.getModifiers())) {
+                    return (context, obj) -> {
+                        try {
+                            ChatFrameEvent event = (ChatFrameEvent) cfm.invoke(null, obj);
+                            context.events().add(event);
+                        } catch (InvocationTargetException e) {
+                            throw new RuntimeException(e.getCause());
+                        } catch (IllegalAccessException e) {
+                            throw new RuntimeException(e);
+                        }
+                    };
+                } else {
+                    return (context, obj) -> {
+                        try {
+                            ChatFrameEvent event = (ChatFrameEvent) cfm.invoke(
+                                    Arc.container().instance(resultMapperClass).get(),
+                                    obj);
+                            context.events().add(event);
+                        } catch (InvocationTargetException e) {
+                            throw new RuntimeException(e.getCause());
+                        } catch (IllegalAccessException e) {
+                            throw new RuntimeException(e);
+                        }
+                    };
                 }
             }
+        }
+        if (clazz.equals(Result.class)) {
+            if (type != null && type instanceof ParameterizedType) {
+                ParameterizedType parameterizedType = (ParameterizedType) type;
+                Type resultType = parameterizedType.getActualTypeArguments()[0];
+                Class<?> resultClass = resolveClass(resultType);
+                EventResolver resultMapper = resolveResultMapper(resultType, resultClass);
+                if (resultMapper != null) {
+                    return (context, obj) -> {
+                        Result<?> result = (Result<?>) obj;
+                        if (result.content() != null) {
+                            resultMapper.resolve(context, result.content());
+                        } else {
+                            for (ToolExecution execution : result.toolExecutions()) {
+                                if (execution.resultObject() != null) {
+                                    resolveResultMapper(execution.resultObject().getClass(),
+                                            execution.resultObject().getClass()).resolve(context, execution.resultObject());
+                                }
+                            }
+                        }
+                    };
+                }
+            }
+            return (context, obj) -> {
+                Result<?> result = (Result<?>) obj;
+                if (result.content() != null) {
+                    resolveResultMapper(result.content().getClass(), result.content().getClass())
+                            .resolve(context, result.content());
+                } else {
+                    for (ToolExecution execution : result.toolExecutions()) {
+                        if (execution.resultObject() != null) {
+                            resolveResultMapper(execution.resultObject().getClass(), execution.resultObject().getClass())
+                                    .resolve(context, execution.resultObject());
+                        }
+                    }
+                }
+            };
+        }
+
+        if (clazz.equals(String.class)) {
+            return (context, obj) -> context.events().add(ChatFrameEvent.stringMessage((String) obj));
+        } else {
+            return (context, obj) -> context.events().add(ChatFrameEvent.objectMessage(obj));
         }
     }
 
@@ -79,17 +174,17 @@ public class ReflectiveChatFrameExecution implements ChatFrameExecution {
         try {
             Object returnValue = null;
             ChatFrameContext context = ChatFrameRecorder.CONTAINER.beanInstance(ChatFrameContext.class);
-            if (method.getParameterCount() == 0) {
+            if (parameterResolvers.size() == 0) {
                 returnValue = method.invoke(instance);
             } else {
-                Object[] parameters = new Object[method.getParameters().length];
-                for (int i = 0; i < method.getParameters().length; i++) {
+                Object[] parameters = new Object[parameterResolvers.size()];
+                for (int i = 0; i < parameterResolvers.size(); i++) {
                     parameters[i] = parameterResolvers.get(i).resolve(context);
                 }
                 returnValue = method.invoke(instance, parameters);
             }
             if (returnValue != null) {
-                handleResponse(context, method.getGenericReturnType(), returnValue);
+                mapper.resolve(context, returnValue);
             }
         } catch (InvocationTargetException e) {
             if (e.getCause() instanceof RuntimeException) {
@@ -101,39 +196,4 @@ public class ReflectiveChatFrameExecution implements ChatFrameExecution {
             throw new RuntimeException(e);
         }
     }
-
-    private void handleResponse(ChatFrameContext context, Type generic, Object returnValue) {
-        for (Method from : responseConstructors) {
-            Log.debugf("handleResponse: from %s", method.toString());
-            Log.debugf("handleResponse: generic %s", generic.getTypeName());
-            if (from.getGenericParameterTypes()[0].equals(generic)) {
-                try {
-                    context.events().add((ChatEvent) from.invoke(null, returnValue));
-                    return;
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-        if (returnValue instanceof Result) {
-            ParameterizedType parameterizedType = (ParameterizedType) generic;
-            Result<?> result = (Result<?>) returnValue;
-            if (result.content() != null) {
-                Type resultType = parameterizedType.getActualTypeArguments()[0];
-                handleResponse(context, resultType, result.content());
-            } else {
-                for (ToolExecution execution : result.toolExecutions()) {
-                    if (execution.resultObject() != null) {
-                        handleResponse(context, execution.resultObject().getClass(), execution.resultObject());
-                    }
-                }
-            }
-            return;
-        } else if (returnValue instanceof String) {
-            context.events().add(new StringMessage((String) returnValue));
-        } else {
-            context.events().add(new ObjectMessage(returnValue));
-        }
-    }
-
 }

@@ -4,10 +4,10 @@ import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 
-import io.quarkiverse.langchain4j.chat.frames.StringMessage;
+import io.quarkiverse.langchain4j.chat.frames.ChatFrameEvent;
 import io.quarkus.logging.Log;
 
-public class MarkdownStringMessage extends StringMessage {
+public class MarkdownStringMessage {
     static Parser parser;
     static HtmlRenderer renderer;
 
@@ -26,12 +26,7 @@ public class MarkdownStringMessage extends StringMessage {
         }
     }
 
-    protected MarkdownStringMessage(String string) {
-        super(markdownToHtml(string));
-    }
-
-    public static MarkdownStringMessage from(String string) {
-        Log.info("MarkdownStringMessage from: " + string);
-        return new MarkdownStringMessage(string);
+    public static ChatFrameEvent from(String string) {
+        return new ChatFrameEvent("StringMessage", markdownToHtml(string));
     }
 }

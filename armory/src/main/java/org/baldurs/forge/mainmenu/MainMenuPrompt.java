@@ -11,7 +11,7 @@ import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.RegisterAiService;
 import io.quarkiverse.langchain4j.ToolBox;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
-import io.quarkiverse.langchain4j.chat.frames.ResultEventTypes;
+import io.quarkiverse.langchain4j.chat.frames.EventMapper;
 
 @RequestScoped
 @RegisterAiService
@@ -20,6 +20,6 @@ public interface MainMenuPrompt {
     @SystemMessage(fromResource = "prompts/mainMenuCommands.txt")
     @ToolBox({ MainMenuToolBox.class })
     @ChatFrame("mainMenu")
-    @ResultEventTypes(MarkdownStringMessage.class)
+    @EventMapper(MarkdownStringMessage.class)
     Result<String> chat(@MemoryId String memoryId, @UserMessage String message);
 }

@@ -5,7 +5,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
-import io.quarkiverse.langchain4j.chat.frames.StringMessage;
 import io.quarkus.logging.Log;
 
 @ApplicationScoped
@@ -44,8 +43,7 @@ public class ChatFrameControllerService implements ChatFrameController {
         }
         if (chatFrame == null) {
             Log.error("Current frame not set and no default chat frame found");
-            context.events()
-                    .add(new StringMessage("I'm having issues at the moment. Can you retry or rephrase your request?"));
+            context.addEvent("I'm having issues at the moment. Can you retry or rephrase your request?");
             return;
         } else if (ChatFrameRecorder.chatFrames.containsKey(chatFrame)) {
             Log.info("Executing chat frame: " + chatFrame);

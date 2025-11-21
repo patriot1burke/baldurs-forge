@@ -5,7 +5,6 @@ import jakarta.annotation.security.RolesAllowed;
 
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
-import io.quarkiverse.langchain4j.chat.frames.StringMessage;
 import io.quarkus.security.Authenticated;
 
 public class SecurityAnnotationsService {
@@ -13,18 +12,18 @@ public class SecurityAnnotationsService {
     @ChatFrame("authenticated")
     @Authenticated
     public void authenticated(ChatFrameContext context) {
-        context.events().add(new StringMessage("authenticated"));
+        context.addEvent("authenticated");
     }
 
     @ChatFrame("deny")
     @DenyAll
     public void deny(ChatFrameContext context) {
-        context.events().add(new StringMessage("deny"));
+        context.addEvent("deny");
     }
 
     @ChatFrame("roles")
     @RolesAllowed("allowed")
     public void rolesAllowed(ChatFrameContext context) {
-        context.events().add(new StringMessage("roles-allowed"));
+        context.addEvent("roles-allowed");
     }
 }

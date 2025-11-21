@@ -12,7 +12,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.quarkiverse.langchain4j.chat.frames.client.ChatFrameClient;
 import io.quarkiverse.langchain4j.chat.frames.client.ChatFrameClientSession;
-import io.quarkiverse.langchain4j.chat.frames.client.ClientStringMessage;
 import io.quarkus.security.test.utils.TestIdentityController;
 import io.quarkus.security.test.utils.TestIdentityProvider;
 import io.quarkus.test.QuarkusUnitTest;
@@ -59,8 +58,8 @@ public class SecurityTest {
     public void testAuthorized() {
         ChatFrameClientSession session = client.session();
         session.basicAuth("user1", "password1");
-        ClientStringMessage text = (ClientStringMessage) session.chat("Hello, world!").get(0);
-        Assertions.assertEquals("defaultChat:Hello, world!", text.getString());
+        String text = session.chat("Hello, world!").get(0).value(String.class);
+        Assertions.assertEquals("defaultChat:Hello, world!", text);
     }
 
     @Test
@@ -68,7 +67,7 @@ public class SecurityTest {
         ChatFrameClientSession session = client.session();
         session.basicAuth("user2", "password2");
         try {
-            ClientStringMessage text = (ClientStringMessage) session.chat("Hello, world!").get(0);
+            String text = session.chat("Hello, world!").get(0).value(String.class);
             Assertions.fail("Expected WebApplicationException");
         } catch (WebApplicationException e) {
             Assertions.assertEquals(403, e.getResponse().getStatus());
@@ -79,7 +78,7 @@ public class SecurityTest {
     public void testUnauthenticated() {
         ChatFrameClientSession session = client.session();
         try {
-            ClientStringMessage text = (ClientStringMessage) session.chat("Hello, world!").get(0);
+            String text = session.chat("Hello, world!").get(0).value(String.class);
             Assertions.fail("Expected WebApplicationException");
         } catch (WebApplicationException e) {
             Assertions.assertEquals(401, e.getResponse().getStatus());

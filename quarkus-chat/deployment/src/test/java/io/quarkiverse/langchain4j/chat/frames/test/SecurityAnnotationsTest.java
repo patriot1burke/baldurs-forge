@@ -12,7 +12,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.quarkiverse.langchain4j.chat.frames.client.ChatFrameClient;
 import io.quarkiverse.langchain4j.chat.frames.client.ChatFrameClientSession;
-import io.quarkiverse.langchain4j.chat.frames.client.ClientStringMessage;
 import io.quarkus.security.test.utils.TestIdentityController;
 import io.quarkus.security.test.utils.TestIdentityProvider;
 import io.quarkus.test.QuarkusUnitTest;
@@ -44,16 +43,16 @@ public class SecurityAnnotationsTest {
     public void testAuthenticated() {
         ChatFrameClientSession session = client.session("authenticated");
         session.basicAuth("user2", "password2");
-        ClientStringMessage text = (ClientStringMessage) session.chat("Hello, world!").get(0);
-        Assertions.assertEquals("authenticated", text.getString());
+        String text = session.chat("Hello, world!").get(0).value(String.class);
+        Assertions.assertEquals("authenticated", text);
     }
 
     @Test
     public void testRole() {
         ChatFrameClientSession session = client.session("roles");
         session.basicAuth("user1", "password1");
-        ClientStringMessage text = (ClientStringMessage) session.chat("Hello, world!").get(0);
-        Assertions.assertEquals("roles-allowed", text.getString());
+        String text = session.chat("Hello, world!").get(0).value(String.class);
+        Assertions.assertEquals("roles-allowed", text);
     }
 
     @Test

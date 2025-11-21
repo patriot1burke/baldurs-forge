@@ -2,24 +2,24 @@ package io.quarkiverse.langchain4j.chat.frames.test;
 
 import dev.langchain4j.service.Result;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
-import io.quarkiverse.langchain4j.chat.frames.ResultEventTypes;
+import io.quarkiverse.langchain4j.chat.frames.EventMapper;
 
 public class ResponseChatService {
 
     @ChatFrame("text")
-    @ResultEventTypes(TestTextMessage.class)
+    @EventMapper(TestMapper.class)
     public String stringResponse() {
         return "stringResponse";
     }
 
     @ChatFrame("int")
-    @ResultEventTypes(TestIntegerMessage.class)
+    @EventMapper(TestMapper.class)
     public int intResponse() {
         return 123;
     }
 
     @ChatFrame("multi-result")
-    @ResultEventTypes({ TestTextMessage.class, TestIntegerMessage.class })
+    @EventMapper(TestMapper.class)
     public Result<String> multiResult() {
         MockResult<String> result = new MockResult<String>(null);
         result.addToolResult("textResult");

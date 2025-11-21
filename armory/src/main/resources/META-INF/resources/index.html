@@ -1276,23 +1276,23 @@
                     console.log(response);
                     chatContext = response.context;
                     if (response.events) {
-                        for (const action of response.events) {
-                            if (action.type === 'ListEquipment') {
-                                listEquipmentEvent(action.equipment);
-                            } else if (action.type === 'ShowEquipment') {
-                                showEquipmentEvent(action.equipment);
-                            } else if (action.type === 'ObjectMessage') {
-                                addJsonMessage(action.message);
-                            } else if (action.type === 'StringMessage') {
-                                addJsonMessage(action.string);
-                            } else if (action.type === 'UpdateNewEquipment') {
-                                updateNewEquipmentEvent(action);
-                            } else if (action.type === 'PackageMod') {
-                                packageModEvent(action);
-                            } else if (action.type === 'ImportMod') {
+                        for (const event of response.events) {
+                            if (event.type === 'ListEquipment') {
+                                listEquipmentEvent(event.value);
+                            } else if (event.type === 'ShowEquipment') {
+                                showEquipmentEvent(event.value);
+                            } else if (event.type === 'ObjectMessage') {
+                                addJsonMessage(event.value);
+                            } else if (event.type === 'StringMessage') {
+                                addJsonMessage(event.value);
+                            } else if (event.type === 'UpdateNewEquipment') {
+                                updateNewEquipmentEvent(event.value);
+                            } else if (event.type === 'PackageMod') {
+                                packageModEvent(event.value);
+                            } else if (event.type === 'ImportMod') {
                                 importModEvent();
-                            } else if (action.type === 'ListVisualModels') {
-                                listVisualModelsEvent(action.visualModels);
+                            } else if (event.type === 'ListVisualModels') {
+                                listVisualModelsEvent(event.value);
                             }
                         }
                     }

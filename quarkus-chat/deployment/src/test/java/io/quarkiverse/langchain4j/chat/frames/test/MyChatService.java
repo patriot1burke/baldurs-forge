@@ -11,7 +11,6 @@ import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.DefaultChatFrame;
-import io.quarkiverse.langchain4j.chat.frames.StringMessage;
 
 @ApplicationScoped
 public class MyChatService {
@@ -21,12 +20,12 @@ public class MyChatService {
     @ChatFrame
     @DefaultChatFrame
     public void defaultChat() {
-        context.events().add(new StringMessage("defaultChat:" + context.userMessage()));
+        context.addEvent("defaultChat:" + context.userMessage());
     }
 
     @ChatFrame
     public void chatone() {
-        context.events().add(new StringMessage("one:" + context.userMessage()));
+        context.addEvent("one:" + context.userMessage());
     }
 
     @ChatFrame("exception")
@@ -39,7 +38,7 @@ public class MyChatService {
         Assertions.assertNotNull(memoryId);
         Assertions.assertNotNull(userMessage);
         Assertions.assertNotNull(ctx);
-        ctx.events().add(new StringMessage("two:" + userMessage));
+        ctx.addEvent("two:" + userMessage);
     }
 
     @ChatFrame("string-result")

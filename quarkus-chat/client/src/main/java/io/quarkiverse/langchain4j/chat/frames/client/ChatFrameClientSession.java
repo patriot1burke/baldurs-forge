@@ -1,33 +1,30 @@
 package io.quarkiverse.langchain4j.chat.frames.client;
 
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.List;
 
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.client.WebTarget;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, isGetterVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ChatFrameClientSession {
     ClientChatFrameContext context;
-    String userMessage = null;
-
-    @JsonIgnore
     ObjectMapper mapper;
-
-    @JsonIgnore
     WebTarget target;
 
     String username;
     String password;
     String bearerToken;
+
+    record FrameRequest(String userMessage, ClientChatFrameContext context) {
+    }
 
     protected ChatFrameClientSession(ObjectMapper mapper, WebTarget target, String frame) {
         this.mapper = mapper;
@@ -60,11 +57,17 @@ public class ChatFrameClientSession {
         return this;
     }
 
+    record Event(String type, JsonNode value) {
+    }
+
+    record FrameResponse(ClientChatFrameContext context, List<Event> events) {
+    }
+
     public List<ClientChatEvent> chat(String userMessage) {
-        this.userMessage = userMessage;
+        FrameRequest request = new FrameRequest(userMessage, context);
         String json = null;
         try {
-            json = mapper.writeValueAsString(this);
+            json = mapper.writeValueAsString(request);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -73,19 +76,45 @@ public class ChatFrameClientSession {
         setAuthentication(requestBuilder);
         json = requestBuilder.post(Entity.json(json), String.class);
         try {
-            ChatFrameResponse response = mapper.readValue(json, ChatFrameResponse.class);
+            System.out.println("*****Client response json: " + json);
+            FrameResponse response = mapper.readValue(json, FrameResponse.class);
             context = response.context;
             if (context.frame != null) {
                 context.frame.setMapper(mapper);
             }
-            return response.events != null ? response.events : Collections.EMPTY_LIST;
+            List<ClientChatEvent> events = new ArrayList<>();
+            for (Event event : response.events) {
+                System.out.println("*****Client event: '" + event.type + "' " + event.value);
+                ClientChatEvent clientEvent = new ClientChatEvent() {
+                    @Override
+                    public String type() {
+                        return event.type;
+                    }
+
+                    @Override
+                    public <T> T value(Class<T> type) {
+                        try {
+                            return mapper.treeToValue(event.value, type);
+                        } catch (JsonProcessingException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+
+                    @Override
+                    public <T> T value(Type type) {
+                        try {
+                            return mapper.treeToValue(event.value, mapper.constructType(type));
+                        } catch (JsonProcessingException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                };
+                events.add(clientEvent);
+            }
+            return events;
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public String userMessage() {
-        return userMessage;
     }
 
     public ClientChatFrameContext context() {

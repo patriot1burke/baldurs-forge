@@ -29,9 +29,15 @@ public class ChatFrameRecorder {
         }
     }
 
+    public static Class<?> resultMapperClass = null;
+
+    public void registerResultMapper(Class<?> resultMapperClass) {
+        ChatFrameRecorder.resultMapperClass = resultMapperClass;
+    }
+
     public void registerChatFrame(String frameName, Class<?> targetClass, String methodName, boolean isDefault) {
         ChatFrameExecution chatFrameExecution = new ReflectiveChatFrameExecution(targetClass,
-                resolveMethod(targetClass, methodName));
+                resolveMethod(targetClass, methodName), resultMapperClass);
         chatFrames.put(frameName, chatFrameExecution);
         if (isDefault) {
             defaultChatFrame = frameName;

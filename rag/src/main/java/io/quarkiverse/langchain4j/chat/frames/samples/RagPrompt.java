@@ -7,7 +7,7 @@ import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.RegisterAiService;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.DefaultChatFrame;
-import io.quarkiverse.langchain4j.chat.frames.ResultEventTypes;
+import io.quarkiverse.langchain4j.chat.frames.EventMapper;
 
 @RequestScoped
 @RegisterAiService
@@ -21,7 +21,7 @@ public interface RagPrompt {
             """)
     @ChatFrame
     @DefaultChatFrame
-    @ResultEventTypes(Markdown.class)
+    @EventMapper(Markdown.class)
     String chat(@UserMessage String question);
 
 }
