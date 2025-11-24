@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Inject;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -15,34 +15,33 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.ChatMessageDeserializer;
 import dev.langchain4j.data.message.ChatMessageSerializer;
+import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import io.quarkus.logging.Log;
 
-/**
- *
- * QuarkusAiServiceContext.close() will call deleteMessages() and this
- * bean is @RequestScoped so it would be out of scope.
- *
- * So, we do not implement ChatMemoryStore directly and instead
- * wrap it in a ClientMemoryStoreBean.
- *
- */
-@RequestScoped
-public class ClientMemoryStore {
+@SessionScoped
+public class ChatFrameMemoryStore implements ChatMemoryStore {
     @Inject
     ObjectMapper mapper;
 
     Map<String, List<ChatMessage>> messages = new ConcurrentHashMap<>();
 
+    public Map<String, List<ChatMessage>> messages() {
+        return messages;
+    }
+
+    @Override
     public void deleteMessages(Object memoryId) {
         Log.debugv("Deleting messages for memoryId: {0}", memoryId);
         messages.remove(memoryId);
     }
 
+    @Override
     public List<ChatMessage> getMessages(Object memoryId) {
         Log.debugv("Getting messages for memoryId: {0}", memoryId);
         return messages.computeIfAbsent(memoryId.toString(), ignored -> new ArrayList<>());
     }
 
+    @Override
     public void updateMessages(Object memoryId, List<ChatMessage> messages) {
         Log.debugv("Updating messages for memoryId: {0}", memoryId);
         this.messages.put(memoryId.toString(), messages);
@@ -73,13 +72,16 @@ public class ClientMemoryStore {
             boolean first = true;
             writer.write("{");
             for (Map.Entry<String, List<ChatMessage>> entry : messages.entrySet()) {
+                String memoryId = entry.getKey();
+                List<ChatMessage> memoryMessages = entry.getValue();
+                if (memoryMessages.isEmpty()) {
+                    continue;
+                }
                 if (first) {
                     first = false;
                 } else {
                     writer.write(",");
                 }
-                String memoryId = entry.getKey();
-                List<ChatMessage> memoryMessages = entry.getValue();
                 String memoryJson = ChatMessageSerializer.messagesToJson(memoryMessages);
                 writer.write("\"" + memoryId + "\": " + memoryJson);
             }

@@ -3,7 +3,6 @@ package io.quarkiverse.langchain4j.chat.frames.internal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
-import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -11,7 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ChatFrameContextSerialization {
 
-    static void deserialize(ObjectMapper mapper, ChatFrameContextImpl context, ClientMemoryStore memory,
+    static void deserialize(ObjectMapper mapper, ChatFrameContextImpl context, ChatFrameMemoryStore memory,
             InputStream entityStream) throws IOException, JsonProcessingException {
         // we have a static method for unit testing unmarshalling
         JsonNode node = mapper.readTree(entityStream);
@@ -54,12 +53,6 @@ public class ChatFrameContextSerialization {
         } else {
             frame.setName(ChatFrameRecorder.defaultChatFrame);
         }
-        JsonNode memoryIdNode = frameNode.get("memoryId");
-        if (memoryIdNode != null && !memoryIdNode.isNull()) {
-            frame.setMemoryId(memoryIdNode.asText());
-        } else {
-            frame.setMemoryId(UUID.randomUUID().toString());
-        }
         JsonNode parentNode = frameNode.get("parent");
         if (parentNode != null && !parentNode.isNull()) {
             frame.setParent(deserializeFrame(parentNode, mapper, false));
@@ -76,7 +69,7 @@ public class ChatFrameContextSerialization {
         return frame;
     }
 
-    static void serialize(ChatFrameContextImpl t, ClientMemoryStore memory, ObjectMapper mapper, Writer writer)
+    static void serialize(ChatFrameContextImpl t, ChatFrameMemoryStore memory, ObjectMapper mapper, Writer writer)
             throws IOException {
         writer.write("{");
         writer.write("\"events\":");
@@ -103,9 +96,6 @@ public class ChatFrameContextSerialization {
         writer.write("{");
         writer.write("\"name\":");
         mapper.writeValue(writer, frame.name());
-        writer.write(",");
-        writer.write("\"memoryId\":");
-        mapper.writeValue(writer, frame.memoryId());
         writer.write(",");
         writer.write("\"data\":");
         mapper.writeValue(writer, frame.data());

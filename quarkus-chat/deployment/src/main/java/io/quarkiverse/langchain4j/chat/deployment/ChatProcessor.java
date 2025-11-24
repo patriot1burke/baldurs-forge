@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import jakarta.enterprise.context.SessionScoped;
+
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
@@ -22,17 +24,19 @@ import io.quarkiverse.langchain4j.chat.frames.internal.ChatFrameControllerServic
 import io.quarkiverse.langchain4j.chat.frames.internal.ChatFrameData;
 import io.quarkiverse.langchain4j.chat.frames.internal.ChatFrameEndpoint;
 import io.quarkiverse.langchain4j.chat.frames.internal.ChatFrameHandler;
+import io.quarkiverse.langchain4j.chat.frames.internal.ChatFrameMemoryStore;
 import io.quarkiverse.langchain4j.chat.frames.internal.ChatFrameRecorder;
-import io.quarkiverse.langchain4j.chat.frames.internal.ClientMemoryStoreBean;
+import io.quarkiverse.langchain4j.chat.frames.internal.DefaultChatFrameMemoryIdProvider;
+import io.quarkiverse.langchain4j.spi.DefaultMemoryIdProvider;
 import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import io.quarkus.arc.deployment.BeanContainerBuildItem;
 import io.quarkus.arc.deployment.UnremovableBeanBuildItem;
-import io.quarkus.arc.processor.DotNames;
 import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.annotations.Record;
 import io.quarkus.deployment.builditem.CombinedIndexBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.ReflectiveClassBuildItem;
+import io.quarkus.deployment.builditem.nativeimage.ServiceProviderBuildItem;
 import io.quarkus.deployment.recording.RecorderContext;
 import io.quarkus.logging.Log;
 import io.quarkus.vertx.http.deployment.BodyHandlerBuildItem;
@@ -41,18 +45,25 @@ import io.quarkus.vertx.http.deployment.RouteBuildItem;
 
 public class ChatProcessor {
     public static final DotName CHAT_FRAME = DotName.createSimple(ChatFrame.class.getName());
+    public static final DotName SESSION_SCOPED = DotName.createSimple(SessionScoped.class.getName());
 
     @BuildStep
     public void registerBeans(BuildProducer<AdditionalBeanBuildItem> additionalBeanProducer,
             BuildProducer<UnremovableBeanBuildItem> unremovableBeanBuildItemBuildProducer) {
         AdditionalBeanBuildItem.builder()
-                .addBeanClasses(ChatFrameControllerService.class, ClientMemoryStoreBean.class,
+                .addBeanClasses(ChatFrameControllerService.class, ChatFrameMemoryStore.class,
                         ChatFrameData.class, ChatFrameEndpoint.class)
                 .setUnremovable().build();
         unremovableBeanBuildItemBuildProducer
-                .produce(UnremovableBeanBuildItem.beanTypes(ChatFrameControllerService.class, ClientMemoryStoreBean.class,
+                .produce(UnremovableBeanBuildItem.beanTypes(ChatFrameControllerService.class, ChatFrameMemoryStore.class,
                         ChatFrameData.class, ChatFrameEndpoint.class));
 
+    }
+
+    @BuildStep
+    ServiceProviderBuildItem serviceProvider() {
+        return new ServiceProviderBuildItem(DefaultMemoryIdProvider.class.getName(),
+                DefaultChatFrameMemoryIdProvider.class.getName());
     }
 
     @BuildStep
@@ -132,7 +143,7 @@ public class ChatProcessor {
         }
         if (!beans.isEmpty()) {
             additionalBeanProducer.produce(AdditionalBeanBuildItem.builder().addBeanClasses(beans)
-                    .setDefaultScope(DotNames.APPLICATION_SCOPED).setUnremovable().build());
+                    .setDefaultScope(SESSION_SCOPED).setUnremovable().build());
         }
     }
 

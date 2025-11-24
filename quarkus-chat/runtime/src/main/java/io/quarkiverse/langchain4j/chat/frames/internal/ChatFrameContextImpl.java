@@ -4,7 +4,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.inject.Default;
@@ -12,7 +11,6 @@ import jakarta.inject.Inject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameController;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameEvent;
@@ -26,9 +24,7 @@ public class ChatFrameContextImpl implements ChatFrameContext {
     List<ChatFrameEvent> events = new ArrayList<>();
 
     String userMessage = null;
-
-    boolean wipeScheduled = false;
-    boolean wipeAborted = false;
+    volatile String contextPath = null;
 
     @Inject
     ObjectMapper mapper;
@@ -37,10 +33,30 @@ public class ChatFrameContextImpl implements ChatFrameContext {
     ChatFrameController chatFrameController;
 
     @Inject
-    ChatMemoryStore chatMemoryStore;
+    ChatFrameMemoryStore chatMemoryStore;
+
+    public void resolveContextPath() {
+        StringBuilder sb = new StringBuilder();
+        resolveContextPath(current, sb);
+        contextPath = sb.toString();
+    }
+
+    private void resolveContextPath(ChatFrameData data, StringBuilder sb) {
+        if (data == null) {
+            return;
+        }
+        resolveContextPath(data.parent(), sb);
+        sb.append("/").append(data.name);
+
+    }
+
+    public String contextPath() {
+        return contextPath;
+    }
 
     public void setCurrent(ChatFrameData current) {
         this.current = current;
+        resolveContextPath();
     }
 
     public ChatFrameData getCurrent() {
@@ -52,14 +68,8 @@ public class ChatFrameContextImpl implements ChatFrameContext {
         return userMessage;
     }
 
-    @Override
     public void setUserMessage(String userMessage) {
         this.userMessage = userMessage;
-    }
-
-    @Override
-    public String memoryId() {
-        return current.memoryId();
     }
 
     @Override
@@ -135,9 +145,10 @@ public class ChatFrameContextImpl implements ChatFrameContext {
         if (!chatFrameController.hasFrame(chatFrame)) {
             throw new IllegalArgumentException("Unknown chat frame: " + chatFrame);
         }
+        chatMemoryStore.messages().clear();
         current = new ChatFrameData(mapper);
         current.setName(chatFrame);
-        current.setMemoryId(UUID.randomUUID().toString());
+        resolveContextPath();
         return this;
     }
 
@@ -149,8 +160,10 @@ public class ChatFrameContextImpl implements ChatFrameContext {
     @Override
     public ChatFrameContext popFrame() {
         if (current != null) {
-            chatMemoryStore.deleteMessages(current.memoryId());
+            scheduleWipe(); // the case where popFrame is called within a tool and chat memory is added to.
+            chatMemoryStore.messages().entrySet().removeIf(entry -> entry.getKey().startsWith(contextPath));
             current = current.parent();
+            resolveContextPath();
         }
         return this;
     }
@@ -160,41 +173,79 @@ public class ChatFrameContextImpl implements ChatFrameContext {
         if (!chatFrameController.hasFrame(chatFrame)) {
             throw new IllegalArgumentException("Unknown chat frame: " + chatFrame);
         }
+
         ChatFrameData parent = current;
         ChatFrameData next = new ChatFrameData(mapper);
         next.setName(chatFrame);
-        next.setMemoryId(UUID.randomUUID().toString());
         next.setParent(parent);
         if (parent != null && deleteMemory) {
-            chatMemoryStore.deleteMessages(parent.memoryId());
+            scheduleWipe();
         }
         current = next;
+        contextPath = contextPath + "/" + chatFrame;
+        resolveContextPath();
         return this;
     }
 
     @Override
     public ChatFrameContext clearMemory() {
         if (current != null) {
-            chatMemoryStore.deleteMessages(current.memoryId());
+            clearMemory(contextPath);
+        }
+        return this;
+    }
+
+    void clearMemory(String path) {
+        chatMemoryStore.messages().entrySet().removeIf(entry -> entry.getKey().startsWith(path + "#"));
+    }
+
+    class ScheduledWipe {
+        String path;
+        boolean aborted = false;
+
+        ScheduledWipe(String path) {
+            this.path = path;
+        }
+
+        void wipe() {
+            if (!aborted)
+                clearMemory(path);
+        }
+    }
+
+    List<ScheduledWipe> scheduledWipes = new ArrayList<>();
+
+    public List<ScheduledWipe> scheduledWipes() {
+        return scheduledWipes;
+    }
+
+    @Override
+    public ChatFrameContext scheduleWipe() {
+        synchronized (scheduledWipes) {
+            ScheduledWipe wipe = scheduledWipes.stream().filter(w -> w.path.equals(contextPath)).findFirst().orElse(null);
+            if (wipe == null) {
+                wipe = new ScheduledWipe(contextPath);
+                scheduledWipes.add(wipe);
+            }
         }
         return this;
     }
 
     @Override
-    public ChatFrameContext scheduleWipe() {
-        wipeScheduled = true;
+    public ChatFrameContext abortWipe() {
+        synchronized (scheduledWipes) {
+            ScheduledWipe wipe = scheduledWipes.stream().filter(w -> w.path.equals(contextPath)).findFirst().orElse(null);
+            if (wipe != null) {
+                wipe.aborted = true;
+            }
+        }
         return this;
     }
 
     @Override
     public boolean wipeScheduled() {
-        return wipeScheduled && !wipeAborted;
-    }
-
-    @Override
-    public ChatFrameContext abortWipe() {
-        wipeScheduled = false;
-        wipeAborted = true;
-        return this;
+        synchronized (scheduledWipes) {
+            return scheduledWipes.stream().anyMatch(w -> w.path.equals(contextPath) && !w.aborted);
+        }
     }
 }

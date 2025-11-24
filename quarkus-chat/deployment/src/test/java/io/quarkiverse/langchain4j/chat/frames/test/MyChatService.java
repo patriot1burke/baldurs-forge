@@ -35,7 +35,7 @@ public class MyChatService {
 
     @ChatFrame("two")
     public void chatTwo(@MemoryId String memoryId, @UserMessage String userMessage, ChatFrameContext ctx) {
-        Assertions.assertNotNull(memoryId);
+        Assertions.assertNull(memoryId); // There is no handler for @MemoryId.  @FrameInject is the default behavior
         Assertions.assertNotNull(userMessage);
         Assertions.assertNotNull(ctx);
         ctx.addEvent("two:" + userMessage);

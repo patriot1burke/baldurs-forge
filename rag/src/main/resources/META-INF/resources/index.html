@@ -723,11 +723,11 @@
                     console.log(response);
                     chatContext = response.context;
                     if (response.events) {
-                        for (const action of response.events) {
-                            if (action.type === 'ObjectMessage') {
-                                addJsonMessage(action.message);
-                            } else if (action.type === 'StringMessage') {
-                                addJsonMessage(action.string);
+                        for (const event of response.events) {
+                            if (event.type === 'ObjectMessage') {
+                                addJsonMessage(event.value);
+                            } else if (event.type === 'StringMessage') {
+                                addJsonMessage(event.value);
                             }
                         }
                     }

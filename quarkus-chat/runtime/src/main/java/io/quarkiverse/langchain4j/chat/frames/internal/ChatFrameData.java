@@ -11,15 +11,10 @@ public class ChatFrameData {
 
     Map<String, Object> data = new ConcurrentHashMap<>();
     String name;
-    String memoryId;
     ChatFrameData parent;
 
     public ChatFrameData(ObjectMapper mapper) {
         this.mapper = mapper;
-    }
-
-    public String memoryId() {
-        return memoryId;
     }
 
     public String name() {
@@ -32,10 +27,6 @@ public class ChatFrameData {
 
     public void setName(String frame) {
         this.name = frame;
-    }
-
-    public void setMemoryId(String memoryId) {
-        this.memoryId = memoryId;
     }
 
     public void setParent(ChatFrameData parent) {

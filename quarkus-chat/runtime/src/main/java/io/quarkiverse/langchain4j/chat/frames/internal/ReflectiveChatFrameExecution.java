@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.Result;
 import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.tool.ToolExecution;
@@ -46,8 +45,6 @@ public class ReflectiveChatFrameExecution implements ChatFrameExecution {
         for (Parameter parameter : method.getParameters()) {
             if (parameter.isAnnotationPresent(UserMessage.class)) {
                 parameterResolvers.add((ctx) -> ctx.userMessage());
-            } else if (parameter.isAnnotationPresent(MemoryId.class)) {
-                parameterResolvers.add((ctx) -> ctx.memoryId());
             } else if (parameter.getType().isAssignableFrom(ChatFrameContext.class)) {
                 parameterResolvers.add((ctx) -> ctx);
             } else if (parameter.isAnnotationPresent(FrameInject.class)) {

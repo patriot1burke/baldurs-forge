@@ -35,15 +35,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 public interface ChatFrameContext {
     String userMessage();
 
-    void setUserMessage(String userMessage);
-
-    /**
-     * The memoryId for the current frame.
-     *
-     * @return
-     */
-    String memoryId();
-
     /**
      * Session Data serialized and shared with client.
      *
@@ -133,7 +124,7 @@ public interface ChatFrameContext {
 
     /**
      * Clears the frame stack and sets the current frame.
-     * CLeared frames are deleted along with their data and memory
+     * CLeared frames are deleted along with their data and chat memory
      *
      * @param chatFrame
      */
@@ -142,7 +133,7 @@ public interface ChatFrameContext {
     /**
      * Pushes the given chat frame onto the frame stack.
      *
-     * Also deletes the messages for the ChatContext's memoryId.
+     * Also deletes the chat memory for the current frame.
      *
      * @param chatFrame
      */
@@ -162,18 +153,19 @@ public interface ChatFrameContext {
     ChatFrameContext popFrame();
 
     /**
-     * Clears chat memory for current frame
+     * Clears chat memory for current frame only, but not sub contexts
      */
     ChatFrameContext clearMemory();
 
     /**
-     * Schedule a wipe of chat memory for current frame.
+     * Schedule a wipe of chat memory for current frame, but not sub contexts.
+     * Wipe will be performed just before the CDI request context is terminated.
      */
     ChatFrameContext scheduleWipe();
 
     /**
      * Abort a scheduled wipe of chat memory for current frame.
-     * An abort cannot be canceled or overridden.
+     * An abort cannot be canceled.
      */
     ChatFrameContext abortWipe();
 

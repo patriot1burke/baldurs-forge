@@ -93,7 +93,7 @@ public class ModPackager {
             Log.error("Error serializing newEquipment", e);
             throw new RuntimeException("Error serializing newEquipment", e);
         }
-        return agent.packageMod(context.memoryId(), context.userMessage(), PackageModel.schema, currentJson);
+        return agent.packageMod(context.userMessage(), PackageModel.schema, currentJson);
     }
 
     private static final String CURRENT_PACKAGE = "currentPackage";

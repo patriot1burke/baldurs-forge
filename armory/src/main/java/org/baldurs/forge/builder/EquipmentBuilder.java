@@ -68,7 +68,7 @@ public abstract class EquipmentBuilder {
     }
 
     public Result<String> build(BaseModel current) {
-        Log.info("chat: " + context.memoryId() + " " + context.userMessage());
+        Log.info("chat: " + context.currentFrameId() + " " + context.userMessage());
         String currentJson = null;
         try {
             currentJson = mapper.writeValueAsString(current);
@@ -77,7 +77,7 @@ public abstract class EquipmentBuilder {
             throw new RuntimeException("Error serializing current", e);
         }
         Log.info("Current JSON: " + currentJson);
-        Result<String> result = agent().build(context.memoryId(), current.type(), current.schema(), currentJson,
+        Result<String> result = agent().build(current.type(), current.schema(), currentJson,
                 context.userMessage());
         return result;
     }

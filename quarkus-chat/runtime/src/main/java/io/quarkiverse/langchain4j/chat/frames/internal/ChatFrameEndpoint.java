@@ -31,7 +31,7 @@ public class ChatFrameEndpoint {
     ChatFrameController chatFrameService;
 
     @Inject
-    ClientMemoryStore memoryStore;
+    ChatFrameMemoryStore memoryStore;
 
     @Inject
     ChatFrameContextImpl context;
@@ -50,15 +50,58 @@ public class ChatFrameEndpoint {
         this.association = association.isResolvable() ? association.get() : null;
     }
 
+    static class ContextActivator {
+        boolean requestAlreadyActive = false;
+        boolean sessionAlreadyActive = false;
+        ManagedContext requestContext;
+        ManagedContext sessionContext;
+
+        static ContextActivator activate() {
+            ContextActivator activator = new ContextActivator();
+            return activator;
+        }
+
+        private ContextActivator() {
+            requestContext = Arc.container().requestContext();
+            sessionContext = Arc.container().sessionContext();
+            requestAlreadyActive = requestContext.isActive();
+            sessionAlreadyActive = sessionContext.isActive();
+            if (!requestAlreadyActive) {
+                requestContext.activate();
+            }
+            if (!sessionAlreadyActive) {
+                sessionContext.activate();
+            }
+        }
+
+        void deactivateRequest() {
+            if (!requestAlreadyActive && requestContext.isActive()) {
+                return;
+            }
+            requestAlreadyActive = false;
+            requestContext.terminate();
+        }
+
+        void deactivateSession() {
+            if (!sessionAlreadyActive && sessionContext.isActive()) {
+                return;
+            }
+            sessionAlreadyActive = false;
+            sessionContext.terminate();
+        }
+
+        void deactivate() {
+            deactivateRequest();
+            deactivateSession();
+        }
+    }
+
     public void handleChat(RoutingContext ctx, String body) {
         Log.debug("Handling chat");
         Log.debugv("Body: {0}", body);
         vertx.executeBlocking(() -> {
-            ManagedContext requestContext = Arc.container().requestContext();
-            boolean alreadyActive = requestContext.isActive();
-            if (!alreadyActive) {
-                requestContext.activate();
-            }
+            ContextActivator activator = ContextActivator.activate();
+            setCurrentIdentityAssociation(ctx);
             try {
                 try {
                     ChatFrameContextSerialization.deserialize(mapper, context, memoryStore,
@@ -68,7 +111,6 @@ public class ChatFrameEndpoint {
                     ctx.response().setStatusCode(400).end("Failed to deserialize chat context");
                     return null;
                 }
-                setCurrentIdentityAssociation(ctx);
                 try {
                     chatFrameService.chat(context);
                 } catch (UnauthorizedException e) {
@@ -80,9 +122,7 @@ public class ChatFrameEndpoint {
                     ctx.response().setStatusCode(403).end("Forbidden");
                     return null;
                 } finally {
-                    if (context.wipeScheduled()) {
-                        context.clearMemory();
-                    }
+                    context.scheduledWipes().forEach(w -> w.wipe());
                 }
                 StringWriter writer = new StringWriter();
                 try {
@@ -97,9 +137,7 @@ public class ChatFrameEndpoint {
                 Log.error("Failed to execute chat", e);
                 ctx.response().setStatusCode(500).end("Failed to execute chat");
             } finally {
-                if (!alreadyActive && requestContext.isActive()) {
-                    requestContext.terminate();
-                }
+                activator.deactivate();
             }
 
             return null;
