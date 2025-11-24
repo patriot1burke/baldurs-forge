@@ -17,6 +17,11 @@ public class ChatFrameRecorder {
     public static ConcurrentHashMap<String, ChatFrameExecution> chatFrames = new ConcurrentHashMap<>();
     public static String defaultChatFrame = null;
     public static volatile BeanContainer CONTAINER = null;
+    public static String rootPath = null;
+
+    public void setRootPath(String rootPath) {
+        ChatFrameRecorder.rootPath = rootPath;
+    }
 
     public void setContainer(BeanContainer container) {
         CONTAINER = container;

@@ -3,6 +3,8 @@ package io.quarkiverse.langchain4j.chat.frames.internal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -11,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ChatFrameContextSerialization {
 
     static void deserialize(ObjectMapper mapper, ChatFrameContextImpl context, ChatFrameMemoryStore memory,
-            InputStream entityStream) throws IOException, JsonProcessingException {
+            InputStream entityStream, String defaultChatFrame) throws IOException, JsonProcessingException {
         // we have a static method for unit testing unmarshalling
         JsonNode node = mapper.readTree(entityStream);
         if (node == null || !node.isObject()) {
@@ -22,19 +24,45 @@ public class ChatFrameContextSerialization {
             context.setUserMessage(userMessageNode.asText());
         }
 
+        JsonNode paramsNode = node.get("params");
+        Map<String, Object> params = new HashMap<>();
+        if (paramsNode != null && !paramsNode.isNull()) {
+            paramsNode.fields().forEachRemaining(field -> {
+                JsonNode value = field.getValue();
+                if (value != null && !value.isNull()) {
+                    params.put(field.getKey(), value);
+                }
+            });
+        }
+
         JsonNode contextNode = node.get("context");
         if (contextNode == null || contextNode.isNull()) {
+            if (defaultChatFrame == null) {
+                return;
+            }
+            context.setFrame(defaultChatFrame);
+            context.data().putAll(params);
             return;
         }
 
         JsonNode currentFrameNode = contextNode.get("frame");
         if (currentFrameNode == null || currentFrameNode.isNull()) {
-            context.setFrame(ChatFrameRecorder.defaultChatFrame);
-            return;
+            if (defaultChatFrame == null) {
+                return;
+            }
+            context.setFrame(defaultChatFrame);
+            context.data().putAll(params);
+        } else {
+            // allow frame name to be null so client can just set context data and post
+            ChatFrameData currentFrame = deserializeFrame(currentFrameNode, mapper, true);
+            if (currentFrame.name == null) {
+                currentFrame.name = defaultChatFrame;
+            }
+            if (currentFrame.name == null) {
+                return;
+            }
+            context.setCurrent(currentFrame);
         }
-        // allow frame name to be null so client can just set context data and post
-        ChatFrameData currentFrame = deserializeFrame(currentFrameNode, mapper, true);
-        context.setCurrent(currentFrame);
 
         JsonNode memoryNode = contextNode.get("memory");
         if (memoryNode != null && !memoryNode.isNull()) {

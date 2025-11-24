@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation.Builder;
@@ -23,15 +24,14 @@ public class ChatFrameClientSession {
     String password;
     String bearerToken;
 
-    record FrameRequest(String userMessage, ClientChatFrameContext context) {
+    record FrameRequest(String userMessage, Map<String, Object> params, ClientChatFrameContext context) {
     }
 
     protected ChatFrameClientSession(ObjectMapper mapper, WebTarget target, String frame) {
         this.mapper = mapper;
         this.target = target;
         if (frame != null) {
-            context().frame().name(frame);
-            context.frame.setMapper(mapper);
+            this.target = this.target.path(frame);
         }
     }
 
@@ -64,7 +64,11 @@ public class ChatFrameClientSession {
     }
 
     public List<ClientChatEvent> chat(String userMessage) {
-        FrameRequest request = new FrameRequest(userMessage, context);
+        return chat(userMessage, null);
+    }
+
+    public List<ClientChatEvent> chat(String userMessage, Map<String, Object> params) {
+        FrameRequest request = new FrameRequest(userMessage, params, context);
         String json = null;
         try {
             json = mapper.writeValueAsString(request);
@@ -76,7 +80,6 @@ public class ChatFrameClientSession {
         setAuthentication(requestBuilder);
         json = requestBuilder.post(Entity.json(json), String.class);
         try {
-            System.out.println("*****Client response json: " + json);
             FrameResponse response = mapper.readValue(json, FrameResponse.class);
             context = response.context;
             if (context.frame != null) {
@@ -84,7 +87,6 @@ public class ChatFrameClientSession {
             }
             List<ClientChatEvent> events = new ArrayList<>();
             for (Event event : response.events) {
-                System.out.println("*****Client event: '" + event.type + "' " + event.value);
                 ClientChatEvent clientEvent = new ClientChatEvent() {
                     @Override
                     public String type() {
@@ -115,12 +117,5 @@ public class ChatFrameClientSession {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public ClientChatFrameContext context() {
-        if (context == null) {
-            context = new ClientChatFrameContext();
-        }
-        return context;
     }
 }

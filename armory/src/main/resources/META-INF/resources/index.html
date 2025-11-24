@@ -744,11 +744,7 @@
             const $chatContainer = $('#chat-container');
             const $messageInput = $('#message-input');
 
-            let chatContext = {
-                frame: {
-                    name: 'mainMenu'
-                }
-            };
+            let chatContext = {};
 
             function saveFile(url, filename) {
                 const a = document.createElement("a");
@@ -1266,7 +1262,7 @@
                     postData = JSON.stringify(request);
 
                     const response = await $.ajax({
-                        url: `/q/chat-frames`,
+                        url: `/q/chat-frames/mainMenu`,
                         type: 'POST',
                         data: postData,
                         processData: false,

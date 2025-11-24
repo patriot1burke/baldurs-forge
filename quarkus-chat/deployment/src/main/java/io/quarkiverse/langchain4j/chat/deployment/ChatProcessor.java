@@ -193,6 +193,7 @@ public class ChatProcessor {
         if (!rootPath.endsWith("/")) {
             rootPath = rootPath + "/";
         }
+        recorder.setRootPath(rootPath); // without *
         rootPath += "*";
         routes.produce(nonApplicationRootPathBuildItem.routeBuilder()
                 .routeFunction(rootPath, recorder.routeFunction(bodyHandlerBuildItem.getHandler()))

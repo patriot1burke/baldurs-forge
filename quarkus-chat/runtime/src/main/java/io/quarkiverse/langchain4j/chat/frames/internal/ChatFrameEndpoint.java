@@ -104,14 +104,29 @@ public class ChatFrameEndpoint {
             setCurrentIdentityAssociation(ctx);
             try {
                 try {
+                    String path = ctx.request().path();
+                    String defaultChatFrame = ChatFrameRecorder.defaultChatFrame;
+                    int index = path.indexOf(ChatFrameRecorder.rootPath);
+                    if (index > -1) {
+                        String newDefault = path.substring(index + ChatFrameRecorder.rootPath.length());
+                        if (!newDefault.isEmpty()) {
+                            defaultChatFrame = newDefault;
+                            Log.info("Defaultchat from path: " + defaultChatFrame);
+                        }
+                    }
                     ChatFrameContextSerialization.deserialize(mapper, context, memoryStore,
-                            new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)));
+                            new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)), defaultChatFrame);
                 } catch (Exception e) {
                     Log.error("Failed to deserialize chat context", e);
                     ctx.response().setStatusCode(400).end("Failed to deserialize chat context");
                     return null;
                 }
                 try {
+                    if (context.currentFrameId() == null) {
+                        Log.error("Current frame not set and no default chat frame found");
+                        ctx.response().setStatusCode(404).end("Current frame not set and no default chat frame found");
+                        return null;
+                    }
                     chatFrameService.chat(context);
                 } catch (UnauthorizedException e) {
                     Log.error("Unauthorized", e);

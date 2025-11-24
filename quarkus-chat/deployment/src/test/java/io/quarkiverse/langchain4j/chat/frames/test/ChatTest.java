@@ -1,6 +1,7 @@
 package io.quarkiverse.langchain4j.chat.frames.test;
 
 import java.util.List;
+import java.util.Map;
 
 import jakarta.ws.rs.WebApplicationException;
 
@@ -142,8 +143,7 @@ public class ChatTest {
         Assertions.assertEquals("second", text);
 
         session = client.session("sent-data");
-        session.context().frame().setData("sentData", "sentData");
-        text = session.chat("dummy").get(0).value(String.class);
+        text = session.chat("dummy", Map.of("sentData", "sentData")).get(0).value(String.class);
         Assertions.assertEquals("sentData", text);
     }
 
