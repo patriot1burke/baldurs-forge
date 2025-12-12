@@ -357,21 +357,21 @@ Here's what it looks like in the UI:
 
 ![Screenshot](query1.png)
 
-If you mouse over a listed item, it pops up a tooltip of the actual item, which is what is shown in the picture.  
+If you mouse over a listed item, it pops up a detailed tooltip of the listed item.  
 
 ![Screenshot2](query1_plus_tooltip.png)
 
-All this is just custom client code using JQuery and nothing
-to do with the LLM.  We have successfully mixed traditional CRUD UI techniques with the LLM.
+All this nice rendering is done solely via custom app developer code using JQuery and the list
+of equipment extract from the embedding search request we did with the LLM..  We have successfully mixed traditional CRUD UI techniques with the LLM!
 
 FYI: In the final implementation I actually decided I didn't care at all about LLM answers to the user message query.  All I cared about was the list of related
 items to my user request.  The LLM response was often inconsistent, irrelevant, and even weird or wrong.  All things you DO NOT WANT in a good UI! So, I removed the
-last interaction with the LLM to get a summary and only used the LLM for creating an search embedding.
+last interaction with the LLM to get a summary and only used the LLM for creating a search embedding.
 
 The final implementation of this RAG query was part of a larger application that I'll dive into later when we talk about other Chat Frame features, but the
 code that invokes the rag request is [here](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/java/org/baldurs/forge/mainmenu/MainMenuToolBox.java#L70), the implementation of the request is [here](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/java/org/baldurs/forge/services/EquipmentDB.java#L256), and the UI code is [here](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/resources/META-INF/resources/index.html#L1274).  
 
-## Chat Memory and Default Memory Ids with Chat Frames
+## Chat Memory Management and Default Memory Ids with Chat Frames
 
 I've written a blog that talks about how chat memory works with Quarkus Langchain4j.  Chat Frames expands on this chat memory management.
 
