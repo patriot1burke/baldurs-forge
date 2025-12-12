@@ -74,7 +74,7 @@ public interface RagPrompt {
 
             When you don't know, respond that you don't know the answer.
             """)
-    @ChatFrame("dnd-db") // highlight-line
+    @ChatFrame("dnd-db")
     String chat(@UserMessage String question);
 }
 ```
@@ -161,8 +161,9 @@ The finished Javascript client looks like this:
                         processData: false,
                         contentType: false
             });
+            // Don't forget to save the context for use in the next conversational chat call!
             chatContext = response.context;
-            // highlight-start
+
             if (response.events) {
                 for (const event of response.events) {
                     if (event.type === 'StringMessage') {
@@ -170,7 +171,6 @@ The finished Javascript client looks like this:
                     }
                 }
             }
-            // highlight-end
 ```
 
 The client just loops through the events returned by the server and calls a handle method based on the type.  We'll see later how you can send your own
@@ -210,7 +210,7 @@ public interface RagPrompt {
             When you don't know, respond that you don't know the answer.
             """)
     @ChatFrame("dnd-db")
-    @RolesAllowed("user") // highlight-line
+    @RolesAllowed("user")
     String chat(@UserMessage String question);
 }
 ```
@@ -280,7 +280,7 @@ public class RagAgent {
             return db.get(id);
         }).toList();
 
-        ctx.addEvent("EquipmentList", relatedItems); // highlight-line
+        ctx.addEvent("EquipmentList", relatedItems); 
 
         String llmSummary = prompt.chat(userMsg, relatedItems);
         return llmSummary;
@@ -301,11 +301,13 @@ If you look at the `query()` method you see that it is a `@ChatFrame`.  It's par
 The `ChatFrameContext` is utility interface for Quarkus Chat Frames.  For this example, we'll use it to piggyback an additional event
 back to the client.
 
+Here is what our Java code is doing:
 
-1. First, a search request was created using the user message and the embedding model.
-2. Next, the search was executed on the embedding store of the BG3 equipment DB.  This returned a set of TextSegments with metadata associated with it.
-3. The matches were iterated upon.  Each embedding had ID metadata associated with it.  This ID was used to query the BG3 database to get the DAO of the item.
-4. Now that we have the list of equipment, we send that list back as an event to the client by calling `ctx.addEvent()`.  The client will use this event to create a nice rendering of each item found.
+
+1. First, a search request is created using the user message and the embedding model.
+2. Next, the search is executed on the embedding store of the BG3 equipment DB.  This returns a set of `TextSegments` with metadata associated with it.
+3. The matches are iterated upon.  Each embedding has ID metadata associated with it.  This ID is used to query the BG3 database to get the DAO of the item.
+4. Now that we have the list of equipment, that list is sent back as an event to the client by calling `ctx.addEvent()`.  The client uses this event to create a nice rendering of each item found.
 5. The user message and list of related equipment is sent to the AiService prompt so that the user message query can be answered
 6. We return the answer the LLM found too.  (This creates an additional event).
 
@@ -314,7 +316,7 @@ Here is the JSON sent back to the client:
 {
     "events": [
         {"type": "ListEquipment", "value": [...]},
-        {"type": "StringMessage", "There are a number of weapons that can help fighting dragons..."}
+        {"type": "StringMessage", "There are a number of weapons that can help fighting giants..."}
     ],
     "context": {...}
 }
@@ -344,26 +346,30 @@ Our web client needs to change to support handling the *ListEquipment* event typ
                 for (const event of response.events) {
                     if (event.type === 'StringMessage') {
                         handleStringMessage(event.value);
-                    // hightlight-start
                     } else if (event.type === 'ListEquipment') {
                         renderEquipmentList(event.value);
                     }
-                    // highlight-end
                 }
             }
 ```
 
 Here's what it looks like in the UI:
 
-<screen shot>
+![Screenshot](query1.png)
 
-If you mouse over a listed item, it pops up a tooltip of the actual item, which is what is shown in the picture.
+If you mouse over a listed item, it pops up a tooltip of the actual item, which is what is shown in the picture.  
 
-In the final implementation I actually decided I didn't care at all about the LLM answer to the user message query.  All I cared about was the list of related
-items to my user request.  The LLM response was often inconsistent, irrelevant, and even weird or wrong.  All things you DO NOT WANT in a good UI!.
+![Screenshot2](query1_plus_tooltip.png)
+
+All this is just custom client code using JQuery and nothing
+to do with the LLM.  We have successfully mixed traditional CRUD UI techniques with the LLM.
+
+FYI: In the final implementation I actually decided I didn't care at all about LLM answers to the user message query.  All I cared about was the list of related
+items to my user request.  The LLM response was often inconsistent, irrelevant, and even weird or wrong.  All things you DO NOT WANT in a good UI! So, I removed the
+last interaction with the LLM to get a summary and only used the LLM for creating an search embedding.
 
 The final implementation of this RAG query was part of a larger application that I'll dive into later when we talk about other Chat Frame features, but the
-code that invokes the rag request is here, the implementation of the request is here, and the UI code is here and here.
+code that invokes the rag request is [here](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/java/org/baldurs/forge/mainmenu/MainMenuToolBox.java#L70), the implementation of the request is [here](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/java/org/baldurs/forge/services/EquipmentDB.java#L256), and the UI code is [here](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/resources/META-INF/resources/index.html#L1274).  
 
 ## Chat Memory and Default Memory Ids with Chat Frames
 
