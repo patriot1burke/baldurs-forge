@@ -552,20 +552,117 @@ Here we get the built weapon from context data.  Pop the chat frame stack back t
 the weapon builder conversation.  From the *Main Menu* chat frame data we get the `NewModModel` object and add the newly created weapon to it.
 Packaging up our new mod so that it can be run within BG3 is a different *Main Menu* command that uses this object.
 
-## @FrameInject
+## @FrameInject and ChatFrameContext parameters
+
+You can inject *Chat Frame Data* directly into `@ChatFrame` method parameters using the `@FrameInject` annotation.
+
+```java
+@ChatFrame("weaponBuilder")
+public String chat(@UserMessage msg, @FrameInject WeaponModel current) {
+    ...
+}
+```
+
+The name and type of the parameter are used to extract it from the context.  The above is equivalent to the below code
+
+```java
+@ChatFrame("weaponBuilder")
+public String chat(@UserMessage msg, ChatFrameContext ctx) {
+    WeaponModel weapon = ctx.getData("current", WeaponModel.class);
+    ...
+}
+```
+Notice that you can have `ChatFrameContext` as a parameter too.  Finally, you do not
+have to specify `@FrameInject` at all.  For `@ChatFrame` methods, any non annotated parameter
+will default to `FrameInject`.  So the below code is also equivalent to the above code
+
+```java
+@ChatFrame("weaponBuilder")
+public String chat(@UserMessage msg, WeaponModel current) {
+    ...
+}
+```
+
+Unfortunately, `@FrameInject` does not work with tool methods at this time.  I first need to get
+this extension approved and merged with Quarkus Langchain4j before I can add support for tool methods as it
+requires changes to the core.
 
 ## @EventType
 
+The `@EventType` annotation allows you to specify what the chat frame event type should be for the result returned
+by a `@ChatFrame` method.
+
+```java
+@SessionScoped
+@RegisterAiService
+public interface WeaponBuilderPrompt {
+
+    @SystemMessage(fromResource = "prompts/weaponBuilder.txt")
+    @ChatFrame("weapon")
+    @EventType("new-weapon")
+    WeaponModel chat(@UserMessage String message);
+}
+```
+
+You can also place this on the class as well:
+
+```java
+
+@EventType("new-weapon")
+public class WeaponModel {
+
+}
+```
+
+If no even type is specified for the return type, if the return type is `String` then the default event type is `StringMessage`, otherwise the
+default is `ObjectMessage`.
+
 ## @EventMapper
+
+The `@EventMapper` annotation is similar to `@EventType` but it allows you to completely transform the return type of a `@ChatFrame1` method
+to an event.  For example:
+
+```java
+public interface RagPrompt {
+
+    @SystemMessage("")
+    @ChatFrame("rag")
+    @EventMapper(Markdown.class)
+    String chat(@UserMessage String question);
+
+}
+
+public class Markdown {
+
+    public static ChatFrameEvent from(String string) {
+        return new ChatFrameEvent("StringMessage", markdownToHtml(string));
+    }
+}
+
+```
+
+The class specified in the `@EventMapper` annotation must have a method named `from()` that takes the type of the result as a parameter
+and returns a `ChatFrameEvent` object.  It can be static or memory method.
 
 ## Other ChatFrameContext methods
 
 ### Schedule a chat memory wipe
 
+Sometimes it is useful to schedule a chat memory wipe when chat request is finished.  You can call `ChatFrameContext.scheduleWipe()` to do this.
+If another portion of code decides that the chat memory should not be wiped it can be aborted by calling `ChatFrameContext.abortWipe()`.
+
 ### Invoking a chat frame dynamically
+
+You can invoke a chat frame dynamically.
+
+```java
+ctx.pushFrame("weaponBuilder");
+ctx.currentFrame().chat();
+```
 
 ## Java Client 
 
+This is a work in progress.
 
 
 
