@@ -371,19 +371,198 @@ last interaction with the LLM to get a summary and only used the LLM for creatin
 The final implementation of this RAG query was part of a larger application that I'll dive into later when we talk about other Chat Frame features, but the
 code that invokes the rag request is [here](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/java/org/baldurs/forge/mainmenu/MainMenuToolBox.java#L70), the implementation of the request is [here](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/java/org/baldurs/forge/services/EquipmentDB.java#L256), and the UI code is [here](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/resources/META-INF/resources/index.html#L1274).  
 
-## Chat Memory Management and Default Memory Ids with Chat Frames
+## Chat Memory Management and the Chat Frame Stack
 
-I've written a blog that talks about how chat memory works with Quarkus Langchain4j.  Chat Frames expands on this chat memory management.
+I've written a [blog about how chat memory works](https://bill.burkecentral.com/2025/11/25/managing-chat-memory-in-quarkus-langchain4j/) with Quarkus Langchain4j.  Chat Frames expands on this chat memory management.  Chat Frames work best when you use default memory ids.  In other words:  when you do *NOT* use `@MemoryId` in your AI Service methods.  For default memory ids, Chat Frames sets the default memory id to be the chat frame *context path* + `#` + *fully qualified interface name* + `.` + *method name*.  So for this AI Service:
+
+```java
+import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
+
+@RegisterAiService
+public interface RagPrompt {
+
+    @ChatFrame("dnd-db")
+    String chat(@UserMessage String question);
+}
+```
+
+The default memory id for the `chat()` method would be `/dnd-db#RagPrompt.chat`.  Why is that distinction important?  Chat Frames allows you to change the current
+`@ChatFrame` your client is talking to by programmatically pushing and popping it from a chat frame stack.  Consider this code:
+
+```java
+
+public class Menu {
+    @Inject
+    RagPromopt rag;
+
+    @ChatFrame("menu")
+    public String chat(@UserMessage msg, ChatFrameContext ctx) {
+        ctx.pushFrame("dnd-db");
+        return rag.chat(msg);
+    }
+}
+```
+
+The `ChatFrameContext.pushFrame()` method call in the above code does a few things:
+1. Any chat memory entries starting with `/menu#` are cleared.
+2. Future posts from the client are now routed to the `dnd-db` chat frame
+3. The default chat memory id prefix becomes `/menu/dnd-db`.
+
+There's also a method `ChatFrameContext.popFrame()`.  If this is invoked after the above scenario
+1. Any chat memory entries starting with `/menu/dnd-db#` are wiped and cleared.
+2. Future posts from the client are now routed to the `menu` chat frame
+3. The default chat memory id prefix is now `/menu` again.
+
+As we'll see in the next chapter, this allows you to have nested chat conversations between the client and server and
+to easily manage chat memory
 
 ## Nested Conversations
 
-Want to add weapons/armor.
+As my BG3 chat application evolved I wanted to add the ability to not only search for current equipment in the game,
+but to also be able to create new equipment.  Creating new equipment required a new chat dialogue with the user.
+Each type of equipment required a little bit different data input to create.
+The LLM started to get really confused when I tried to do so many different things within one prompt, so I broke things out into
+multiple AI Services (one for each equipment type, i.e. armor, ring, weapon, boots, gloves, cloak, etc.) and wrote what I call a *Main Menu* prompt
+that took a user message query and routed it to a prompt that handled what the user wanted to do.
 
 ### Main Menu Prompt and tools
 
-### Create Weapon needs its own conversation (pushFrame)
+The *Main Menu* prompt worked by telling the LLM to invoke a specific tool method based on the user message posted to the prompt.
 
-### Create weapon chat needs to build up a document
+```java
+@SessionScoped
+@RegisterAiService
+public interface MainMenuPrompt {
 
-### Finish the weapon and go back to main menu
+    @SystemMessage(fromResource = "prompts/mainMenuCommands.txt")
+    @ToolBox({ MainMenuToolBox.class })
+    @ChatFrame("mainMenu")
+    String chat(@UserMessage String message);
+}```
+
+The prompt says something like this:
+
+*If the user is searching for some equipment, then call the search tool.  If the user wants to create a weapon call the createWeapon tool*
+
+Here is the [full prompt](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/resources/prompts/mainMenuCommands.txt).
+
+The `MainMenuToolBox` contains all the tool methods for the *Main Menu* prompt.
+
+### Create Weapon needs its own chat conversation (pushFrame)
+
+As I said earlier, creating an item requires a specific chat dialogue with the LLM as there is a little bit of generative AI going on as well 
+as a bunch of data input that is needed from the user.  When a user first interacts with our chat application, the *Main Menu* chat frame
+is called.  If the user wants to create an item, they might type something like this *Create me a +3 legendary longsword*.  The *Main Menu*
+chat frame runs this query through the *Main Menu* prompt and the LLM will invoke the `createNewWeapon` tool.
+
+```java
+@SessionScoped
+public class MainMenuToolBox {
+    @Inject
+    WeaponBuilderPrompt weapon;
+
+    @Inject
+    ChatFrameContext ctx;
+
+    @Tool("Create a new weapon")
+    public String createWeapon() {
+        ctx.pushFrame("weapon");
+        return weapon.chat(ctx.userMessage());
+
+    }
+}
+```
+
+The `createWeapon()` tool method uses the `ChatFrameContext` to push a new chat conversation on the conversation stack: creating a new weapon.
+We then invoke the `WeaponBuilderPrompt.chat()` method with the current user message to start the dialogue.  Calling `ChatFrameContext.pushFrame()` clears all
+chat memory referenced in the *Main Menu* chat frame conversation and sets a new default memory prefix to be `/mainmenu/weapon`.  Any
+user messages the client posts to the server will now be routed to the `weapon` chat frame.
+
+Originally, `createWeapon()` had a `String` parameter for the creation query extracted from the user message.  What I found was that the LLM
+was very unreliable on what was put in that parameter.  This is why we need the original full user message which can be obtained from `ChatFrameContext.userMessage()`.
+The weapon builder will be very interested in the *+3 legendary longsword* text and we want to make sure it gets it!
+
+### Create weapon chat needs to build a document: Chat Frame Context Data
+
+The weapon builder chat dialogue needs a bunch of information from the user before it can complete it.  Originally I relied on chat memory
+to hold on the information gathered before the item finished.  While this usually worked, it was not 100%, and sometimes the LLM got confused
+and left out inputed data in the final product.  To make this more reliable I had a set of tool methods that were invoked by the weapon builder
+prompt and they would store the weapon object directly in memory through Chat Frame Data.
+
+```java
+@ApplicationScope
+public class WeaponBuilderToolbox {
+    @Inject
+    ChatFrameContext ctx;
+
+    @Tool("Set the name of the weapon")
+    public void setName(String name) {
+        WeaponModel weapon = ctx.getData("current", WewaponModel.class);
+        if (weapon == null) {
+            weapon = new WeaponModel();
+            ctx.setData("current", weapon);
+        }
+        weapon.setName(name);
+    }
+}
+```
+
+The `ChatFrameContext.getData()` and `ChatFrameContext.setData()` methods allow you to interact with chat frame data.  It is important to note that
+for REST chat frame sessions, this data is marshalled to json and set back to the client.  REST conversations are server-side stateless and the client
+will hold all session data.  This means that any data must be marshallable to JSON.  Use Jackson annotations if you want to fine tune this.
+
+Another thing to note is that chat context data is associated with the current chat frame.  When the current chat framed is popped by callling
+`ChatFrameContext.popFrame()` all the context data associated with the current chat frame will be released.  This gives you a nice way
+of cleaning up after your dialogue is complete.
+
+### Finish the weapon and go back to main menu (popFrame)
+
+The user is told that when they are done defining their new weapon that they should say that they are finished.  In our implementation
+this routes to the `finishEquipment()` tool method.
+
+```java
+@ApplicationScope
+public class WeaponBuilderToolbox {
+    @Inject
+    ChatFrameContext ctx;
+
+    @Tool("Set the name of the weapon")
+    public void finishEquipment() {
+        WeaponModel weapon = ctx.getData("current", WewaponModel.class);
+        popFrame(); // cleans up chat memory and chat frame data for weapon chat
+
+        // we are now back to the main menu chat frame
+        NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
+        if (newEquipment == null) {
+            newEquipment = new NewModModel();
+            context.setData(NewModModel.NEW_EQUIPMENT, newEquipment);
+        }
+        newEquipment.addEquipment(current);
+        context.addEvent("Finished building item!  Tell me to package up your new mod when you are ready.");        
+    }
+}
+```
+
+Here we get the built weapon from context data.  Pop the chat frame stack back to the *Main Menu* chat frame.  This cleans up chat memory and chat frame data from
+the weapon builder conversation.  From the *Main Menu* chat frame data we get the `NewModModel` object and add the newly created weapon to it.
+Packaging up our new mod so that it can be run within BG3 is a different *Main Menu* command that uses this object.
+
+## @FrameInject
+
+## @EventType
+
+## @EventMapper
+
+## Other ChatFrameContext methods
+
+### Schedule a chat memory wipe
+
+### Invoking a chat frame dynamically
+
+## Java Client 
+
+
+
+
+
 
