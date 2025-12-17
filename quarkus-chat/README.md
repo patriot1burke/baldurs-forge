@@ -489,9 +489,10 @@ The weapon builder will be very interested in the *+3 legendary longsword* text 
 ### Create weapon chat needs to build a document: Chat Frame Context Data
 
 The weapon builder chat dialogue needs a bunch of information from the user before it can complete it.  Originally I relied on chat memory
-to hold on the information gathered before the item finished.  While this usually worked, it was not 100%, and sometimes the LLM got confused
+to hold all the information gathered before the item finished.  While this usually worked, it was not 100%, and sometimes the LLM got confused
 and left out inputed data in the final product.  To make this more reliable I had a set of tool methods that were invoked by the weapon builder
-prompt and they would store the weapon object directly in memory through Chat Frame Data.
+prompt and they would store the weapon object directly in memory through something called *Chat Frame Data*.  Think of it as session data associated
+with a specific chat dialogue.
 
 ```java
 @ApplicationScope
@@ -530,7 +531,7 @@ public class WeaponBuilderToolbox {
     @Inject
     ChatFrameContext ctx;
 
-    @Tool("Set the name of the weapon")
+    @Tool("Finish creating the weapon")
     public void finishEquipment() {
         WeaponModel weapon = ctx.getData("current", WewaponModel.class);
         popFrame(); // cleans up chat memory and chat frame data for weapon chat
