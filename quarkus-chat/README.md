@@ -438,7 +438,8 @@ public interface MainMenuPrompt {
     @ToolBox({ MainMenuToolBox.class })
     @ChatFrame("mainMenu")
     String chat(@UserMessage String message);
-}```
+}
+```
 
 The prompt says something like this:
 
