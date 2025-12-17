@@ -442,7 +442,10 @@ public interface MainMenuPrompt {
 
 The prompt says something like this:
 
-*If the user is searching for some equipment, then call the search tool.  If the user wants to create a weapon call the createWeapon tool*
+```
+If the user is searching for some equipment, then call the search tool.  
+If the user wants to create a weapon call the createWeapon tool
+```
 
 Here is the [full prompt](https://github.com/patriot1burke/baldurs-forge/blob/main/armory/src/main/resources/prompts/mainMenuCommands.txt).
 
