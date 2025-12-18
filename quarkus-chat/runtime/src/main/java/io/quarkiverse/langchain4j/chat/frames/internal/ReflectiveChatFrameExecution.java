@@ -17,6 +17,7 @@ import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameEvent;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameExecution;
 import io.quarkiverse.langchain4j.chat.frames.EventMapper;
+import io.quarkiverse.langchain4j.chat.frames.EventType;
 import io.quarkiverse.langchain4j.chat.frames.FrameInject;
 import io.quarkus.arc.Arc;
 import io.quarkus.arc.runtime.BeanContainer;
@@ -63,7 +64,8 @@ public class ReflectiveChatFrameExecution implements ChatFrameExecution {
         }
         resultMapperClass = resultMapperAnnotation != null ? resultMapperAnnotation.value() : defaultResultMapper;
         resultMappers = resolveResultMappers(resultMapperClass);
-        mapper = resolveResultMapper(method.getGenericReturnType(), method.getReturnType());
+        mapper = resolveResultMapper(method.getAnnotation(EventType.class), method.getGenericReturnType(),
+                method.getReturnType());
     }
 
     private static List<Method> resolveResultMappers(Class<?> resultMapperClass) {
@@ -90,7 +92,7 @@ public class ReflectiveChatFrameExecution implements ChatFrameExecution {
         return null;
     }
 
-    private EventResolver resolveResultMapper(Type type, Class<?> clazz) {
+    private EventResolver resolveResultMapper(EventType eventType, Type type, Class<?> clazz) {
         for (Method cfm : resultMappers) {
             if (type.equals(cfm.getGenericParameterTypes()[0])) {
                 if (Modifier.isStatic(cfm.getModifiers())) {
@@ -125,7 +127,7 @@ public class ReflectiveChatFrameExecution implements ChatFrameExecution {
                 ParameterizedType parameterizedType = (ParameterizedType) type;
                 Type resultType = parameterizedType.getActualTypeArguments()[0];
                 Class<?> resultClass = resolveClass(resultType);
-                EventResolver resultMapper = resolveResultMapper(resultType, resultClass);
+                EventResolver resultMapper = resolveResultMapper(eventType, resultType, resultClass);
                 if (resultMapper != null) {
                     return (context, obj) -> {
                         Result<?> result = (Result<?>) obj;
@@ -134,7 +136,7 @@ public class ReflectiveChatFrameExecution implements ChatFrameExecution {
                         } else {
                             for (ToolExecution execution : result.toolExecutions()) {
                                 if (execution.resultObject() != null) {
-                                    resolveResultMapper(execution.resultObject().getClass(),
+                                    resolveResultMapper(eventType, execution.resultObject().getClass(),
                                             execution.resultObject().getClass()).resolve(context, execution.resultObject());
                                 }
                             }
@@ -145,17 +147,22 @@ public class ReflectiveChatFrameExecution implements ChatFrameExecution {
             return (context, obj) -> {
                 Result<?> result = (Result<?>) obj;
                 if (result.content() != null) {
-                    resolveResultMapper(result.content().getClass(), result.content().getClass())
+                    resolveResultMapper(eventType, result.content().getClass(), result.content().getClass())
                             .resolve(context, result.content());
                 } else {
                     for (ToolExecution execution : result.toolExecutions()) {
                         if (execution.resultObject() != null) {
-                            resolveResultMapper(execution.resultObject().getClass(), execution.resultObject().getClass())
+                            resolveResultMapper(eventType, execution.resultObject().getClass(),
+                                    execution.resultObject().getClass())
                                     .resolve(context, execution.resultObject());
                         }
                     }
                 }
             };
+        }
+        EventType eventTypeAnnotation = eventType != null ? eventType : clazz.getAnnotation(EventType.class);
+        if (eventTypeAnnotation != null) {
+            return (context, obj) -> context.events().add(new ChatFrameEvent(eventTypeAnnotation.value(), obj));
         }
 
         if (clazz.equals(String.class)) {

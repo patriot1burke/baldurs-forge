@@ -11,6 +11,7 @@ import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
 import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
 import io.quarkiverse.langchain4j.chat.frames.DefaultChatFrame;
+import io.quarkiverse.langchain4j.chat.frames.EventType;
 
 @ApplicationScoped
 public class MyChatService {
@@ -74,5 +75,16 @@ public class MyChatService {
         MockResult<String> result = new MockResult<String>(null);
         result.addToolResult(null);
         return result;
+    }
+
+    @ChatFrame("event-type")
+    @EventType("my-event-type")
+    public String eventType() {
+        return "event-type";
+    }
+
+    @ChatFrame("customer")
+    public Customer customer() {
+        return new Customer("John Doe", "john.doe@example.com");
     }
 }

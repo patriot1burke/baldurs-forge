@@ -27,7 +27,8 @@ public class SecurityTest {
     @RegisterExtension
     public static QuarkusUnitTest test = new QuarkusUnitTest()
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
-                    .addClasses(MyChatService.class, MockResult.class, TestIdentityController.class,
+                    .addClasses(MyChatService.class, Customer.class,
+                            MockResult.class, TestIdentityController.class,
                             TestIdentityProvider.class, PathHandler.class)
                     .addAsResource(new StringAsset(APP_PROPS), "application.properties"));
 

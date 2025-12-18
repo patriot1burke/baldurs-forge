@@ -660,9 +660,13 @@ ctx.pushFrame("weaponBuilder");
 ctx.currentFrame().chat();
 ```
 
+## Frame Data from Client
+
+WIP
+
 ## Java Client 
 
-This is a work in progress.
+WIP
 
 
 

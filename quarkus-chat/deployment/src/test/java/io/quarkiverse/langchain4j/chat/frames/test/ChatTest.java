@@ -23,6 +23,7 @@ public class ChatTest {
     public static QuarkusUnitTest test = new QuarkusUnitTest()
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
                     .addClasses(MyChatService.class, AnotherChatService.class, AnotherChat.class, MockResult.class,
+                            Customer.class,
                             ResponseChatService.class, TestMapper.class,
                             TestChatDataService.class));
 
@@ -156,5 +157,24 @@ public class ChatTest {
         } catch (WebApplicationException e) {
             Assertions.assertEquals(500, e.getResponse().getStatus());
         }
+    }
+
+    @Test
+    public void testEventType() {
+        ChatFrameClientSession session = client.session("event-type");
+        ClientChatEvent clientChatEvent = session.chat("Hello, world!").get(0);
+        String text = clientChatEvent.value(String.class);
+        Assertions.assertEquals("event-type", text);
+        Assertions.assertEquals("my-event-type", clientChatEvent.type());
+    }
+
+    @Test
+    public void testEventTypeOnClass() {
+        ChatFrameClientSession session = client.session("customer");
+        ClientChatEvent clientChatEvent = session.chat("Hello, world!").get(0);
+        Customer customer = clientChatEvent.value(Customer.class);
+        Assertions.assertEquals("John Doe", customer.name());
+        Assertions.assertEquals("john.doe@example.com", customer.email());
+        Assertions.assertEquals("customer", clientChatEvent.type());
     }
 }
