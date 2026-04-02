@@ -18,8 +18,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-import org.baldurs.forge.builder.ModPackager;
 import org.baldurs.forge.builder.NewModModel;
+import org.baldurs.forge.builder.PakFileExporter;
 import org.baldurs.forge.services.EquipmentDB;
 import org.baldurs.forge.services.LibraryService;
 import org.jboss.logging.Logger;
@@ -82,7 +82,7 @@ public class AssistantResource {
     }
 
     @Inject
-    ModPackager modPackager;
+    PakFileExporter modPackager;
 
     @POST
     @Path("/package-mod")

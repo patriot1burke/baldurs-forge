@@ -5,10 +5,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -16,187 +13,17 @@ import org.baldurs.archivist.IdMaker;
 import org.baldurs.archivist.LS.Converter;
 import org.baldurs.archivist.LS.PackedVersion;
 import org.baldurs.archivist.PackageWriter;
-import org.baldurs.forge.messages.ListEquipmentMessage;
-import org.baldurs.forge.messages.MarkdownStringMessage;
-import org.baldurs.forge.messages.PackageModMessage;
-import org.baldurs.forge.messages.ShowEquipmentMessage;
-import org.baldurs.forge.messages.UpdateNewEquipmentMessage;
-import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.scanner.RootTemplate;
 import org.baldurs.forge.scanner.StatsArchive;
-import org.baldurs.forge.services.BoostService;
 import org.baldurs.forge.services.LibraryService;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import dev.langchain4j.agent.tool.ReturnBehavior;
-import dev.langchain4j.agent.tool.Tool;
-import dev.langchain4j.service.Result;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
-import io.quarkiverse.langchain4j.chat.frames.EventMapper;
 import io.quarkus.logging.Log;
 
 @ApplicationScoped
-public class ModPackager {
-
-    public static final String PACKAGE_MODE_CHAT_COMMAND = "Package mod";
-
-    @Inject
-    ChatFrameContext context;
-
-    @Inject
-    ModPackagePrompt agent;
+public class PakFileExporter {
 
     @Inject
     LibraryService library;
-
-    @Inject
-    BodyArmorBuilder bodyArmorBuilder;
-
-    @Inject
-    BoostService boostService;
-
-    ObjectMapper mapper;
-
-    @PostConstruct
-    public void init() {
-        mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(Include.NON_NULL);
-    }
-
-    /**
-     * Called by menu menu tool. Resets the chat history and calls packageMod.
-     *
-     * @return
-     */
-    public void startPackageMod() {
-        NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
-        if (newEquipment == null) {
-            context.addEvent("Nothing to package.  You have not created any new equipment.");
-            return;
-        }
-        context.pushFrame("packageMod");
-        context.setData(CURRENT_PACKAGE, new PackageModel());
-        context.currentFrame().chat();
-    }
-
-    @ChatFrame("packageMod")
-    @EventMapper(MarkdownStringMessage.class)
-    public Result<String> packageMod(PackageModel currentPackage) {
-        String currentJson = null;
-        try {
-            currentJson = mapper.writeValueAsString(currentPackage);
-        } catch (JsonProcessingException e) {
-            Log.error("Error serializing newEquipment", e);
-            throw new RuntimeException("Error serializing newEquipment", e);
-        }
-        return agent.packageMod(context.userMessage(), PackageModel.schema, currentJson);
-    }
-
-    private static final String CURRENT_PACKAGE = "currentPackage";
-
-    @Tool("Update the current package json document.")
-    public String updatePackage(PackageModel packageModel) throws Exception {
-        PackageModel current = context.getData(CURRENT_PACKAGE, PackageModel.class);
-        if (current == null) {
-            current = packageModel;
-        }
-        if (packageModel.name != null) {
-            current.name = packageModel.name;
-        }
-        if (packageModel.author != null) {
-            current.author = packageModel.author;
-        }
-        if (packageModel.description != null) {
-            current.description = packageModel.description;
-        }
-        context.setData(CURRENT_PACKAGE, current);
-        return mapper.writeValueAsString(current);
-    }
-
-    @Tool(value = "Finish packaging the mod.", returnBehavior = ReturnBehavior.IMMEDIATE)
-    public void finishPackage(PackageModel packageModel) {
-        NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
-        newEquipment.name = packageModel.name;
-        newEquipment.author = packageModel.author;
-        newEquipment.description = packageModel.description;
-        context.popFrame();
-        String baseFileName = toAlphaNumericUnderscore(newEquipment.name);
-        context.removeData(NewModModel.NEW_EQUIPMENT);
-
-        PackageModMessage.addResponse(context, baseFileName + ".pak", newEquipment);
-    }
-
-    public List<EquipmentModel> listBuiltEquipment() {
-        NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
-        if (newEquipment == null || newEquipment.isEmpty()) {
-            return Collections.EMPTY_LIST;
-        }
-        return newEquipment.toEquipmentModels(boostService, library);
-    }
-
-    public void showNewEquipment() {
-        List<EquipmentModel> equipment = listBuiltEquipment();
-        if (!equipment.isEmpty()) {
-            ListEquipmentMessage.addResponse(context, equipment);
-        } else {
-            context.addEvent("No new equipment.");
-        }
-    }
-
-    public void deleteAllNewEquipment() {
-        context.removeData(NewModModel.NEW_EQUIPMENT);
-        UpdateNewEquipmentMessage.addResponse(context, null, 0);
-        context.clearMemory();
-    }
-
-    public void deleteNewEquipment(String name) {
-        NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
-        if (newEquipment == null || newEquipment.isEmpty()) {
-            context.addEvent("No equipment to delete.");
-            return;
-        }
-
-        BaseModel equipment = newEquipment.findEquipmentByName(name);
-        if (equipment == null) {
-            showNewEquipment();
-            context.addEvent("Equipment with name not found.");
-            return;
-        }
-        newEquipment.removeEquipment(equipment);
-
-        if (newEquipment.count == 0) {
-            context.removeData(NewModModel.NEW_EQUIPMENT);
-        } else {
-            context.setData(NewModModel.NEW_EQUIPMENT, newEquipment);
-            showNewEquipment();
-        }
-        context.clearMemory();
-        UpdateNewEquipmentMessage.addResponse(context, null, newEquipment.count);
-
-        context.addEvent("Equipment deleted.");
-    }
-
-    public void updateNewEquipment(String name) {
-        NewModModel newEquipment = context.getData(NewModModel.NEW_EQUIPMENT, NewModModel.class);
-        if (newEquipment == null || newEquipment.isEmpty()) {
-            context.addEvent("No equipment to update.");
-            return;
-        }
-        BaseModel equipment = newEquipment.findEquipmentByName(name);
-        if (equipment == null) {
-            showNewEquipment();
-            context.addEvent("Equipment with name not found.");
-            return;
-        }
-        context.setData(EquipmentBuilder.CURRENT_EQUIPMENT, equipment);
-        ShowEquipmentMessage.addResponse(context, equipment.toEquipmentModel(boostService, library));
-        context.pushFrame(equipment.type());
-        context.currentFrame().chat();
-    }
 
     public void addGameObject(StringBuilder localizations, StringBuilder gameObjects, String name, String description,
             String visualModel, String baseStat, String statName, String MapKey) {

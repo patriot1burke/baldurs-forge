@@ -105,6 +105,10 @@ public class ChatFrameContextImpl implements ChatFrameContext {
     }
 
     @Override
+    public ChatFrameContext replaceEvent(String type, Object value) {
+        return addEvent(type, value, true);
+    }
+
     public ChatFrameContext addEvent(String type, Object value, boolean replace) {
         if (replace) {
             events.removeIf(event -> event.getType().equals(type));

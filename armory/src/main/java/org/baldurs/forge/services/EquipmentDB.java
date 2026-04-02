@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 
 import org.baldurs.forge.mainmenu.MetadataPrompts;
@@ -34,7 +33,6 @@ import dev.langchain4j.store.embedding.filter.Filter;
 import dev.langchain4j.store.embedding.filter.MetadataFilterBuilder;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.Startup;
-import io.quarkus.runtime.StartupEvent;
 
 @ApplicationScoped
 public class EquipmentDB {
@@ -57,7 +55,7 @@ public class EquipmentDB {
     Map<String, Equipment> equipmentDB = new HashMap<>();
 
     @Startup(PRIORITY)
-    public void start(@Observes StartupEvent event) throws Exception {
+    public void start() throws Exception {
         buildEquipment();
         load();
     }

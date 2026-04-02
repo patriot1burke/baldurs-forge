@@ -5,63 +5,42 @@ import java.util.List;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import org.baldurs.forge.builder.AmuletBuilder;
-import org.baldurs.forge.builder.BodyArmorBuilder;
-import org.baldurs.forge.builder.BootsBuilder;
-import org.baldurs.forge.builder.CloakBuilder;
-import org.baldurs.forge.builder.GlovesBuilder;
-import org.baldurs.forge.builder.HelmetBuilder;
-import org.baldurs.forge.builder.ModPackager;
-import org.baldurs.forge.builder.RingBuilder;
-import org.baldurs.forge.builder.WeaponBuilder;
+import org.baldurs.forge.builder.AmuletModel;
+import org.baldurs.forge.builder.BodyArmorModel;
+import org.baldurs.forge.builder.BootsModel;
+import org.baldurs.forge.builder.CloakModel;
+import org.baldurs.forge.builder.GlovesModel;
+import org.baldurs.forge.builder.HelmetModel;
+import org.baldurs.forge.builder.NewModBuilder;
+import org.baldurs.forge.builder.RingModel;
+import org.baldurs.forge.builder.WeaponModel;
 import org.baldurs.forge.messages.ImportModMessage;
 import org.baldurs.forge.messages.ListEquipmentMessage;
-import org.baldurs.forge.messages.ShowEquipmentMessage;
 import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.services.EquipmentDB;
 import org.baldurs.forge.services.LibraryService;
 
 import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrameContext;
+import io.quarkiverse.langchain4j.chatscopes.ChatRouteContext;
+import io.quarkiverse.langchain4j.chatscopes.ChatRoutes;
+import io.quarkiverse.langchain4j.chatscopes.ChatScope;
+import io.quarkiverse.langchain4j.chatscopes.ChatScopeMemory;
 import io.quarkus.logging.Log;
 
 @ApplicationScoped
 public class MainMenuToolBox {
     @Inject
-    ChatFrameContext context;
+    ChatRouteContext ctx;
 
     @Inject
     EquipmentDB equipmentDB;
 
     @Inject
-    BodyArmorBuilder bodyArmorBuilder;
-
-    @Inject
-    WeaponBuilder weaponBuilder;
-
-    @Inject
-    BootsBuilder bootsBuilder;
-
-    @Inject
-    GlovesBuilder glovesBuilder;
-
-    @Inject
-    HelmetBuilder helmetBuilder;
-
-    @Inject
-    RingBuilder ringBuilder;
-
-    @Inject
-    AmuletBuilder amuletBuilder;
-    @Inject
-    CloakBuilder cloakBuilder;
-
-    @Inject
     LibraryService library;
 
     @Inject
-    ModPackager modPackager;
+    NewModBuilder modBuilder;
 
     @Inject
     MainMenuPrompt chat;
@@ -71,15 +50,15 @@ public class MainMenuToolBox {
         // query parameter is ignored, but tool invocations are fickle so keeping it as
         // a parameter.
         Log.debug("Searching equipment database with query: " + query);
-        Log.info("Searching equipment database with user message: " + context.userMessage());
-        List<EquipmentModel> models = equipmentDB.ragSearch(context.userMessage());
+        Log.info("Searching equipment database with user message: " + ctx.request().userMessage());
+        List<EquipmentModel> models = equipmentDB.ragSearch(ctx.request().userMessage());
         if (models.isEmpty()) {
-            context.addEvent("Could not find any equipment that matched your query.");
+            ctx.response().message("Could not find any equipment that matched your query.");
         } else {
-            context.addEvent("I found some possible matches for your query.");
-            ListEquipmentMessage.addResponse(context, models);
+            ctx.response().message("I found some possible matches for your query.");
+            ctx.response().event(new ListEquipmentMessage(models));
         }
-        context.scheduleWipe();
+        ChatScopeMemory.scheduleWipe();
         return null;
     }
 
@@ -88,20 +67,19 @@ public class MainMenuToolBox {
         Log.info("Finding equipment by name: " + name);
         EquipmentModel model = equipmentDB.findByName(name);
         if (model == null) {
-            List<EquipmentModel> models = equipmentDB.ragSearch(context.userMessage());
+            List<EquipmentModel> models = equipmentDB.ragSearch(ctx.request().userMessage());
             if (models.isEmpty()) {
-                context.addEvent("I could not find any equipment with that name or any similar names.");
+                ctx.response().message("I could not find any equipment with that name or any similar names.");
             } else {
-                context.addEvent(
-                        "I could not find an exact match for your query, but I found some possible matches.");
-                ListEquipmentMessage.addResponse(context, models);
+                ctx.response().message("I could not find an exact match for your query, but I found some possible matches.");
+                ctx.response().event(new ListEquipmentMessage(models));
             }
         } else {
-            context.addEvent(
+            ctx.response().message(
                     "I found what you were looking for.");
-            ShowEquipmentMessage.addResponse(context, model);
+            ctx.response().event("ShowEquipment", model);
         }
-        context.scheduleWipe();
+        ChatScopeMemory.scheduleWipe();
         // can the tool return void or will it confuse LLM?
         return null;
 
@@ -110,49 +88,57 @@ public class MainMenuToolBox {
     @Tool(value = "Create new body armor.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void createNewBodyArmor(String userMessage) {
         Log.info("Creating new body armor");
-        bodyArmorBuilder.startBuild();
+        ChatScope.push(BodyArmorModel.TYPE);
+        ChatRoutes.execute();
     }
 
     @Tool(value = "Create new weapon.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void createNewWeapon(String userMessage) {
         Log.info("Creating new weapon");
-        weaponBuilder.startBuild();
+        ChatScope.push(WeaponModel.TYPE);
+        ChatRoutes.execute();
     }
 
     @Tool(value = "Create new boots.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void createNewBoots(String userMessage) {
         Log.info("Creating new boots");
-        bootsBuilder.startBuild();
+        ChatScope.push(BootsModel.TYPE);
+        ChatRoutes.execute();
     }
 
     @Tool(value = "Create new gloves.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void createNewGloves(String userMessage) {
         Log.info("Creating new gloves");
-        glovesBuilder.startBuild();
+        ChatScope.push(GlovesModel.TYPE);
+        ChatRoutes.execute();
     }
 
     @Tool(value = "Create new helmet.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void createNewHelmet(String userMessage) {
         Log.info("Creating new helmet");
-        helmetBuilder.startBuild();
+        ChatScope.push(HelmetModel.TYPE);
+        ChatRoutes.execute();
     }
 
     @Tool(value = "Create new ring.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void createNewRing(String userMessage) {
         Log.info("Creating new ring");
-        ringBuilder.startBuild();
+        ChatScope.push(RingModel.TYPE);
+        ChatRoutes.execute();
     }
 
     @Tool(value = "Create new amulet.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void createNewAmulet(String userMessage) {
         Log.info("Creating new amulet");
-        amuletBuilder.startBuild();
+        ChatScope.push(AmuletModel.TYPE);
+        ChatRoutes.execute();
     }
 
     @Tool(value = "Create new cloak.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void createNewCloak(String userMessage) {
         Log.info("Creating new cloak");
-        cloakBuilder.startBuild();
+        ChatScope.push(CloakModel.TYPE);
+        ChatRoutes.execute();
     }
 
     @Tool(value = "Find all values for data attribute by name.   This is a raw data untyped query.", returnBehavior = ReturnBehavior.IMMEDIATE)
@@ -160,59 +146,60 @@ public class MainMenuToolBox {
         Log.info("Finding data attribute values for: " + attributeName);
         List<String> values = library.getStatAttributeValues(attributeName);
         if (values.isEmpty()) {
-            context.addEvent("I could not find any values for attribute: " + attributeName);
+            ctx.response().message("I could not find any values for attribute: " + attributeName);
         } else {
-            context.addEvent("ListDataAttributeValues", values, true);
+            ctx.response().event("ListDataAttributeValues", values);
         }
-        context.scheduleWipe();
+        ChatScopeMemory.scheduleWipe();
         return null;
     }
 
     @Tool(value = "Show all new equipment the user has created.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String showNewEquipment() {
         Log.info("showNewEquipment");
-        List<EquipmentModel> equipment = modPackager.listBuiltEquipment();
+        List<EquipmentModel> equipment = modBuilder.listBuiltEquipment();
         if (equipment.isEmpty()) {
-            context.addEvent("You have not created any new equipment yet.");
+            ctx.response().message("You have not created any new equipment yet.");
         } else {
-            context.addEvent("This is the equipment you have created so far:");
-            ListEquipmentMessage.addResponse(context, equipment);
-            context.addEvent("Ask me to <i>Package Mod</i> to package up your new equipment.");
+            ctx.response().message("This is the equipment you have created so far:");
+            ctx.response().event(new ListEquipmentMessage(equipment));
+            ctx.response().message("Ask me to <i>Package Mod</i> to package up your new equipment.");
         }
-        context.scheduleWipe();
+        ChatScopeMemory.scheduleWipe();
         return null;
     }
 
     @Tool(value = "Delete new equipment item by name.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void deleteNewEquipmentByName(String name) {
         Log.info("deleteNewEquipment: " + name);
-        modPackager.deleteNewEquipment(name);
+        modBuilder.deleteNewEquipment(name);
     }
 
     @Tool(value = "Update new equipment item by name.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void updateNewEquipmentByName(String name) {
         Log.info("updateNewEquipment: " + name);
-        modPackager.updateNewEquipment(name);
+        modBuilder.updateNewEquipment(name);
     }
 
     @Tool(value = "Delete all new equipment the user has created.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void deleteAllNewEquipment() {
         Log.info("deleteAllNewEquipment");
-        modPackager.deleteAllNewEquipment();
+        modBuilder.deleteAllNewEquipment();
     }
 
     @Tool(value = "Package mod with any new equipment the user has created.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void packageMod() {
         Log.info("packageMod");
-        modPackager.startPackageMod();
+        ChatScope.push("buildPackage");
+        ChatRoutes.execute();
     }
 
     @Tool(value = "Import a mod from a file.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String importMod() {
         Log.info("importMod");
-        ImportModMessage.addResponse(context);
-        context.addEvent("Please select a file to import.");
-        context.scheduleWipe();
+        ctx.response().event(new ImportModMessage("Import"));
+        ctx.response().message("Please select a file to import.");
+        ChatScopeMemory.scheduleWipe();
         return null;
     }
 }

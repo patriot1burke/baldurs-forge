@@ -84,7 +84,7 @@ public interface ChatFrameContext {
     List<ChatFrameEvent> events();
 
     /**
-     * Add an event to the response list.
+     * Add an event to the end of the event list.
      *
      * @param type
      * @param value
@@ -93,14 +93,14 @@ public interface ChatFrameContext {
     ChatFrameContext addEvent(String type, Object value);
 
     /**
-     * Add an event to the response list. If replace is true, the event will replace the existing event with the same type.
+     * Add an event to the end of event list. If another event of the same type exists it will be deleted from the list
      *
      * @param type
      * @param value
      * @param replace
      * @return
      */
-    ChatFrameContext addEvent(String type, Object value, boolean replace);
+    ChatFrameContext replaceEvent(String type, Object value);
 
     /**
      * Add a StringMessage event to the response list.

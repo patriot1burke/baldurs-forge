@@ -34,7 +34,7 @@ public class InMemoryEmbeddingStoreProducer {
         cachePath = rootPath + "/cache";
     }
 
-    @Startup(EquipmentDB.PRIORITY + 1)
+    @Startup(EquipmentDB.PRIORITY - 1)
     public void start() {
         cached = load();
         Log.info("Embedding store loaded: " + cached);

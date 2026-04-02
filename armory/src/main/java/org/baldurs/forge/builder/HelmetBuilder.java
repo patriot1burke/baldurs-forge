@@ -1,96 +1,91 @@
 package org.baldurs.forge.builder;
 
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import org.baldurs.forge.messages.MarkdownStringMessage;
+import org.baldurs.forge.messages.MarkdownToHtml;
 import org.baldurs.forge.model.Rarity;
 import org.baldurs.forge.scanner.StatsArchive;
 
 import dev.langchain4j.agent.tool.ReturnBehavior;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.service.Result;
-import io.quarkiverse.langchain4j.chat.frames.ChatFrame;
-import io.quarkiverse.langchain4j.chat.frames.EventMapper;
+import io.quarkiverse.langchain4j.chatscopes.ChatRoute;
+import io.quarkiverse.langchain4j.chatscopes.ChatScoped;
 import io.quarkus.logging.Log;
 
-@ApplicationScoped
+@ChatScoped
 public class HelmetBuilder extends EquipmentBuilder {
 
     @Inject
     HelmetBuilderPrompt agent;
 
     @Override
-    protected BuilderPrompt agent() {
+    public BuilderPrompt agent() {
         return agent;
     }
 
+    HelmetModel model = new HelmetModel();
+
     @Override
-    protected Supplier<BaseModel> supplier() {
-        return () -> {
-            HelmetModel bootsModel = new HelmetModel();
-            return bootsModel;
-        };
+    public HelmetModel model() {
+        return model;
     }
 
-    @ChatFrame(HelmetModel.TYPE)
-    @EventMapper(MarkdownStringMessage.class)
-    public Result<String> buildHelmet(HelmetModel current) {
-        return build(current);
+    @Override
+    public void setModel(BaseModel model) {
+        this.model = (HelmetModel) model;
+    }
+
+    @ChatRoute(HelmetModel.TYPE)
+    @MarkdownToHtml
+    public Result<String> buildHelmet() {
+        return build();
     }
 
     @Tool("Set the name for the current helmet.")
     public void setName(String name) {
         Log.info("Setting name: " + name);
-        HelmetModel current = context.getData(CURRENT_EQUIPMENT, HelmetModel.class);
-        current.name = name;
-        addShowEquipmentAction(current);
+        model().name = name;
+        addShowEquipmentAction();
     }
 
     @Tool("Set the description for the current helmet.")
     public void setDescription(String description) {
         Log.info("Setting description: " + description);
-        HelmetModel current = context.getData(CURRENT_EQUIPMENT, HelmetModel.class);
-        current.description = description;
-        addShowEquipmentAction(current);
+        model().description = description;
+        addShowEquipmentAction();
     }
 
     @Tool("Set the rarity for the current helmet.")
     public void setRarity(Rarity rarity) {
         Log.info("Setting rarity: " + rarity);
-        HelmetModel current = context.getData(CURRENT_EQUIPMENT, HelmetModel.class);
-        current.rarity = rarity;
-        addShowEquipmentAction(current);
+        model().rarity = rarity;
+        addShowEquipmentAction();
     }
 
     @Tool("Set the visual model for the current helmet.")
     public void setVisualModel(String visualModel) {
         Log.info("Setting visual model: " + visualModel);
-        HelmetModel current = context.getData(CURRENT_EQUIPMENT, HelmetModel.class);
-        setVisualModel(current, visualModel, visualModelPredicate(current));
+        setVisualModel(visualModel, visualModelPredicate(model()));
     }
 
     @Tool("Set the armor category for the current helmet.")
     public void setArmorCategory(ArmorCategory armorCategory) {
         Log.info("Setting armorCategory: " + armorCategory);
-        HelmetModel current = context.getData(CURRENT_EQUIPMENT, HelmetModel.class);
-        current.armorCategory = armorCategory;
-        addShowEquipmentAction(current);
+        model().armorCategory = armorCategory;
+        addShowEquipmentAction();
     }
 
     @Tool("Add boost to the current helmet.")
     public void addBoost(String boostDescription) throws Exception {
-        HelmetModel current = context.getData(CURRENT_EQUIPMENT, HelmetModel.class);
-        super.addBoost(current, boostDescription);
+        super.addBoost(boostDescription);
     }
 
     @Tool("Set boost macro for the current helmet.")
     public void setBoost(String boostDescription) throws Exception {
-        HelmetModel current = context.getData(CURRENT_EQUIPMENT, HelmetModel.class);
-        super.setBoost(current, boostDescription);
+        super.setBoost(boostDescription);
     }
 
     private Predicate<? super StatsArchive.Stat> visualModelPredicate(HelmetModel helmet) {
@@ -111,14 +106,12 @@ public class HelmetBuilder extends EquipmentBuilder {
 
     @Tool(value = "Summarizes available visual models for the current helmet type.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public String showVisualModels() {
-        HelmetModel helmet = context.getData(CURRENT_EQUIPMENT, HelmetModel.class);
-        return showVisualModels(visualModelPredicate(helmet));
+        return showVisualModels(visualModelPredicate(model()));
     }
 
     @Tool(value = "When finished building helmet, call this tool to finish the helmet.", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void finishEquipment() throws Exception {
-        HelmetModel current = context.getData(CURRENT_EQUIPMENT, HelmetModel.class);
-        finishEquipment(current);
+        super.finishEquipment();
     }
 
 }
