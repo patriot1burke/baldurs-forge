@@ -15,7 +15,6 @@ import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.service.Result;
 import io.quarkiverse.langchain4j.chatscopes.ChatRoute;
 import io.quarkiverse.langchain4j.chatscopes.ChatRouteContext;
-import io.quarkiverse.langchain4j.chatscopes.ChatRoutes;
 import io.quarkiverse.langchain4j.chatscopes.ChatScope;
 import io.quarkiverse.langchain4j.chatscopes.ChatScoped;
 import io.quarkus.logging.Log;
