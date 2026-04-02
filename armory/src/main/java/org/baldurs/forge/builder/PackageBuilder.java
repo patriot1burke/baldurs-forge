@@ -15,6 +15,7 @@ import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.service.Result;
 import io.quarkiverse.langchain4j.chatscopes.ChatRoute;
 import io.quarkiverse.langchain4j.chatscopes.ChatRouteContext;
+import io.quarkiverse.langchain4j.chatscopes.ChatRoutes;
 import io.quarkiverse.langchain4j.chatscopes.ChatScope;
 import io.quarkiverse.langchain4j.chatscopes.ChatScoped;
 import io.quarkus.logging.Log;
@@ -22,7 +23,8 @@ import io.quarkus.logging.Log;
 @ChatScoped
 public class PackageBuilder {
 
-    NewModModel newMod;
+    @Inject
+    NewModBuilder modBuilder;
 
     @Inject
     ChatRouteContext ctx;
@@ -44,6 +46,7 @@ public class PackageBuilder {
     @ChatRoute("buildPackage")
     @MarkdownToHtml
     public Result<String> buildPackage() {
+        Log.info("buildPackage");
         String currentJson = null;
         try {
             currentJson = mapper.writeValueAsString(currentPackage);
@@ -51,11 +54,16 @@ public class PackageBuilder {
             Log.error("Error serializing newEquipment", e);
             throw new RuntimeException("Error serializing newEquipment", e);
         }
-        return agent.buildPackage(ctx.request().userMessage(), PackageModel.schema, currentJson);
+        Result<String> result = agent.buildPackage(ctx.request().userMessage(), PackageModel.schema, currentJson);
+
+        return result;
     }
 
     @Tool("Update the current package json document.")
     public String updatePackage(PackageModel packageModel) throws Exception {
+        if (packageModel == null) {
+            return mapper.writeValueAsString(currentPackage);
+        }
         if (currentPackage == null) {
             currentPackage = packageModel;
         }
@@ -71,14 +79,15 @@ public class PackageBuilder {
         return mapper.writeValueAsString(currentPackage);
     }
 
-    @Tool(value = "Finish packaging the mod.", returnBehavior = ReturnBehavior.IMMEDIATE)
-    public void finishPackage(PackageModel packageModel) {
-        NewModModel model = newMod;
-        model.name = packageModel.name;
-        model.author = packageModel.author;
-        model.description = packageModel.description;
+    @Tool(value = "Call when the user is finished defining the package document.", returnBehavior = ReturnBehavior.IMMEDIATE)
+    public void finishPackage() {
+        Log.info("finishPackage, scopeId: " + ChatScope.id());
+        ChatScope.pop();
+        NewModModel model = modBuilder.newMod();
+        model.name = currentPackage.name;
+        model.author = currentPackage.author;
+        model.description = currentPackage.description;
         String baseFileName = PakFileExporter.toAlphaNumericUnderscore(model.name);
         ctx.response().event(new PackageModMessage(baseFileName + ".pak", model));
-        ChatScope.pop();
     }
 }

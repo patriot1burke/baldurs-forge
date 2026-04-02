@@ -41,6 +41,10 @@ public class NewModBuilder {
         newMod = null;
     }
 
+    public NewModModel newMod() {
+        return newMod;
+    }
+
     public void addEquipment(BaseModel equipment) {
         if (newMod == null) {
             newMod = new NewModModel();

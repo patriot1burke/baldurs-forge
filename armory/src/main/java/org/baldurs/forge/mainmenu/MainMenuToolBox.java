@@ -187,9 +187,13 @@ public class MainMenuToolBox {
         modBuilder.deleteAllNewEquipment();
     }
 
-    @Tool(value = "Package mod with any new equipment the user has created.", returnBehavior = ReturnBehavior.IMMEDIATE)
+    @Tool(value = "Package our new mod..", returnBehavior = ReturnBehavior.IMMEDIATE)
     public void packageMod() {
         Log.info("packageMod");
+        if (modBuilder.newMod() == null || modBuilder.newMod().isEmpty()) {
+            ctx.response().message("You have not created any new equipment yet.");
+            return;
+        }
         ChatScope.push("buildPackage");
         ChatRoutes.execute();
     }

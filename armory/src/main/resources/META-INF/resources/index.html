@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Baldur's Forge Assistant Chat</title>
     <link rel="stylesheet" href="/webjars/font-awesome/css/all.min.css">
+    <script src="/_chat/javascript/chatscopes.js"></script>
     <script src="/webjars/jquery/jquery.min.js"></script>
     <style>
         * {
@@ -691,33 +692,6 @@
 
 
             </div>
-
-            <!-- Right Container (50% width, split vertically) -->
-            <!--
-            <div class="right-container">
-                <div class="top-right-panel">
-                    <div class="panel-title">Top Right Panel</div>
-                    <div class="panel-content">
-                        <div class="sample-content">
-                            <img src="/static/img/icons/items-tooltip/Item_MAG_Giantslayer_Greatsword.144.png"/>
-                        </div>
-                     </div>
-                </div>
-
-                <div class="bottom-right-panel">
-                    <div class="panel-title">Bottom Right Panel</div>
-                    <div class="panel-content">
-                        <div class="sample-content">
-                            <h3>Bottom Right Content</h3>
-                            <p>This panel takes up the bottom 50% of the right side.</p>
-                        </div>
-                        <div class="sample-content">
-                            <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit
-                                anim id est laborum.</p>
-                        </div>
-                    </div>
-                </div>
-            </div> rigtht panel -->
         </div>
     </div>
 
@@ -740,11 +714,23 @@
     </div>
 
     <script>
-        $(document).ready(function () {
+        $(document).ready(async function () {
             const $chatContainer = $('#chat-container');
             const $messageInput = $('#message-input');
 
-            let chatContext = {};
+            var client = new ChatScopesClient();
+            const openResult = await client.open("ws://localhost:8080/_chat/routes");
+            var builder = client.builder();
+            builder.eventHandler('ListEquipment', listEquipmentEvent);
+            builder.eventHandler('ShowEquipment', showEquipmentEvent);
+            builder.eventHandler('ObjectMessage', addJsonMessage);
+            builder.messageHandler(addJsonMessage);
+            builder.eventHandler('UpdateNewEquipment', updateNewEquipmentEvent);
+            builder.eventHandler('PackageMod', packageModEvent);
+            builder.eventHandler('ImportMod', importModEvent);
+            builder.eventHandler('ListVisualModels', listVisualModelsEvent);
+            session = await builder.connect("mainMenu");
+            console.log("Set up session");
 
             function saveFile(url, filename) {
                 const a = document.createElement("a");
@@ -1254,44 +1240,7 @@
 
 
                 try {
-                    let postData = null;
-                    let request = {
-                        userMessage: message,
-                        context: chatContext
-                    }
-                    postData = JSON.stringify(request);
-
-                    const response = await $.ajax({
-                        url: `/q/chat-frames/mainMenu`,
-                        type: 'POST',
-                        data: postData,
-                        processData: false,
-                        contentType: false
-                    });
-
-                    console.log(response);
-                    chatContext = response.context;
-                    if (response.events) {
-                        for (const event of response.events) {
-                            if (event.type === 'ListEquipment') {
-                                listEquipmentEvent(event.value);
-                            } else if (event.type === 'ShowEquipment') {
-                                showEquipmentEvent(event.value);
-                            } else if (event.type === 'ObjectMessage') {
-                                addJsonMessage(event.value);
-                            } else if (event.type === 'StringMessage') {
-                                addJsonMessage(event.value);
-                            } else if (event.type === 'UpdateNewEquipment') {
-                                updateNewEquipmentEvent(event.value);
-                            } else if (event.type === 'PackageMod') {
-                                packageModEvent(event.value);
-                            } else if (event.type === 'ImportMod') {
-                                importModEvent();
-                            } else if (event.type === 'ListVisualModels') {
-                                listVisualModelsEvent(event.value);
-                            }
-                        }
-                    }
+                    await session.chat(message);
                     hideLoading();
                 } catch (error) {
                     hideLoading();
