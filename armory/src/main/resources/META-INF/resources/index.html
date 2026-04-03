@@ -45,26 +45,84 @@
         }
 
         .banner {
-            height: 70px;
+            box-sizing: border-box;
+            height: 115px;
+            padding: 15px 0 0;
             background-color: #333639;
             color: white;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
             font-size: 24px;
             font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             z-index: 100;
-            border-bottom: 3px solid #BCAE79;
         }
 
-        .banner img {
-            height: 40px;
-            margin-right: 15px;
+        .banner-brand {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .banner-chip {
+            background: linear-gradient(165deg, #2c2f33 0%, #232528 100%);
+            border: 1px solid rgba(0, 0, 0, 0.35);
+            box-shadow:
+                0 2px 6px rgba(0, 0, 0, 0.4),
+                0 1px 0 rgba(255, 255, 255, 0.07) inset,
+                0 -1px 2px rgba(0, 0, 0, 0.25) inset;
+        }
+
+        .banner-logo-wrap {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .banner-title-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: -5px;
+            padding: 10px 24px;
+            border-radius: 999px;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 1;
+            letter-spacing: 0.03em;
+            text-rendering: optimizeLegibility;
+            background: linear-gradient(
+                175deg,
+                #fff4d4 0%,
+                #f0d78a 22%,
+                #e0c06b 42%,
+                #c9a545 58%,
+                #a67c2e 85%
+            );
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.45))
+                drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+        }
+
+        .banner-logo-wrap img {
+            height: 60px;
+            width: 60px;
+            object-fit: contain;
+            margin: 0;
         }
 
         .main-content {
-            height: calc(100vh - 70px);
+            height: calc(100vh - 115px);
             display: flex;
         }
 
@@ -76,8 +134,6 @@
 
         .left-panel {
             width: 100%;
-            border-right: 2px solid #BCAE79;
-            border-left: 1px solid #BCAE79;
             padding: 20px;
             overflow-y: auto;
         }
@@ -99,6 +155,12 @@
             padding-bottom: 90px;
             height: calc(100% - 60px);
             background-color: transparent;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .chat-container::-webkit-scrollbar {
+            display: none;
         }
 
         .input-container-wrap {
@@ -120,6 +182,11 @@
             background-color: #444750;
             border-radius: 25px;
             padding: 5px;
+            border: 1px solid rgba(0, 0, 0, 0.3);
+            box-shadow:
+                0 4px 18px rgba(0, 0, 0, 0.38),
+                0 2px 6px rgba(0, 0, 0, 0.22),
+                0 1px 0 rgba(255, 255, 255, 0.08) inset;
         }
 
         #message-input {
@@ -324,19 +391,26 @@
             clip-path: polygon(0 0, 100% 0, 100% 100%);
         }
 
-        .assistant-message {
+        .assistant-message,
+        .data-message {
+            display: block;
+            width: fit-content;
+            max-width: min(85%, 36rem);
             margin-right: auto;
+            margin-left: 0;
+            padding: 11px 16px 13px;
             color: #e8e8e8;
-            padding: 0 0 0 15px;
-            border-left: 3px solid #59666C;
+            line-height: 1.45;
+            background: linear-gradient(165deg, #2f3237 0%, #242629 100%);
+            border-radius: 18px;
+            border: 1px solid rgba(0, 0, 0, 0.35);
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.04) inset,
+                0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
         .data-message {
-            margin-right: auto;
-            color: #e8e8e8;
-            padding: 0 0 0 15px;
-            border-left: 3px solid #BCAE79;
-            max-width: 90%;
+            overflow-x: auto;
         }
 
         .data-message ol {
@@ -722,9 +796,13 @@
 <body>
     <!-- Banner across the top -->
     <div class="banner">
-        <div style="display: flex; align-items: center;">
-            <img src="/favicon.ico" alt="Baldur's Gate 3 Logo">
-            Baldur's Forge Assistant
+        <div class="banner-brand">
+            <div class="banner-chip banner-logo-wrap">
+                <img src="/favicon.ico" alt="" width="60" height="60">
+            </div>
+            <div class="banner-chip banner-title-wrap">
+                Baldur's Forge Assistant
+            </div>
         </div>
     </div>
 
@@ -733,7 +811,6 @@
     <!-- Main content area -->
     <div class="main-content">
         <div class="container">
-            <!-- Left Panel (50% width) -->
             <div class="left-panel">
                 <div class="chat-container" id="chat-container">
                     <div class="message assistant-message">
@@ -961,7 +1038,6 @@
 
                 $chatContainer.append($messageDiv);
                 $chatContainer.scrollTop($chatContainer[0].scrollHeight);
-                updateClearButtonVisibility();
             }
 
             // Convert a string to a JSON object if possible
@@ -1186,7 +1262,6 @@
                 $resultDev.append($list);
                 $chatContainer.append($resultDev);
                 $chatContainer.scrollTop($chatContainer[0].scrollHeight);
-                updateClearButtonVisibility();
             }
 
             function addJsonMessage(data) {
@@ -1209,7 +1284,6 @@
 
                 $chatContainer.append($messageDiv);
                 $chatContainer.scrollTop($chatContainer[0].scrollHeight);
-                updateClearButtonVisibility();
             }
 
             function listEquipmentEvent(items) {
@@ -1350,6 +1424,7 @@
                     session.requestContext = {}
                     await session.chat(message);
                     hideLoading();
+                    updateClearButtonVisibility();
                 } catch (error) {
                     hideLoading();
                     addMessage(`Sorry, there was an error processing your request: ${error.statusText || error.message}`, false);
