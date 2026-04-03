@@ -88,6 +88,7 @@ public abstract class EquipmentBuilder {
         }
         modBuilder.addEquipment(model());
         ctx.response().message("Finished building item!");
+        ctx.response().event("PopRoute", "pop");
         ChatScopeMemory.scheduleWipe();
     }
 

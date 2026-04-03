@@ -6,6 +6,7 @@ import java.util.List;
 import jakarta.inject.Inject;
 
 import org.baldurs.forge.messages.ListEquipmentMessage;
+import org.baldurs.forge.messages.PushRoute;
 import org.baldurs.forge.messages.ShowEquipmentMessage;
 import org.baldurs.forge.messages.UpdateNewEquipmentMessage;
 import org.baldurs.forge.model.EquipmentModel;
@@ -50,7 +51,6 @@ public class NewModBuilder {
             newMod = new NewModModel();
         }
         newMod.addEquipment(equipment);
-        ctx.response().message("Finished building item!");
         ctx.response().event(
                 new UpdateNewEquipmentMessage("To create a mod containing your newly built equipment, tell me to 'Package Mod'",
                         newMod.count));
@@ -120,6 +120,7 @@ public class NewModBuilder {
         ChatScope.push(equipment.type());
         EquipmentBuilder builder = ChatRoutes.bean();
         builder.setModel(equipment);
+        ctx.response().event(new PushRoute("Modify your " + equipment.type() + "..."));
         ChatRoutes.execute();
     }
 }

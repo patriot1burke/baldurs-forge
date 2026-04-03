@@ -16,6 +16,7 @@ import org.baldurs.forge.builder.RingModel;
 import org.baldurs.forge.builder.WeaponModel;
 import org.baldurs.forge.messages.ImportModMessage;
 import org.baldurs.forge.messages.ListEquipmentMessage;
+import org.baldurs.forge.messages.PushRoute;
 import org.baldurs.forge.model.EquipmentModel;
 import org.baldurs.forge.services.EquipmentDB;
 import org.baldurs.forge.services.LibraryService;
@@ -89,6 +90,7 @@ public class MainMenuToolBox {
     public void createNewBodyArmor(String userMessage) {
         Log.info("Creating new body armor");
         ChatScope.push(BodyArmorModel.TYPE);
+        ctx.response().event(new PushRoute("Build your armor..."));
         ChatRoutes.execute();
     }
 
@@ -96,6 +98,7 @@ public class MainMenuToolBox {
     public void createNewWeapon(String userMessage) {
         Log.info("Creating new weapon");
         ChatScope.push(WeaponModel.TYPE);
+        ctx.response().event(new PushRoute("Build your weapon..."));
         ChatRoutes.execute();
     }
 
@@ -103,6 +106,7 @@ public class MainMenuToolBox {
     public void createNewBoots(String userMessage) {
         Log.info("Creating new boots");
         ChatScope.push(BootsModel.TYPE);
+        ctx.response().event(new PushRoute("Build your boots..."));
         ChatRoutes.execute();
     }
 
@@ -110,6 +114,7 @@ public class MainMenuToolBox {
     public void createNewGloves(String userMessage) {
         Log.info("Creating new gloves");
         ChatScope.push(GlovesModel.TYPE);
+        ctx.response().event(new PushRoute("Build your gloves..."));
         ChatRoutes.execute();
     }
 
@@ -117,6 +122,7 @@ public class MainMenuToolBox {
     public void createNewHelmet(String userMessage) {
         Log.info("Creating new helmet");
         ChatScope.push(HelmetModel.TYPE);
+        ctx.response().event(new PushRoute("Build your helmet..."));
         ChatRoutes.execute();
     }
 
@@ -124,6 +130,7 @@ public class MainMenuToolBox {
     public void createNewRing(String userMessage) {
         Log.info("Creating new ring");
         ChatScope.push(RingModel.TYPE);
+        ctx.response().event(new PushRoute("Build your ring..."));
         ChatRoutes.execute();
     }
 
@@ -131,6 +138,7 @@ public class MainMenuToolBox {
     public void createNewAmulet(String userMessage) {
         Log.info("Creating new amulet");
         ChatScope.push(AmuletModel.TYPE);
+        ctx.response().event(new PushRoute("Build your amulet..."));
         ChatRoutes.execute();
     }
 
@@ -138,6 +146,7 @@ public class MainMenuToolBox {
     public void createNewCloak(String userMessage) {
         Log.info("Creating new cloak");
         ChatScope.push(CloakModel.TYPE);
+        ctx.response().event(new PushRoute("Build your cloak..."));
         ChatRoutes.execute();
     }
 
@@ -195,6 +204,7 @@ public class MainMenuToolBox {
             return;
         }
         ChatScope.push("buildPackage");
+        ctx.response().event(new PushRoute("Package your mod..."));
         ChatRoutes.execute();
     }
 

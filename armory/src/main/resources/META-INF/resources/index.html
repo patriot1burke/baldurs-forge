@@ -101,17 +101,24 @@
             background-color: transparent;
         }
 
-        .input-container {
+        .input-container-wrap {
             position: fixed;
             bottom: 20px;
             left: 2%;
-            /*transform: translateX(-50%)*/
             width: 95%;
-            /*max-width: 1160px;*/
+            z-index: 10;
             display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            background-color: transparent;
+        }
+
+        .input-container {
+            display: flex;
+            width: 100%;
+            margin-top: 0;
             background-color: #444750;
             border-radius: 25px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
             padding: 5px;
         }
 
@@ -714,16 +721,18 @@
                         Hello! I'm your Baldur's Forge Assistant. Enter 'Help' to get a list of things I can do.
                     </div>
                 </div>
-                <div class="input-container">
-                    <input type="text" id="message-input" placeholder="Ask a question about your data..."
-                        autocomplete="off" autofocus>
-                    <div class="button-group">
-                        <button id="ask-button" class="btn" title="Ask a question">
-                            <i class="fas fa-comment"></i>
-                            <div class="save-indicator" id="save-indicator">
-                                <span class="save-count">0</span>
-                            </div>
-                        </button>
+                <div class="input-container-wrap">
+                    <div class="input-container">
+                        <input type="text" id="message-input" placeholder="Browse db or create new items..."
+                            autocomplete="off" autofocus>
+                        <div class="button-group">
+                            <button id="ask-button" class="btn" title="Ask a question">
+                                <i class="fas fa-comment"></i>
+                                <div class="save-indicator" id="save-indicator">
+                                    <span class="save-count">0</span>
+                                </div>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -766,8 +775,27 @@
             builder.eventHandler('PackageMod', packageModEvent);
             builder.eventHandler('ImportMod', importModEvent);
             builder.eventHandler('ListVisualModels', listVisualModelsEvent);
+            builder.eventHandler('PushRoute', pushRoute);
+            builder.eventHandler('PopRoute', popRoute);
             session = await builder.connect("mainMenu");
+            stack = [ "Browse db or create new items..." ];
+
             console.log("Set up session");
+
+            function pushRoute(data) {
+                stack.push(data);                
+                updateRoute();
+            }
+
+            function popRoute(data) {
+                stack.pop();
+                updateRoute();
+            }
+
+            function updateRoute() {
+                placeholder = stack[stack.length - 1];
+                $messageInput.attr('placeholder', placeholder);
+            }
 
             function saveFile(url, filename) {
                 const a = document.createElement("a");

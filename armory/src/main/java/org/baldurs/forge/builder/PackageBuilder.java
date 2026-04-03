@@ -88,5 +88,6 @@ public class PackageBuilder {
         model.description = currentPackage.description;
         String baseFileName = PakFileExporter.toAlphaNumericUnderscore(model.name);
         ctx.response().event(new PackageModMessage(baseFileName + ".pak", model));
+        ctx.response().event("PopRoute", "pop");
     }
 }
