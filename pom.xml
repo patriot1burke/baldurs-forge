@@ -14,11 +14,9 @@
     <packaging>pom</packaging>
     <name>Baldur's Forge - Parent</name>
     <modules>
-        <module>quarkus-chat</module>
         <module>archivist</module>
         <module>archivist-cli</module>
         <module>armory</module>
-        <module>rag</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:patriot1burke/baldurs-forge.git</connection>
@@ -62,21 +60,6 @@
             <dependency>
                 <groupId>org.baldurs.forge</groupId>
                 <artifactId>baldurs-armory</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.quarkiverse.langchain4j</groupId>
-                <artifactId>quarkus-langchain4j-chat-frames</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-           <dependency>
-                <groupId>io.quarkiverse.langchain4j</groupId>
-                <artifactId>quarkus-langchain4j-chat-frames-client</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.quarkiverse.langchain4j</groupId>
-                <artifactId>quarkus-langchain4j-chat-frames-deployment</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
