@@ -115,4 +115,9 @@ public class BodyArmorBuilder extends EquipmentBuilder {
         super.finishEquipment();
     }
 
+    @Tool(value = "Cancel or abort building the current body armor without saving it.", returnBehavior = ReturnBehavior.IMMEDIATE)
+    public void cancelEquipment() {
+        super.cancelEquipment();
+    }
+
 }

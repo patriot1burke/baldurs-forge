@@ -114,4 +114,9 @@ public class HelmetBuilder extends EquipmentBuilder {
         super.finishEquipment();
     }
 
+    @Tool(value = "Cancel or abort building the current helmet without saving it.", returnBehavior = ReturnBehavior.IMMEDIATE)
+    public void cancelEquipment() {
+        super.cancelEquipment();
+    }
+
 }

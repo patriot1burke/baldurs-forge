@@ -92,6 +92,13 @@ public abstract class EquipmentBuilder {
         ChatScopeMemory.scheduleWipe();
     }
 
+    public void cancelEquipment() {
+        ChatScope.pop();
+        ctx.response().message("Equipment building cancelled.");
+        ctx.response().event("PopRoute", "pop");
+        ChatScopeMemory.scheduleWipe();
+    }
+
     public void setVisualModel(String visualModel, Predicate<? super Stat> visualModelPredicate) {
         List<RootTemplate> rootTemplates = library.findRootIconsFrom(visualModelPredicate);
         boolean found = false;

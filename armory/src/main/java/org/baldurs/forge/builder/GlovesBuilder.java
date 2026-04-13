@@ -114,4 +114,9 @@ public class GlovesBuilder extends EquipmentBuilder {
         super.finishEquipment();
     }
 
+    @Tool(value = "Cancel or abort building the current gloves without saving them.", returnBehavior = ReturnBehavior.IMMEDIATE)
+    public void cancelEquipment() {
+        super.cancelEquipment();
+    }
+
 }

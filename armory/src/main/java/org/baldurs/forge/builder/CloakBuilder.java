@@ -98,4 +98,9 @@ public class CloakBuilder extends EquipmentBuilder {
         super.finishEquipment();
     }
 
+    @Tool(value = "Cancel or abort building the current cloak without saving it.", returnBehavior = ReturnBehavior.IMMEDIATE)
+    public void cancelEquipment() {
+        super.cancelEquipment();
+    }
+
 }

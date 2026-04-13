@@ -119,4 +119,9 @@ public class WeaponBuilder extends EquipmentBuilder {
         super.finishEquipment();
     }
 
+    @Tool(value = "Cancel or abort building the current weapon without saving it.", returnBehavior = ReturnBehavior.IMMEDIATE)
+    public void cancelEquipment() {
+        super.cancelEquipment();
+    }
+
 }
